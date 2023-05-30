@@ -1,0 +1,2 @@
+django-leaflet==0.28.3
+django-geojson==4.0.0
