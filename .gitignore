@@ -22,6 +22,8 @@ venv
 package-lock.json
 
 staticfiles/*
+media/*
+.vscode/
 !staticfiles/.gitkeep 
 .vscode/symbols.json
 
