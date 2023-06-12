@@ -25,9 +25,9 @@ class BasicAuditModel(models.Model):
     class Meta:
         abstract = True
 
-class Incidencia(BasicAuditModel):
+class Incidence(BasicAuditModel):
 
-    TIPO_INCIDENTES_CHOICES = (
+    INCIDENCE_TYPE_CHOICES = (
         ("accidente_aereo", "Accidente aéreo"),
         ("accidente_transito", "Accidente de tránsito"),
         ("colapso_puente", "Alerta por colapso de puente"),
@@ -46,16 +46,16 @@ class Incidencia(BasicAuditModel):
     geom = models.PointField(verbose_name=_("Localización"), srid=4326, blank=True, null=True)
 
     name = models.CharField(_("Nombre"), max_length=255)
-    tipo_incidente = models.CharField(_("Tipo incidente"), max_length=50, choices=TIPO_INCIDENTES_CHOICES, default="tipo1")
-    descripcion = models.TextField(_("Descripción"), blank=True, null=True)
+    incidence_type = models.CharField(_("Tipo incidente"), max_length=50, choices=INCIDENCE_TYPE_CHOICES, default="tipo1")
+    description = models.TextField(_("Descripción"), blank=True, null=True)
     
     status = models.CharField(_("Status"), max_length=50, choices=STATUS_CHOICES, default="creado")
     
-    foto1 = models.FileField(verbose_name=_("Foto 1"), upload_to="incidencia_fotos",
+    image1 = models.ImageField(verbose_name=_("Foto 1"), upload_to="incidencia_fotos",
                                                 null=False, blank=False)
-    foto2 = models.FileField(verbose_name=_("Foto 2"), upload_to="incidencia_fotos",
+    image2 = models.ImageField(verbose_name=_("Foto 2"), upload_to="incidencia_fotos",
                                                 null=False, blank=False)
-    foto3 = models.FileField(verbose_name=_("Foto 3"), upload_to="incidencia_fotos",
+    image3 = models.ImageField(verbose_name=_("Foto 3"), upload_to="incidencia_fotos",
                                                 null=False, blank=False)
     audio = models.FileField(verbose_name=_("Audio"), upload_to="incidencia_audioa",
                                                 null=False, blank=False)
@@ -69,7 +69,7 @@ class Incidencia(BasicAuditModel):
         return self.name
 
     class Meta:
-        db_table = 'sini_incidencia'
+        db_table = 'sini_incidence'
         managed = True
         verbose_name =  'Incidencia'
         verbose_name_plural =  'Incidencias'

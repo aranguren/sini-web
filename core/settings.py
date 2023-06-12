@@ -32,6 +32,9 @@ INSTALLED_APPS = [
     'leaflet',
     'djgeojson',
     'sini',
+    'rest_framework',
+    'rest_framework_gis',
+    'rest_framework_simplejwt',
     'apps.home'  # Enable the inner home (home)
 ]
 
@@ -132,8 +135,11 @@ STATICFILES_DIRS = (
 #############################################################
 #############################################################
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+MEDIA_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+MEDIA_ROOT = os.path.join(MEDIA_BASE_DIR, 'media')
+MEDIA_URL = '/uploaded/'
 
 ##################################################
 #LEAFLET CONFIG
@@ -155,4 +161,14 @@ LEAFLET_CONFIG = {
             'auto-include': True
         }
     }
+}
+
+REST_FRAMEWORK = {
+
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+       'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
+
 }

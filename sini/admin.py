@@ -3,17 +3,17 @@ from leaflet.admin import LeafletGeoAdmin
 
 # Register your models here.
 
-from .models import Incidencia
+from .models import Incidence
 
 
-class IncidenciaAdmin(LeafletGeoAdmin):
+class IncidenceAdmin(LeafletGeoAdmin):
     #fields = ['name', 'geom']
-    list_display = ('name','tipo_incidente','status','created','created_by','modified','modified_by')
+    list_display = ('name','incidence_type','status','created','created_by','modified','modified_by')
     readonly_fields = ['created','created_by','modified','modified_by']
     fieldsets = [
         #(None,               {'fields': ['question_text']}),
-         ('Información Incidencia', {'fields': ['name','tipo_incidente','status','descripcion', 'geom']}),
-        ('Archivos', {'fields': ['foto1','foto2','foto3','audio', 'video']}),
+         ('Información Incidencia', {'fields': ['name','incidence_type','status','description', 'geom']}),
+        ('Archivos', {'fields': ['image1','image2','image3','audio', 'video']}),
          ('Informacion registro BD', {'fields': ['created','created_by','modified','modified_by']}),
          
     ]
@@ -27,4 +27,4 @@ class IncidenciaAdmin(LeafletGeoAdmin):
         super().save_model(request, obj, form, change)
 
 
-admin.site.register(Incidencia, IncidenciaAdmin)
+admin.site.register(Incidence, IncidenceAdmin)

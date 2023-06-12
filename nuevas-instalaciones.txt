@@ -1,2 +1,8 @@
 django-leaflet==0.28.3
 django-geojson==4.0.0
+pip install djangorestframework
+pip install markdown
+pip install django-filter 
+pip install djangorestframework-gis
+pip install djangorestframework-simplejwt
+pip install Pillow
