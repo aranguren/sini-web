@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_gis',
     'rest_framework_simplejwt',
+    'api',
     'apps.home'  # Enable the inner home (home)
 ]
 
@@ -172,3 +173,23 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 
 }
+
+
+
+EMAIL_HOST =  os.getenv('DJANGO_EMAIL_HOST', 'sandbox.smtp.mailtrap.io')
+EMAIL_HOST_USER =  os.getenv( 'DJANGO_EMAIL_HOST_USER' , '57446d8d1a6be2')
+EMAIL_HOST_PASSWORD =  os.getenv( 'DJANGO_EMAIL_HOST_PASSWORD','9667bd5a798c11')
+EMAIL_PORT = os.getenv( 'DJANGO_EMAIL_PORT', '2525')
+EMAIL_USE_TLS = os.getenv( 'DJANGO_EMAIL_USE_TLS', 'False').lower() in ['true', '1', 'True'] 
+EMAIL_USE_SSL =  os.getenv( 'DJANGO_EMAIL_USE_SSL', 'False').lower() in ['true', '1', 'True'] 
+DEFAULT_FROM_EMAIL = os.getenv( 'DEFAULT_FROM_EMAIL', 'GeoNode <no-reply@geonode.org>')
+PASSWORD_RESET_TIMEOUT = int(os.getenv( 'PASSWORD_RESET_TIMEOUT',  259200))
+
+#DJANGO_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+#DJANGO_EMAIL_HOST=sandbox.smtp.mailtrap.io
+#DJANGO_EMAIL_PORT=2525
+#DJANGO_EMAIL_HOST_USER=57446d8d1a6be2
+#DJANGO_EMAIL_HOST_PASSWORD=9667bd5a798c11
+#DJANGO_EMAIL_USE_TLS=False
+#DJANGO_EMAIL_USE_SSL=False
+#DEFAULT_FROM_EMAIL="GeoNode <no-reply@geonode.org>"

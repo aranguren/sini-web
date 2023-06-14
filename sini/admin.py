@@ -3,7 +3,7 @@ from leaflet.admin import LeafletGeoAdmin
 
 # Register your models here.
 
-from .models import Incidence
+from .models import Incidence, ApiGroup, ApiUser
 
 
 class IncidenceAdmin(LeafletGeoAdmin):
@@ -28,3 +28,32 @@ class IncidenceAdmin(LeafletGeoAdmin):
 
 
 admin.site.register(Incidence, IncidenceAdmin)
+
+
+
+class ApiUserAdmin(admin.ModelAdmin):
+    #fields = ['name', 'geom']
+    list_display = ('name','email','group', 'active')
+    readonly_fields = ['password','password_str']
+    fields  =[
+        'name','email','token_fcm','group', 'password_str', 'active'
+    ]
+ 
+
+
+
+
+admin.site.register(ApiUser, ApiUserAdmin)
+
+class ApiGroupAdmin(admin.ModelAdmin):
+    #fields = ['name', 'geom']
+    list_display = ('name',)
+    fields  =[
+        'name'
+    ]
+ 
+
+
+
+
+admin.site.register(ApiGroup, ApiGroupAdmin)

@@ -6,3 +6,5 @@ pip install django-filter
 pip install djangorestframework-gis
 pip install djangorestframework-simplejwt
 pip install Pillow
+pip install passlib
+pip install six

@@ -11,7 +11,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),          # Django admin route
     path("", include("apps.authentication.urls")), # Auth routes - login / register
-    #path('sini/', include('sini.urls', namespace="sini")), 
+    path('sini/', include('sini.urls', namespace="sini")), 
     path('api/', include('api.urls', namespace="api")),
     path("", include("apps.home.urls"))          # UI Kits Html files
 ]

@@ -1,0 +1,10 @@
+{% autoescape off %}  
+<strong>Hola!</strong> <br> 
+Saludos cordiales de parte de SINI<br>
+Este es un correo electrónico de confirmación de cuenta por parte de la aplicación SINI.<br>
+Estos son los datos para acceder a la aplicación móvil:<br>
+Email: {{email}}<br>
+Contraseña: {{password_random}}<br><br>
+Puede activar su cuenta con el siguiente enlace:<a href="http://{{ domain }}{% url 'agrimensuras:activate' uidb64=uid token=token %}">Confirmar cuenta</a>
+
+{% endautoescape %}  

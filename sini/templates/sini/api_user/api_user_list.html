@@ -1,0 +1,294 @@
+{% extends 'layouts/base.html' %}
+{% load l10n %}
+{% load i18n %}
+{% block title %}
+  Listado usuarios móviles
+{% endblock title %}
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+  <link href="/static/assets/js/plugins/datatables/jquery.dataTables.css"
+        rel="stylesheet">
+  <style>
+  .clickable{
+       cursor: pointer;
+  }
+  .btn-close {
+    color: red; 
+    opacity: 1;
+}
+  </style>
+{% endblock stylesheets %}
+{% block body_class %}g-sidenav-show  bg-gray-100{% endblock %}
+{% block content %}
+  <div class="container-fluid py-4">
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card">
+          <!-- Card header -->
+          <div class="card-header">
+            <h3 class="mb-1">Listado usuarios móviles</h3>
+            <hr class="horizontal dark my-2">
+            <div class="d-flex justify-content-left">
+              <a href="{% url 'sini:api_user_create' %}"
+                 class="btn btn-primary btn-large btn-sm m-b-xm mr-4"><i class="fa fa-plus"></i>&nbsp;&nbsp;Crear</a>
+              <button class="btn bg-secondary text-white btn-large btn-sm m-b-xm mx-1"
+                      id="eliminarB"
+                      data-bs-toggle="modal"
+                      data-bs-target="#deleteModal"
+                      value="{{ farm.id }} ">
+                <i class="fa fa-filter" aria-hidden="true"></i>&nbsp;&nbsp;Filtrar
+              </button>
+              {% if has_filters %}
+                <h6 class="mt-0">
+                  <span class="badge badge-pill badge-large badge-danger  mt-0 ml-1 mr-0">Filtros aplicados
+                    <button type="button"
+                            onclick="window.location='{% url 'sini:api_user_list' %}'"
+                            class="btn-close"></button>
+                  </span>
+                </h6>
+              {% endif %}
+            </div>
+            
+          </div>
+          <div class="card-body mt-0">
+            <div class="d-flex justify-content-right">
+              <nav>
+                <ul class="pagination">
+                  {% if 'name' in request.get_full_path %}
+                    {% if has_previous_pages %}
+                      <li class="page-item">
+                        <a class="page-link"
+                           href="{{ request.get_full_path }}&page={{ 1 }}"
+                           aria-label="1...">
+                          <span aria-hidden="true">1</span>
+                          <span class="sr-only">1...</span>
+                        </a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link"
+                           href="{{ request.get_full_path }}&page={{ previous_page }}"
+                           aria-label="Anterior">
+                          <span aria-hidden="true">&laquo;</span>
+                          <span class="sr-only">{% trans 'Anterior' %}</span>
+                        </a>
+                      </li>
+                    {% endif %}
+                    {% for pr in paginator_rows %}
+                      {% if pr == actual_page %}
+                        <li class="page-item active">
+                          <a class="page-link" href="{{ request.get_full_path }}&page={{ pr }}">{{ pr }}</a>
+                        </li>
+                      {% else %}
+                        <li class="page-item">
+                          <a class="page-link" href="{{ request.get_full_path }}&page={{ pr }}">{{ pr }}</a>
+                        </li>
+                      {% endif %}
+                    {% endfor %}
+                    {% if has_more_pages %}
+                      <li class="page-item">
+                        <a class="page-link"
+                           href="{{ request.get_full_path }}&page={{ next_page }}"
+                           aria-label=">>">
+                          <span aria-hidden="true">&raquo;</span>
+                          <span class="sr-only">>></span>
+                        </a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link"
+                           href="{{ request.get_full_path }}&page={{ total_pages }}"
+                           aria-label="1...">
+                          <span aria-hidden="true">{{ total_pages }}</span>
+                          <span class="sr-only">{{ total_pages }}...</span>
+                        </a>
+                      </li>
+                    {% endif %}
+                  {% else %}
+                    {% if page_obj.has_previous %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ 1 }}" aria-label="1...">
+                          <span aria-hidden="true">1</span>
+                          <span class="sr-only">1...</span>
+                        </a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link"
+                           href="?page={{ page_obj.previous_page_number }}"
+                           aria-label="Anterior">
+                          <span aria-hidden="true">&laquo;</span>
+                          <span class="sr-only">{% trans 'Anterior' %}</span>
+                        </a>
+                      </li>
+                    {% endif %}
+                    {% for pr in paginator_rows %}
+                      {% if pr == page_obj.number %}
+                        <li class="page-item active">
+                          <a class="page-link" href="?page={{ pr }}">{{ pr }}</a>
+                        </li>
+                      {% else %}
+                        <li class="page-item">
+                          <a class="page-link" href="?page={{ pr }}">{{ pr }}</a>
+                        </li>
+                      {% endif %}
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                      <li class="page-item">
+                        <a class="page-link"
+                           href="?page={{ page_obj.next_page_number }}"
+                           aria-label=">>">
+                          <span aria-hidden="true">&raquo;</span>
+                          <span class="sr-only">>></span>
+                        </a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link"
+                           href="?page={{ page_obj.paginator.num_pages }}"
+                           aria-label="1...">
+                          <span aria-hidden="true">{{ page_obj.paginator.num_pages }}</span>
+                          <span class="sr-only">{{ page_obj.paginator.num_pages }}...</span>
+                        </a>
+                      </li>
+                    {% endif %}
+                  {% endif %}
+                </ul>
+              </nav>
+            </div>
+            <div class="table-responsive mt-0">
+              {% if users %}
+                <table class="table table-bordered table-hover mt-0" id="mydatatable">
+                  <thead>
+                    <tr>
+                      <th>
+                        <b>Nombre y apellidos</b>
+                      </th>
+                      <th>
+                        <b>Email</b>
+                      </th>
+                      <th>
+                        <b>Grupo</b>
+                      </th>
+                    
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for user in users %}
+                      <tr class="clickable"
+                          onclick="window.location='{% url 'sini:api_user_detail' user.id %}'">
+                  
+                        <!--tr class="clickable" onclick="window.location='http://localhost:8000/riesgo/centro/detalles/{{center.id }}'"> -->
+                        <td>
+                          {{ user.name }}
+                        </td>
+                        <td >{% firstof user.email|default_if_none:"" %}</td>
+                        <td >{% firstof user.group|default_if_none:"" %}</td>
+                      </tr>
+                    </tbody>
+                  {% endfor %}
+                </table>
+              {% else %}
+                <h3 style="color: red" class="text-center">
+                  {% trans 'No existen usuarios a mostrar' %}
+                </h3>
+              {% endif %}
+            </div>
+            <div class="modal fade"
+                 id="deleteModal"
+                 tabindex="-1"
+                 role="dialog"
+                 aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                      Filtrar
+                    </h5>
+                    <button type="button"
+                            class="btn-close text-dark"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                            id="elim">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="container">
+                      <form id="filter_form"
+                            action="{% url 'sini:api_user_list' %}"
+                            class=""
+                            method="get"
+                            autocomplete="off">
+                        <div class="form-group">
+                          <label class="control-label" for="id_name">
+                            {% trans 'Nombre' %}
+                          </label>
+                          <div class=" ">
+                            <input id="id_name"
+                                   type="text"
+                                   name="name"
+                                   class="form-control"
+                                   value="{{ value_name }}">
+                          </div>
+                          <br>
+                        </div>
+                        <div class="form-group">
+                          <label class="control-label" for="id_email">
+                            {% trans 'Código' %}
+                          </label>
+                          <div class=" ">
+                            <input id="id_cemail"
+                                   type="text"
+                                   name="email"
+                                   class="form-control"
+                                   value="{{ value_email }}">
+                          </div>
+                          <br>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button id="reset_button"
+                            form="filter_form"
+                            type="button"
+                            class="btn btn-light btn-sm">
+                      <i class="fa fa-trash"></i>&nbsp;&nbsp;{% trans 'Limpiar filtros' %}
+                    </button>
+                    <button form="filter_form" type="submit" class="btn btn-primary btn-sm">
+                      <i class="fa fa-filter"></i>&nbsp;&nbsp;{% trans 'Filtrar' %}
+                    </button>
+                    <button type="button" class="btn btn-white btn-sm" data-bs-dismiss="modal">
+                      {% trans 'Cerrar' %}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+   
+    {% include "includes/footer.html" %}
+  </div>
+{% endblock content %}
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+  <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+  <script>
+
+
+  $('#reset_button').click(function () {
+      document.getElementById("id_name").value = "";
+      document.getElementById("id_email").value = "";
+     
+  });
+
+
+  //$(document).ready(function() {
+  //    $('#mydatatable').DataTable();
+  //} );
+
+
+
+  </script>
+{% endblock javascripts %}

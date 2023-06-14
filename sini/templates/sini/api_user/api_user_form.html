@@ -1,0 +1,228 @@
+{% extends 'layouts/base.html' %}
+{% load leaflet_tags %}
+{% load geojson_tags %}
+
+{% block title %} Formulario Finca {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+{% leaflet_js plugins="forms" %}
+{% leaflet_css plugins="forms" %}
+
+<style type="text/css">
+
+
+  #gis {
+      width:100%;
+      height:600px;
+      }
+ 
+     </style> 
+     <link href="/static/assets/css/datapicker/datepicker3.css" rel="stylesheet" />
+     <link href="/static/assets/css/datapicker/bootstrap-datetimepicker.css" rel="stylesheet" />
+     
+     
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid py-4">
+
+    <div class="row">
+      <div class="col-lg-12 col-12 mx-auto">
+        <form enctype="multipart/form-data" method="post">
+          {% csrf_token %}
+          {% if form.errors %}
+          {% for field in form %}
+              {% for error in field.errors %}
+                  <div class="alert alert-danger text-white">
+                      <strong>{{ error|escape }}</strong>
+                        {{ field.label|capfirst }}
+                  </div>
+              {% endfor %}
+          {% endfor %}
+
+          {% for error in form.non_field_errors %}
+              <div class="alert alert-danger text-white">
+                  <strong>{{ error|escape }}</strong>
+              </div>
+          {% endfor %}
+      {% endif %}
+      {% if val_errors %}
+      {% for valerr in val_errors %}
+          
+              <div class="alert alert-danger">
+                  <strong>{{valerr}}</strong>
+              </div>
+        
+      {% endfor %}
+  
+  
+  {% endif %}
+
+      <div class="page-header min-height-300 border-radius-xl mt-4"
+               style="background-image: url('/static/assets/img/curved-images/curved0.jpg');
+                      background-position-y: 50%">
+            <span class="mask bg-gradient-primary opacity-6"></span>
+          </div>
+          <div class="card card-body blur shadow-blur mx-4 mt-n6 overflow-hidden">
+            <div class="row gx-4">
+              <!--div class="col-auto">
+            <div class="avatar avatar-xl position-relative">
+              <img src="/static/assets/img/arbol.jpeg" alt="profile_image" class="w-100 border-radius-lg shadow-sm">
+            </div>
+          </div-->
+              <div class="col-auto my-auto">
+                <div class="h-100">
+                  {% if not form.instance.id %}
+                    <h3>Nuevo usuario móvil</h3>
+                  {% else %}
+                    <h3>
+                      <h3>Actualizar usuario móvil:  <span>'{% firstof api_user.name|default_if_none:"-" %}'</span></h3>
+                    </h3>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="col-lg-4 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3 d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary btn-large btn-sm m-b-xm mx-1"><i class="fa fa-save"></i>&nbsp;&nbsp;Guardar</button>
+                <a href="{% url 'sini:api_user_list' %}" class="btn btn-danger btn-large btn-sm m-b-xm mx-1"><i class="fa fa-undo"></i>&nbsp;&nbsp;Cancelar</a>
+              </div>
+            </div>
+          </div>
+        <div class="card card-body mt-4">
+          <!--h6 class="mb-0">New Project</h6>
+          <p class="text-sm mb-0">Create new project</p-->
+
+          <div class="row mb-2">
+            <div class="col-6">
+              <div class="form-group">
+                <h6>{{ form.name.label }} {% if form.name.field.required %}<span>*</span>{% endif %}</h6>
+                {{ form.name }}
+              </div>
+            </div>
+
+
+
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <div class="form-group">
+                <h6>{{ form.email.label }} {% if form.email.field.required %}<span>*</span>{% endif %}</h6>
+                {{ form.email }}
+              </div>                
+              
+            </div>
+            <div class="col-4">
+              <div class="form-group">
+                <h6>{{ form.group.label }} {% if form.group.field.required %}<span>*</span>{% endif %}</h6>
+                {{ form.group }}
+              </div>                
+            </div>
+            <div class="col-4">
+              <div class="form-group">
+                <h6>{{ form.token_fcm.label }} {% if form.token_fcm.field.required %}<span>*</span>{% endif %}</h6>
+                {{ form.token_fcm }}
+              </div>                
+            </div>
+
+          </div>
+
+          
+          
+        </div>
+        
+      </div>
+    </div>
+
+    {% include "includes/footer.html" %}
+    
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+
+<script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+<script src="/static/assets/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+<script src="/static/assets/js/plugins/datapicker/bootstrap-datepicker.es.js"></script>
+
+<script>
+$(document).ready(function () {
+
+  $('.datepicker').datepicker({'format': 'dd/mm/yyyy',  'language': 'es'});
+  
+  /*
+$(document).ready(function () {
+
+  document.getElementById("id_finca").value = "{{farm_pk}}";
+  $('.datepicker').datepicker({'format': 'dd/mm/yyyy',  'language': 'es'});
+
+});
+*/
+  origen = $('#id_origen_punto').find(":selected").val();
+  if (origen=='mapa'){
+    $('#id_lat').disabled = true;
+    $('#id_lng').disabled = true;
+    $('#div_lat').hide();
+    $('#div_lng').hide();
+    
+  }
+  else{
+   $('#geo_card').hide();
+   //$("id_lat").prop('required',true);
+   //$("id_lng").prop('required',true);
+   $('id_lat').attr('required', true); 
+   $('id_lng').attr('required', true); 
+    
+  }
+  $('#id_origen_punto').on('change', function() { 
+
+    origen = $('#id_origen_punto').find(":selected").val();
+    if (origen=='mapa'){
+      //$('#id_lat').value = '';
+      //$('#id_lng').value = '';
+      //$('#id_lat').val("");
+      //$('#id_lng').val("");
+      $('#id_lat').disabled = true;
+      $('#id_lng').disabled = true;
+      $('#div_lat').hide();
+      $('#div_lng').hide();
+      $('#geo_card').show();
+    }
+    else{
+      $('#geo_card').hide();
+      $('#id_lat').disabled = false;
+      $('#id_lng').disabled = false;
+
+
+     // $("id_lat").prop('required',true);
+      //$("id_lng").prop('required',true);
+      $('#div_lat').show();
+      $('#div_lng').show();
+      $('id_lat').attr('required', true); 
+      $('id_lng').attr('required', true); 
+
+      
+    }
+});
+  //var conceptName = $('#aioConceptName').find(":selected").val();
+  console.log(origen);
+
+/*
+  $('#make_hide_button').on('click', function() {
+    $('#target_area').hide().find('input, textarea').prop('disabled', true);
+  });
+  
+  $('#make_show_button').on('click', function() {
+    $('#target_area').show().find('input, textarea').prop('disabled', false);
+  });
+
+*/
+
+});
+</script>
+{% endblock javascripts %}

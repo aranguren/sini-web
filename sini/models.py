@@ -3,6 +3,9 @@ from django.utils.translation import gettext_lazy as _
 import uuid
 from django.conf import settings
 
+from django.contrib.auth import get_user_model
+from passlib.hash import pbkdf2_sha256 as sha256
+
 # Create your models here.
 
 class BasicAuditModel(models.Model):
@@ -73,3 +76,114 @@ class Incidence(BasicAuditModel):
         managed = True
         verbose_name =  'Incidencia'
         verbose_name_plural =  'Incidencias'
+
+
+
+
+
+
+class ApiUser(BasicAuditModel):
+
+
+    name = models.CharField(_("Nombre y apellidos"), max_length=254)
+    email = models.EmailField(_("Email"), max_length=254, unique=True)
+    token_fcm = models.CharField(_("Token"), max_length=254, blank=True, null=True)
+    
+    password = models.CharField(max_length=250, default="usuario", blank=True, null=True)
+    password_str = models.CharField(_("Password STR"), max_length=50, blank=True, null=True)
+    active = models.BooleanField(_("Activo?"), default=False)
+
+    group = models.ForeignKey("ApiGroup", verbose_name=_("Grupo"), on_delete=models.RESTRICT, related_name="usuarios")
+
+    def check_password(self,password):
+        return sha256.verify(password, self.password)
+
+    def set_password(self, password):
+        self.password = sha256.hash(password)
+        self.save()
+         
+    """
+    def save(self, *args, **kwargs):
+        if not self.pk:
+
+            User = get_user_model()
+            password = User.objects.make_random_password() # 7Gjk2kd4T9
+
+            self.password = sha256.hash(password)
+            self.password_str = password
+            #current_app.send_task("riesgo.tasks.send_worker_email",args=(self.email,password,"new"),queue="celery")
+
+            # to get the domain of the current site  
+           
+            from django.contrib.sites.shortcuts import get_current_site  
+            from django.utils.encoding import force_bytes, force_text  
+            from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode  
+            from django.template.loader import render_to_string  
+            from ..tokens import account_activation_token  
+            from django.core.mail import EmailMessage  
+            current_site = get_current_site(request) #"localhost:8000" #get_current_site(request)  
+            mail_subject = 'Enlace para activación de cuenta en INETER'  
+            uid = urlsafe_base64_encode(force_bytes(new_user.id))
+
+            token = account_activation_token.make_token(new_user)
+
+            uiddecoded = force_text(urlsafe_base64_decode(uid))  
+            new_user.save() 
+            message = render_to_string('agrimensuras/acc_active_email.html', {  
+                'user': new_user,  
+                'domain': current_site.domain,  
+                'uid':uid,  
+                'token':token,  
+            })  
+            
+            email_message = EmailMessage(  
+                        mail_subject, message, to=[email], from_email= settings.DEFAULT_FROM_EMAIL # "idec@deneb.io"  
+            )  
+            email_message.content_subtype = "html"  
+            email_message.send()  
+          
+            #self.password = sha256.hash(self.password)
+            # This code only happens if the objects is
+            # not in the database yet. Otherwise it would
+            # have pk
+        super(ApiUser, self).save(*args, **kwargs)
+
+
+    def __str__(self):
+        return f"{self.name} ({self.email})"
+
+    class Meta:
+        db_table = 'sini_api_user'
+        managed = True
+        verbose_name = 'Usuario API'
+        verbose_name_plural = 'Usuarios API'
+
+    """
+class ApiGroup(models.Model):
+
+    name = models.CharField(_("Nombre grupo"), max_length=50)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'sini_api_group'
+        managed = True
+        verbose_name = 'Grupos API'
+        verbose_name_plural = 'Grupos API'
+
+
+class BlacklistedToken(models.Model):
+    
+    token =  models.TextField( verbose_name="Token")
+    blacklisted_date = models.DateTimeField(verbose_name=_("Fecha"), auto_now_add=True)
+
+
+    def __str__(self):
+        return self.token
+
+    class Meta:
+        db_table = 'sini_api_blacklisted_token'
+        managed = True
+        verbose_name = 'Token'
+        verbose_name_plural = 'Token'
