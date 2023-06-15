@@ -3,7 +3,7 @@ import jwt
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 
-class IsWorkerAuthenticated(permissions.BasePermission):
+class IsUserAuthenticated(permissions.BasePermission):
     """
     Allows access only to authenticated users.
     """
@@ -24,6 +24,15 @@ class IsWorkerRegistered(permissions.BasePermission):
         if not isinstance(request.user, AnonymousUser):
             return bool(request.user and request.user.is_registered)
         return False
+
+class IsUserOwner(permissions.BasePermission):
+    """
+    Custom permission to only allow owners of an object to edit it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+
+        return obj.created_by_api_user == request.user
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """

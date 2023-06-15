@@ -14,7 +14,7 @@ class IncidenceFilterDRF(filters.FilterSet):
         parent = super().qs
         created_by = getattr(self.request, 'user', None)
 
-        return parent.filter(created_by=created_by)
+        return parent.filter(created_by_api_user=created_by)
 
     class Meta:
         model = Incidence

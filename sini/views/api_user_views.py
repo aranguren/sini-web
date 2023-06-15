@@ -23,12 +23,12 @@ class ApiUserListView(LoginRequiredMixin, ListView):
     template_name = 'sini/api_user/api_user_list.html'
     context_object_name = 'users'
     paginate_by = 10
-    """
+    
     def get_context_data(self, *args, **kwargs):
         context = super(ApiUserListView, self).get_context_data(*args, **kwargs)
 
-        context['segment'] = ['ganaclima','finca']
-        context['active_menu'] ='ganaclima'
+        context['segment'] = ['appmobile','api_user']
+        context['active_menu'] ='appmobile'
 
     
         context['value_name'] = self.request.GET.get('name', '')
@@ -87,7 +87,7 @@ class ApiUserListView(LoginRequiredMixin, ListView):
             query_result = query_result.filter(email__icontains=query['email'])
   
         return query_result
-    """
+    
 
 
 
@@ -122,7 +122,8 @@ def create_api_user(request):
                     'form': form,                          
                     'val_errors':val_errors,
                 }
-
+                context['segment'] = ['appmobile','api_user']
+                context['active_menu'] ='appmobile'
                 return render(request, 'sini/api_user/api_user_form.html', context)
             
             #api_group = ApiGroup.objects.get(id=int(group))
@@ -132,7 +133,7 @@ def create_api_user(request):
             User = get_user_model()
             password_random = User.objects.make_random_password() # 7Gjk2kd4T9
 
-            password = sha256.hash(password)
+            password = sha256.hash(password_random)
             new_user.password = password
 
             new_user.save()  
@@ -175,6 +176,8 @@ def create_api_user(request):
         'val_errors':val_errors,
 
     }
+    context['segment'] = ['appmobile','api_user']
+    context['active_menu'] ='appmobile'
 
     return render(request, 'sini/api_user/api_user_form.html', context)
 
@@ -187,11 +190,12 @@ class ApiUserDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)   
-        context['segment'] = ['ganaclima','finca']
-        context['active_menu'] ='ganaclima'
+        context['segment'] = ['appmobile','api_user']
+        context['active_menu'] ='appmobile'
         
-
         return context
+    
+
     
 
 
@@ -208,3 +212,47 @@ class ApiUserUpdateView(LoginRequiredMixin, UpdateView):
         api_user = form.save(commit=False)
         api_user.modified_by = self.request.user 
         return super(ApiUserUpdateView, self).form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)   
+        context['segment'] = ['appmobile','api_user']
+        context['active_menu'] ='appmobile'
+        
+        return context
+    
+
+
+def activate_user(request, uidb64, token):  
+    #User = get_user_model()  
+    context={}
+    try:  
+        uid = force_text(urlsafe_base64_decode(uidb64))  
+        user = ApiUser.objects.get(id=uid)  
+    except(TypeError, ValueError, OverflowError ):
+        context['status']='error'
+        context['error'] = "invalid_token"
+        user = None
+    except ApiUser.DoesNotExist:
+        context['status']='error'
+        context['error'] = "user_not_found"
+        user = None  
+    except Exception as e:
+        context['status']='error'
+        context['error'] = "unknown"
+        context['error_message']= str(e)
+        user = None
+    else: 
+        if user is not None and not account_activation_token.check_token(user, token):
+            context['status']='error'
+            context['error'] = "invalid_token"
+        elif user is not None and account_activation_token.check_token(user, token):  
+             
+            user.active = True  
+            user.save()  
+            #return HttpResponseRedirect(reverse("agrimensuras:topografo_activate"))
+            context['api_user']=user
+            context['status']='ok'
+            return render(request, 'sini/api_user/api_user_activate.html', context)     
+
+
+    return render(request, 'sini/api_user/api_user_activate.html', context)  

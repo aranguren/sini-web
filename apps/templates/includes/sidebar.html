@@ -11,12 +11,12 @@
     <div class="collapse navbar-collapse  w-auto h-auto h-100" id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a data-bs-toggle="collapse" href="#dashboardsExamples" 
+          <a data-bs-toggle="collapse" href="#siniMenu" 
 
              class="nav-link {% if active_menu == 'dashboard' %} active {% endif %}" 
              aria-expanded="{% if active_menu == 'dashboard' %} true {% else %} false {% endif %}"
 
-             aria-controls="dashboardsExamples" role="button">
+             aria-controls="siniMenu" role="button">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center d-flex align-items-center justify-content-center  me-2">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <title>shop </title>
@@ -32,54 +32,14 @@
                 </g>
               </svg>
             </div>
-            <span class="nav-link-text ms-1">Dashboards</span>
+            <span class="nav-link-text ms-1">SINI</span>
           </a>
-          <div class="collapse {% if active_menu == 'dashboard' %} show {% endif %}" id="dashboardsExamples">
+          <div class="collapse {% if active_menu == 'sini' %} show {% endif %}" id="siniMenu">
             <ul class="nav ms-4 ps-3">
               <li class="nav-item ">
-                <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/index.html">
+                <a class="nav-link {% if 'api_user' in segment %} active {% endif %}" href="{% url 'sini:api_user_list' %}">
                   <span class="sidenav-mini-icon"> D </span>
-                  <span class="sidenav-normal"> Default </span>
-                </a>
-              </li>
-              <li class="nav-item ">
-                <a class="nav-link {% if '-automotive.html' in segment %} active {% endif %}" href="/dashboards-automotive.html">
-                  <span class="sidenav-mini-icon"> A </span>
-                  <span class="sidenav-normal"> Automotive </span>
-                </a>
-              </li>
-              <li class="nav-item ">
-                <a class="nav-link {% if '-smart-home.html' in segment %} active {% endif %}" href="/dashboards-smart-home.html">
-                  <span class="sidenav-mini-icon"> S </span>
-                  <span class="sidenav-normal"> Smart Home </span>
-                </a>
-              </li>
-              <li class="nav-item ">
-                <a class="nav-link " data-bs-toggle="collapse" aria-expanded="false" href="#vrExamples">
-                  <span class="sidenav-mini-icon"> V </span>
-                  <span class="sidenav-normal"> Virtual Reality <b class="caret"></b></span>
-                </a>
-                <div class="collapse {% if 'dashboards-vr' in segment %} show {% endif %}" id="vrExamples">
-                  <ul class="nav nav-sm flex-column">
-                    <li class="nav-item {% if '-vr-default.html' in segment %} active {% endif %}">
-                      <a class="nav-link " href="/dashboards-vr-default.html">
-                        <span class="sidenav-mini-icon text-xs"> V </span>
-                        <span class="sidenav-normal"> VR Default </span>
-                      </a>
-                    </li>
-                    <li class="nav-item {% if '-vr-info.html' in segment %} active {% endif %}">
-                      <a class="nav-link " href="/dashboards-vr-info.html">
-                        <span class="sidenav-mini-icon text-xs"> V </span>
-                        <span class="sidenav-normal"> VR Info </span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-              <li class="nav-item  {% if 'dashboards-crm.html' in segment %} active {% endif %}">
-                <a class="nav-link " href="/dashboards-crm.html">
-                  <span class="sidenav-mini-icon"> C </span>
-                  <span class="sidenav-normal"> CRM </span>
+                  <span class="sidenav-normal"> Usuarios móviles </span>
                 </a>
               </li>
             </ul>
@@ -88,7 +48,7 @@
         <li class="nav-item mt-3">
           <h6 class="ps-4  ms-2 text-uppercase text-xs font-weight-bolder opacity-6">PAGES</h6>
         </li>
-        <li class="nav-item">
+        <!--li class="nav-item">
           <a data-bs-toggle="collapse" href="#pagesExamples" 
           
             class="nav-link {% if active_menu == 'pages' %} active {% endif %}" 
@@ -427,9 +387,9 @@
               </li>
             </ul>
           </div>
-        </li>
+        </li-->
         <li class="nav-item">
-          <a data-bs-toggle="collapse" href="#authExamples" class="nav-link " aria-controls="authExamples" role="button" aria-expanded="false">
+          <a data-bs-toggle="collapse" href="#movilMenu" class="nav-link " aria-controls="movilMenu" role="button" aria-expanded="false">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center d-flex align-items-center justify-content-center  me-2">
               <svg width="12px" height="12px" viewBox="0 0 40 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <title>document</title>
@@ -445,171 +405,15 @@
                 </g>
               </svg>
             </div>
-            <span class="nav-link-text ms-1">Authentication</span>
+            <span class="nav-link-text ms-1">APP Móvil</span>
           </a>
-          <div class="collapse " id="authExamples">
+            <div class="collapse {% if active_menu == 'appmobile' %} show {% endif %}" id="movilMenu">
             <ul class="nav ms-4 ps-3">
               <li class="nav-item ">
-                <a class="nav-link " data-bs-toggle="collapse" aria-expanded="false" href="#signinExample">
-                  <span class="sidenav-mini-icon"> S </span>
-                  <span class="sidenav-normal"> Sign In <b class="caret"></b></span>
+                <a class="nav-link {% if 'api_user' in segment %} active {% endif %}" href="{% url 'sini:api_user_list' %}">
+                  <span class="sidenav-mini-icon"> D </span>
+                  <span class="sidenav-normal"> Usuarios móviles </span>
                 </a>
-                <div class="collapse " id="signinExample">
-                  <ul class="nav nav-sm flex-column">
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-signin-basic.html">
-                        <span class="sidenav-mini-icon text-xs"> B </span>
-                        <span class="sidenav-normal"> Basic </span>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-signin-cover.html">
-                        <span class="sidenav-mini-icon text-xs"> C </span>
-                        <span class="sidenav-normal"> Cover </span>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-signin-illustration.html">
-                        <span class="sidenav-mini-icon text-xs"> I </span>
-                        <span class="sidenav-normal"> Illustration </span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-              <li class="nav-item ">
-                <a class="nav-link " data-bs-toggle="collapse" aria-expanded="false" href="#signupExample">
-                  <span class="sidenav-mini-icon"> S </span>
-                  <span class="sidenav-normal"> Sign Up <b class="caret"></b></span>
-                </a>
-                <div class="collapse " id="signupExample">
-                  <ul class="nav nav-sm flex-column">
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-signup-basic.html">
-                        <span class="sidenav-mini-icon text-xs"> B </span>
-                        <span class="sidenav-normal"> Basic </span>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-signup-cover.html">
-                        <span class="sidenav-mini-icon text-xs"> C </span>
-                        <span class="sidenav-normal"> Cover </span>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-signup-illustration.html">
-                        <span class="sidenav-mini-icon text-xs"> I </span>
-                        <span class="sidenav-normal"> Illustration </span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-              <li class="nav-item ">
-                <a class="nav-link " data-bs-toggle="collapse" aria-expanded="false" href="#resetExample">
-                  <span class="sidenav-mini-icon"> R </span>
-                  <span class="sidenav-normal"> Reset Password <b class="caret"></b></span>
-                </a>
-                <div class="collapse " id="resetExample">
-                  <ul class="nav nav-sm flex-column">
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-reset-basic.html">
-                        <span class="sidenav-mini-icon text-xs"> B </span>
-                        <span class="sidenav-normal"> Basic </span>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-reset-cover.html">
-                        <span class="sidenav-mini-icon text-xs"> C </span>
-                        <span class="sidenav-normal"> Cover </span>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-reset-illustration.html">
-                        <span class="sidenav-mini-icon text-xs"> I </span>
-                        <span class="sidenav-normal"> Illustration </span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-              <li class="nav-item ">
-                <a class="nav-link " data-bs-toggle="collapse" aria-expanded="false" href="#lockExample">
-                  <span class="sidenav-mini-icon"> L </span>
-                  <span class="sidenav-normal"> Lock <b class="caret"></b></span>
-                </a>
-                <div class="collapse " id="lockExample">
-                  <ul class="nav nav-sm flex-column">
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-lock-basic.html">
-                        <span class="sidenav-mini-icon text-xs"> B </span>
-                        <span class="sidenav-normal"> Basic </span>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-lock-cover.html">
-                        <span class="sidenav-mini-icon text-xs"> C </span>
-                        <span class="sidenav-normal"> Cover </span>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-lock-illustration.html">
-                        <span class="sidenav-mini-icon text-xs"> I </span>
-                        <span class="sidenav-normal"> Illustration </span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-              <li class="nav-item ">
-                <a class="nav-link " data-bs-toggle="collapse" aria-expanded="false" href="#StepExample">
-                  <span class="sidenav-mini-icon"> 2 </span>
-                  <span class="sidenav-normal"> 2-Step Verification <b class="caret"></b></span>
-                </a>
-                <div class="collapse " id="StepExample">
-                  <ul class="nav nav-sm flex-column">
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-verification-basic.html">
-                        <span class="sidenav-mini-icon text-xs"> B </span>
-                        <span class="sidenav-normal"> Basic </span>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-verification-cover.html">
-                        <span class="sidenav-mini-icon text-xs"> C </span>
-                        <span class="sidenav-normal"> Cover </span>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link " href="/authentication-verification-illustration.html">
-                        <span class="sidenav-mini-icon text-xs"> I </span>
-                        <span class="sidenav-normal"> Illustration </span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-              <li class="nav-item ">
-                <a class="nav-link " data-bs-toggle="collapse" aria-expanded="false" href="#errorExample">
-                  <span class="sidenav-mini-icon"> E </span>
-                  <span class="sidenav-normal"> Error <b class="caret"></b></span>
-                </a>
-                <div class="collapse " id="errorExample">
-                  <ul class="nav nav-sm flex-column">
-                    <li class="nav-item">
-                      <a class="nav-link " href="/page-404.html">
-                        <span class="sidenav-mini-icon text-xs"> E </span>
-                        <span class="sidenav-normal"> Error 404 </span>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link " href="/page-500.html">
-                        <span class="sidenav-mini-icon text-xs"> E </span>
-                        <span class="sidenav-normal"> Error 500 </span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
               </li>
             </ul>
           </div>

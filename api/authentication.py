@@ -4,7 +4,7 @@ from rest_framework.authentication import BaseAuthentication
 from django.middleware.csrf import CsrfViewMiddleware
 from rest_framework import exceptions
 from django.conf import settings
-from .models import BlacklistedToken, ApiUser
+from sini.models import BlacklistedToken, ApiUser
 
 
 class CSRFCheck(CsrfViewMiddleware):

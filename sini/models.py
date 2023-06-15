@@ -43,6 +43,7 @@ class Incidence(BasicAuditModel):
         ("creado","Creado"),
         ("finalizado","Finalizado"),
     )
+    
 
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
@@ -64,9 +65,7 @@ class Incidence(BasicAuditModel):
                                                 null=False, blank=False)
     
     video = models.FileField(verbose_name=_("Video"), upload_to="incidencia_video",
-                                                null=False, blank=False)
-
-    
+                                                null=False, blank=False)    
 
     def __str__(self):
         return self.name
@@ -78,6 +77,75 @@ class Incidence(BasicAuditModel):
         verbose_name_plural =  'Incidencias'
 
 
+
+class MobileWarning(BasicAuditModel):
+
+    INCIDENCE_TYPE_CHOICES = (
+        ("accidente_aereo", "Accidente aéreo"),
+        ("accidente_transito", "Accidente de tránsito"),
+        ("colapso_puente", "Alerta por colapso de puente"),
+        ("arbol_caido", "Árbo caído"),
+        ("asfixia_inmersion", "Asfixia por inmersión"),
+        ("aumento_cauce", "Aumento de cauce"),
+        ("aumento_caudal", "Aumento  de caudal")
+    )
+    STATUS_CHOICES = (
+        ("creado","Creado"),
+        ("asignado","Asignado"),
+        ("descartado","Descartado"),
+    )
+    CREATION_CHOICES = (
+        ("api","API"),
+        ("web","WEB"),
+    )
+    
+
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    geom = models.PointField(verbose_name=_("Localización"), srid=4326, blank=True, null=True)
+
+    name = models.CharField(_("Nombre"), max_length=255)
+    incidence_type = models.CharField(_("Tipo incidente"), max_length=50, choices=INCIDENCE_TYPE_CHOICES, default="tipo1")
+    description = models.TextField(_("Descripción"), blank=True, null=True)
+    
+    status = models.CharField(_("Status"), max_length=50, choices=STATUS_CHOICES, default="creado")
+    
+    image1 = models.ImageField(verbose_name=_("Foto 1"), upload_to="aviso_fotos",
+                                                null=True, blank=True)
+    image2 = models.ImageField(verbose_name=_("Foto 2"), upload_to="aviso_fotos",
+                                                null=True, blank=True)
+    image3 = models.ImageField(verbose_name=_("Foto 3"), upload_to="aviso_fotos",
+                                                 null=True, blank=True)
+    audio = models.FileField(verbose_name=_("Audio"), upload_to="aviso_audios",
+                                               null=True, blank=True)
+    
+    video = models.FileField(verbose_name=_("Video"), upload_to="aviso_video",
+                                               null=True, blank=True)
+
+
+    creation_origin = models.CharField(_("Creado desde"), max_length=50, choices=CREATION_CHOICES, default="api")
+    created_by_api_user = models.ForeignKey("ApiUser", 
+                related_name="+",
+                verbose_name=_("Creado por (Usuario Móvil)"), 
+                null=True,
+                blank=False,
+                on_delete=models.RESTRICT)
+    modified_by_api_user = models.ForeignKey("ApiUser", 
+                    related_name="+",
+                    verbose_name=_("Modificado por (Usuario Móvil)"), 
+                    null=True,
+                    blank=False,
+                    on_delete=models.RESTRICT)
+    
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'sini_warning'
+        managed = True
+        verbose_name =  'Aviso'
+        verbose_name_plural =  'Avisos'
 
 
 
@@ -149,6 +217,7 @@ class ApiUser(BasicAuditModel):
         super(ApiUser, self).save(*args, **kwargs)
 
 
+    """
     def __str__(self):
         return f"{self.name} ({self.email})"
 
@@ -158,7 +227,6 @@ class ApiUser(BasicAuditModel):
         verbose_name = 'Usuario API'
         verbose_name_plural = 'Usuarios API'
 
-    """
 class ApiGroup(models.Model):
 
     name = models.CharField(_("Nombre grupo"), max_length=50)

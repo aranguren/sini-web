@@ -1,6 +1,6 @@
 from rest_framework import generics, serializers
 from rest_framework.fields import CharField
-from  sini.models import Incidence
+from  sini.models import Incidence, MobileWarning
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 #from django.contrib.auth.models import User
 #from django.conf import settings#
@@ -23,7 +23,25 @@ class IncidenceSerializer(GeoFeatureModelSerializer):
         read_only_fields = ['id','created_by', 'modified_by', 'created','modified']
 
 
-  
+
+class UploadWarningFilesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MobileWarning
+        fields = ('image1', 'image2', 'image3', 'audio', 'video')
+        #read_only_fields = ['id','created_by', 'modified_by', 'created','modified', 'created_by_api_user', 'modified_by_api_user']
+
+
+class WarningSerializer(GeoFeatureModelSerializer):
+
+    class Meta:
+        model = MobileWarning
+        geo_field = "geom"
+        fields = ('id','geom','name','incidence_type',
+        'description',)
+        extra_kwargs = {'geom': {'required': True}} 
+        read_only_fields = ['id','created_by', 'modified_by', 'created','modified', 'created_by_api_user', 'modified_by_api_user']
+
 """
 class PeriodSerializer(serializers.ModelSerializer):
     resultados_totales = TotalResultSerializer(read_only=True)

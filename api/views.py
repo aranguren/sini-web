@@ -1,9 +1,11 @@
 from django.shortcuts import render
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import IsAuthenticated
+#from rest_framework_simplejwt.authentication import JWTAuthentication
+#from rest_framework.permissions import IsAuthenticated
+from .authentication import SafeJWTAuthentication
+from .permissions import IsUserAuthenticated, IsUserOwner
 from rest_framework import generics
-from sini.models import Incidence
-from .serializers import IncidenceSerializer
+from sini.models import Incidence, ApiUser, MobileWarning
+from .serializers import IncidenceSerializer, WarningSerializer, UploadWarningFilesSerializer
 from django_filters import rest_framework as filters
 from .filters import IncidenceFilterDRF
 
@@ -16,7 +18,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 #from accounts.serializers import UserSerializer
 from .tokens import generate_access_token, generate_refresh_token
 from passlib.hash import pbkdf2_sha256 as sha256
-from sini.models import ApiUser
+
 from rest_framework.response import Response
 
 
@@ -61,10 +63,31 @@ def login_view(request):
 
     return response
 
+class WarningAPICreate(generics.CreateAPIView):
+    authentication_classes = [SafeJWTAuthentication]
+    permission_classes = (IsUserAuthenticated,)
+    queryset = MobileWarning.objects.all()
+    serializer_class = WarningSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(created_by_api_user=self.request.user, 
+        modified_by_api_user=self.request.user,creation_origin="api"  )
+
+
+
+class WarningAPIUpdate(generics.UpdateAPIView):
+    authentication_classes = [SafeJWTAuthentication]
+    permission_classes = (IsUserAuthenticated, IsUserOwner,)  
+    queryset = MobileWarning.objects.all()
+    serializer_class = UploadWarningFilesSerializer
+
+    def perform_update(self, serializer):
+        serializer.save( modified_by_api_user=self.request.user,  )
+
 
 class IncidenceAPIList(generics.ListAPIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = (IsAuthenticated,)
+    authentication_classes = [SafeJWTAuthentication]
+    permission_classes = (IsUserAuthenticated,)
     queryset = Incidence.objects.all()
     serializer_class = IncidenceSerializer
     filter_backends = (filters.DjangoFilterBackend,)
@@ -72,8 +95,8 @@ class IncidenceAPIList(generics.ListAPIView):
 
 
 class IncidenceAPIRetrieve(generics.RetrieveAPIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = (IsAuthenticated,)
+    authentication_classes = [SafeJWTAuthentication]
+    permission_classes = (IsUserAuthenticated,)
     queryset = Incidence.objects.all()
     serializer_class = IncidenceSerializer
     filter_backends = (filters.DjangoFilterBackend,)
@@ -100,14 +123,17 @@ class IncidenceAPIRetrieve(generics.RetrieveAPIView):
 
 
 class IncidenceAPICreate(generics.CreateAPIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = (IsAuthenticated,)
+    authentication_classes = [SafeJWTAuthentication]
+    permission_classes = (IsUserAuthenticated,)
     queryset = Incidence.objects.all()
     serializer_class = IncidenceSerializer
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user, 
         modified_by=self.request.user,  )
+
+
+
 
 """
 class FarmAPIUpdate(generics.UpdateAPIView):
