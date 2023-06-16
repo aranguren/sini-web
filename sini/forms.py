@@ -35,10 +35,31 @@ class WarningForm(forms.ModelForm):
         widgets = {
             #'name':forms.TextInput(attrs={'class': 'form-control'}),
             'name':forms.TextInput(attrs={'class': 'form-control'}),
-               'geom': LeafletWidget(attrs=LEAFLET_WIDGET_ATTRS),
+            'geom': LeafletWidget(attrs=LEAFLET_WIDGET_ATTRS),
             'incidence_type':forms.Select(attrs={'class': 'form-select form-select-lg'}),
              'description':forms.Textarea(attrs={'class': 'form-control'}),
+            'active':forms.CheckboxInput(attrs={'class': 'form-check-input '}),
+            'image1':forms.FileInput(attrs={'class': 'form-control'}),
+            'image2':forms.FileInput(attrs={'class': 'form-control'}),
+            'image3':forms.FileInput(attrs={'class': 'form-control'}),
+            'audio':forms.FileInput(attrs={'class': 'form-control'}),
+            'video':forms.FileInput(attrs={'class': 'form-control'})
+            }
+
+
+class IncidenceForm(forms.ModelForm):
+
+
+    class Meta:
+        model = Incidence
+        exclude = ("id",'created_by', 'modified_by','status')
+        
+        widgets = {
+            #'name':forms.TextInput(attrs={'class': 'form-control'}),
+            'name':forms.TextInput(attrs={'class': 'form-control'}),
+            'geom': LeafletWidget(attrs=LEAFLET_WIDGET_ATTRS),
             'incidence_type':forms.Select(attrs={'class': 'form-select form-select-lg'}),
+            'description':forms.Textarea(attrs={'class': 'form-control'}),
             'active':forms.CheckboxInput(attrs={'class': 'form-check-input '}),
             'image1':forms.FileInput(attrs={'class': 'form-control'}),
             'image2':forms.FileInput(attrs={'class': 'form-control'}),

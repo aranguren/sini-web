@@ -2,7 +2,7 @@
 {% load l10n %}
 {% load i18n %}
 {% block title %}
-  Listado Avisos
+  Listado Incidencias
 {% endblock title %}
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
@@ -26,10 +26,10 @@
         <div class="card">
           <!-- Card header -->
           <div class="card-header">
-            <h3 class="mb-1">Listado Avisos</h3>
+            <h3 class="mb-1">Listado Incidencias</h3>
             <hr class="horizontal dark my-2">
             <div class="d-flex justify-content-left">
-              <a href="{% url 'sini:warning_create' %}"
+              <a href="{% url 'sini:incidence_create' %}"
                  class="btn btn-primary btn-large btn-sm m-b-xm mr-4"><i class="fa fa-plus"></i>&nbsp;&nbsp;Crear</a>
               <button class="btn bg-secondary text-white btn-large btn-sm m-b-xm mx-1"
                       id="eliminarB"
@@ -42,7 +42,7 @@
                 <h6 class="mt-0">
                   <span class="badge badge-pill badge-large badge-danger  mt-0 ml-1 mr-0">Filtros aplicados
                     <button type="button"
-                            onclick="window.location='{% url 'sini:warning_list' %}'"
+                            onclick="window.location='{% url 'sini:api_user_list' %}'"
                             class="btn-close"></button>
                   </span>
                 </h6>
@@ -153,7 +153,7 @@
               </nav>
             </div>
             <div class="table-responsive mt-0">
-              {% if warnings %}
+              {% if incidences %}
                 <table class="table table-bordered table-hover mt-0" id="mydatatable">
                   <thead>
                     <tr>
@@ -164,7 +164,7 @@
                         <b>Nombre</b>
                       </th>
                       <th>
-                        <b>Tipo aviso</b>
+                        <b>Tipo incidencia</b>
                       </th>
                       <th>
                         <b>Estado</b>
@@ -173,33 +173,23 @@
                         <b>Creado por</b>
                       </th>
                       <th>
-                        <b>Creado desde</b>
-                      </th>
-                      <th>
                         <b>Activo</b>
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {% for warning in warnings %}
+                    {% for incidence in incidences %}
                       <tr class="clickable"
-                          onclick="window.location='{% url 'sini:warning_detail' warning.id %}'">
-                        <td >{% firstof warning.created|default_if_none:"" %}</td>
+                          onclick="window.location='{% url 'sini:incidence_detail' incidence.id %}'">
+                        <td >{% firstof incidence.created|default_if_none:"" %}</td>
                         <!--tr class="clickable" onclick="window.location='http://localhost:8000/riesgo/centro/detalles/{{center.id }}'"> -->
                         <td>
-                          {{ warning.name }}
+                          {{ incidence.name }}
                         </td>
-                        <td >{% firstof warning.get_incidence_type_display|default_if_none:"" %}</td>
-                        <td >{% firstof warning.get_status_display|default_if_none:"" %}</td>
-                        {% if  warning.creation_origin == 'api'%}
-                            <td >{% firstof warning.created_by_api_user|default_if_none:"" %}</td>
-                        {% elif  warning.creation_origin == 'web'%}
-                            <td >{% firstof warning.created_by|default_if_none:"" %}</td>
-                        {% else %}
-                        <td>-<td>
-                        {% endif %}
-                        <td>{% firstof warning.get_creation_origin_display|default_if_none:"" %}</td>
-                        {% if warning.active %}
+                        <td >{% firstof incidence.get_incidence_type_display|default_if_none:"" %}</td>
+                        <td >{% firstof incidence.get_status_display|default_if_none:"" %}</td>
+                        <td >{% firstof incidence.created_by|default_if_none:"" %}</td>
+                        {% if incidence.active %}
                         <td>SI</td>
                         {% else %}
                         <td>NO</td>
@@ -237,7 +227,7 @@
                   <div class="modal-body">
                     <div class="container">
                       <form id="filter_form"
-                            action="{% url 'sini:api_user_list' %}"
+                            action="{% url 'sini:incidence_list' %}"
                             class=""
                             method="get"
                             autocomplete="off">
