@@ -47,6 +47,8 @@ class Incidence(BasicAuditModel):
 
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    active = models.BooleanField(_("Activo?"), default=True)
+
     geom = models.PointField(verbose_name=_("Localización"), srid=4326, blank=True, null=True)
 
     name = models.CharField(_("Nombre"), max_length=255)
@@ -102,6 +104,7 @@ class MobileWarning(BasicAuditModel):
 
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    active = models.BooleanField(_("Activo?"), default=True)
     geom = models.PointField(verbose_name=_("Localización"), srid=4326, blank=True, null=True)
 
     name = models.CharField(_("Nombre"), max_length=255)

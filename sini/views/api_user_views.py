@@ -2,11 +2,13 @@ from django.shortcuts import render
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, TemplateView, View, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
+from django.conf import settings
+
 from django.contrib.sites.shortcuts import get_current_site  
 from django.utils.encoding import force_bytes, force_text  
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode  
 from django.template.loader import render_to_string  
-from django.conf import settings
+
 from django.http import HttpResponseRedirect
 from django.contrib.auth import get_user_model
 from passlib.hash import pbkdf2_sha256 as sha256

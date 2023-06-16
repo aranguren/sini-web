@@ -1,0 +1,356 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load leaflet_tags %}
+{% load geojson_tags %}
+{% block title %}
+  Detalles Aviso
+{% endblock title %}
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+  {% leaflet_js plugins="forms" %}
+  {% leaflet_css plugins="forms" %}
+  <style type="text/css">
+ #gis {
+     width:100%;
+     height:700px;
+     }
+  .clickable{
+      cursor: pointer;
+ }
+
+  </style>
+{% endblock stylesheets %}
+{% block body_class %}g-sidenav-show bg-gray-100{% endblock %}
+{% block content %}
+  <div class="container-fluid py-4">
+    <div class="row">
+      <div class="col-lg-12 col-12 mx-auto">
+        <div class="page-header min-height-300 border-radius-xl mt-4"
+             style="background-image: url('/static/assets/img/curved-images/curved0.jpg');
+                    background-position-y: 50%">
+          <span class="mask bg-gradient-primary opacity-6"></span>
+        </div>
+        <div class="card card-body blur shadow-blur mx-4 mt-n6 overflow-hidden">
+          <div class="row gx-4">
+            <!--div class="col-auto">
+         <div class="avatar avatar-xl position-relative">
+           <img src="/static/assets/img/arbol.jpeg" alt="profile_image" class="w-100 border-radius-lg shadow-sm">
+         </div>
+       </div-->
+            <div class="col-auto my-auto">
+              <div class="h-100">
+                <h3>
+                  Detalles: <span>'{% firstof warning.name|default_if_none:"-" %}'</span>
+                </h3>
+              </div>
+            </div>
+            <div class="col-lg-6 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3 d-flex justify-content-end">
+              <a href="{% url 'sini:warning_list' %}"
+                 class="btn btn-secondary btn-large btn-sm m-b-xm mx-1"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;Atrás</a>
+              <a href="{% url 'sini:warning_create' %}"
+                 class="btn btn-primary btn-large btn-sm m-b-xm mx-1"><i class="fa fa-plus"></i>&nbsp;&nbsp;Crear</a>
+              <a href="{% url 'sini:warning_update' warning.id %}"
+                 class="btn btn-info btn-large btn-sm m-b-xm mx-1"><i class="fa fa-edit"></i>&nbsp;&nbsp;Editar</a>
+              <!--a class="btn btn-danger btn-large btn-sm m-b-xm"><i class="fa fa-edit"></i>&nbsp;&nbsp;Eliminar</a-->
+              <button class="btn btn-danger btn-large btn-sm m-b-xm mx-1"
+                      id="eliminarB"
+                      data-bs-toggle="modal"
+                      data-bs-target="#deleteModal"
+                      value="{{ warning.id }}">
+                <i class="far fa-trash-alt me-2" aria-hidden="true"></i>&nbsp;&nbsp;Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="card card-body mt-4">
+          <!--h6 class="mb-0">New Project</h6>
+<p class="text-sm mb-0">Create new project</p-->
+          <div class="row mb-2">
+            <div class="col-3">
+              <div class="form-group">
+                <h6>Nombre</h6>
+                <div class="mr-2">{% firstof warning.name|default_if_none:"-" %}</div>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group">
+                <h6>Tipo incidente</h6>
+                <div class="mr-2">{% firstof warning.get_incidence_type_display|default_if_none:"-" %}</div>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group">
+                <h6>Status</h6>
+                <div class="mr-2">{% firstof warning.get_status_display|default_if_none:"-" %}</div>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group">
+                <h6>Creado por</h6>
+                {% if  warning.creation_origin == 'api'%}
+                  <div class="mr-2">{% firstof warning.created_by_api_user|default_if_none:"-" %}</div>
+                {% elif  warning.creation_origin == 'web'%}
+                <div class="mr-2">{% firstof warning.created_by|default_if_none:"-" %}</div>
+                {% else %}
+                -
+                {% endif %}
+              </div>
+            </div>
+            
+          </div>
+          <div class="row">
+            <div class="col-3">
+              <div class="form-group">
+                <h6>Fecha creación</h6>
+                <div class="mr-2">{% firstof warning.created|default_if_none:"-" %}</div>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group">
+                <h6>Creado desde</h6>
+                <div class="mr-2">{% firstof warning.get_creation_origin_display|default_if_none:"-" %}</div>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group">
+                <h6>Activo</h6>
+                {% if warning.active %}
+                <div class="mr-2"><span class="badge badge-success">SI</span></div> 
+                {% else %}
+                <div class="mr-2"><span class="badge badge-danger">NO</span></div>
+                {% endif %}
+               
+              </div>
+            </div>
+
+          
+          
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <div class="form-group">
+                <h6>Descripción</h6>
+                <div class="mr-2">{% firstof warning.description|safe|default_if_none:"-"|linebreaks  %}</div>
+              </div>
+            </div>          
+          </div>
+        </div>
+        <div class="card mt-4" id="archivos">
+          <div class="card-header">
+            <h5>Archivos</h5>
+          </div>
+          <div class="card card-body">
+            <div class="row">
+              <div class="col-3">
+                <div class="form-group">
+                  <h6>Imagen 1</h6>
+                  {% if warning.image1 %}
+                  <div class="mr-2"><a href="{{warning.image1.url }}"  target="_blank">Descargar <i class="fa fa-download"></i></a></div>
+                  {% else %}
+                  <div class="mr-2">-</div>
+    
+                  {% endif %}
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group">
+                  <h6>Imagen 2</h6>
+                  {% if warning.image2 %}
+                  <div class="mr-2"><a href="{{warning.image2.url }}"  target="_blank">Descargar <i class="fa fa-download"></i></a></div>
+                  {% else %}
+                  <div class="mr-2">-</div>
+    
+                  {% endif %}
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group">
+                  <h6>Imagen 3</h6>
+                  {% if warning.image3 %}
+                  <div class="mr-2"><a href="{{warning.image3.url }}" target="_blank">Descargar <i class="fa fa-download"></i></a></div>
+                  {% else %}
+                  <div class="mr-2">-</div>
+    
+                  {% endif %}
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group">
+                  <h6>Audio</h6>
+                  {% if warning.audio %}
+                  <div class="mr-2"><a href="{{warning.audio.url }}" target="_blank">Descargar <i class="fa fa-download"></i></a></div>
+                  {% else %}
+                  <div class="mr-2">-</div>
+    
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-3">
+                <div class="form-group">
+                  <h6>Video</h6>
+                  {% if warning.video %}
+                  <div class="mr-2"><a href="{{warning.video.url }}"  target="_blank">Descargar <i class="fa fa-download"></i></a></div>
+                  {% else %}
+                  <div class="mr-2">-</div>
+    
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card mt-4" id="geo">
+          <div class="card-header">
+            <h5>Localizacion</h5>
+          </div>
+          <div class="card-body d-sm-flex pt-0">{% leaflet_map "gis" callback="window.our_layers" %}</div>
+        </div>
+
+
+
+    <div class="modal fade"
+         id="deleteModal"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">
+              Eliminar
+            </h5>
+            <button type="button"
+                    class="btn-close text-dark"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                    id="elim">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p class="text-sm mb-0 font-weight-bold">
+              ¿Está seguro de que desea eliminar el aviso?
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn bg-success" data-bs-dismiss="modal">
+              Cerrar
+            </button>
+            <button type="button" class="btn bg-danger text-white" id="aceptar">
+              Aceptar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade"
+    id="errorModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+     <div class="modal-header">
+       <h5 class="modal-title" id="exampleModalLabel">
+         Error</span>
+       </h5>
+       <button type="button"
+               class="btn-close text-dark"
+               data-bs-dismiss="modal"
+               aria-label="Close"
+               id="closemodalerror">
+    
+         <span aria-hidden="true">&times;</span>
+       </button>
+     </div>
+     <div class="modal-body">
+       <div  class="row">
+         <div class="col-2 text-center text-danger">
+           <i class="fa fa-3x fa-exclamation-circle "></i>
+          </div>
+          <div class="col-10">
+           <p class="text-sm mb-0 font-weight-bold">
+              Han ocurrido errores al eliminar <br>
+              <span id="errorspan"></span>
+           </p>
+           
+          </div>
+       </div>
+     </div>
+     <div class="modal-footer">
+       <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal" >
+         Cerrar
+       </button>
+     </div>
+    </div>
+    </div>
+
+ 
+</div>
+    {% include "includes/footer.html" %}
+  </div>
+{% endblock content %}
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+  <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+
+  <script type="text/javascript">
+  
+    function our_layers(map,options){
+      console.log('Layer');
+      var geom = {{ warning|geojsonfeature|safe }};
+      var feature = L.geoJson(geom).addTo(map);
+      map.fitBounds(feature.getBounds());
+      map.setZoom(12)
+  };
+  
+    document.getElementById("aceptar").addEventListener('click', function(){
+
+    console.log('ACEPTAR');
+    var valor = document.getElementById('eliminarB').value;
+
+    var request = $.ajax({
+        type: "GET",
+        url: "/sini/avisos/eliminar/",
+        data: {
+            "id": valor
+        },
+        success: function (response) {
+            console.log(response)
+            $("#deleteModal").modal('hide');
+            $(location).attr('href', "{% url 'sini:warning_list' %}");
+
+        },
+        error: function (response, e) {
+            console.log(response);
+            
+            $("#deleteModal").modal('hide');
+
+         
+
+            $('#errorModal').modal('show');
+             var errorspan = document.getElementById('errorspan');
+            
+            if (response.responseJSON.mensaje =='restricted'){
+                 errorspan.textContent = response.responseJSON.error;
+            }
+            else{
+              errorspan.textContent ='Ha ocurrido un error al eliminar, Contacte al Administrador';
+            }
+            
+            
+        }
+    });
+
+});   
+
+
+
+
+  </script>
+{% endblock javascripts %}

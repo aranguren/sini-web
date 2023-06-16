@@ -2,6 +2,7 @@
 from django.urls import path 
 
 from .views.api_user_views import ApiUserListView, create_api_user, ApiUserDetailView, ApiUserUpdateView, activate_user
+from .views.warning_views import WarningListView, WarningDetailView, WarningCreateView, WarningUpdateView, warning_delete
 
 app_name = 'sini'
 
@@ -14,4 +15,13 @@ urlpatterns = [
 
     path('activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/',  
         activate_user, name='activate_user'),  
+
+    #-----------------------------------------------------------------
+    path('avisos/', WarningListView.as_view(), name='warning_list'),
+    path('avisos/crear/', WarningCreateView.as_view(), name='warning_create'),
+    path('avisos/detalles/<str:pk>/', WarningDetailView.as_view(), name='warning_detail'),
+    path('avisos/modificar/<str:pk>/', WarningUpdateView.as_view(), name='warning_update'),
+    path('avisos/eliminar/', warning_delete, name='warning_delete'),
+
+
 ]

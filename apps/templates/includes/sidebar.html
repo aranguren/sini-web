@@ -37,9 +37,9 @@
           <div class="collapse {% if active_menu == 'sini' %} show {% endif %}" id="siniMenu">
             <ul class="nav ms-4 ps-3">
               <li class="nav-item ">
-                <a class="nav-link {% if 'api_user' in segment %} active {% endif %}" href="{% url 'sini:api_user_list' %}">
+                <a class="nav-link {% if 'warning' in segment %} active {% endif %}" href="{% url 'sini:warning_list' %}">
                   <span class="sidenav-mini-icon"> D </span>
-                  <span class="sidenav-normal"> Usuarios móviles </span>
+                  <span class="sidenav-normal">Avisos</span>
                 </a>
               </li>
             </ul>
