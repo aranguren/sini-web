@@ -4,7 +4,7 @@ from django.urls import path
 from .views.api_user_views import ApiUserListView, create_api_user, ApiUserDetailView, ApiUserUpdateView, activate_user
 from .views.warning_views import WarningListView, WarningDetailView, WarningCreateView, WarningUpdateView, warning_delete
 from .views.incidence_views import IncidenceListView, IncidenceDetailView, IncidenceCreateView, IncidenceUpdateView, incidence_delete
-
+from .views.advice_views import AdviceListView, AdviceDetailView, AdviceCreateView, AdviceUpdateView, advice_delete
 app_name = 'sini'
 
 urlpatterns = [
@@ -30,6 +30,13 @@ urlpatterns = [
     path('incidencias/modificar/<str:pk>/', IncidenceUpdateView.as_view(), name='incidence_update'),
     path('incidencias/eliminar/', incidence_delete, name='incidence_delete'),
     #------------------------------------------------------------------------------------------------
+    path('consejos/', AdviceListView.as_view(), name='advice_list'),
+    path('consejos/crear/', AdviceCreateView.as_view(), name='advice_create'),
+    
+    path('consejos/detalles/<str:pk>/', AdviceDetailView.as_view(), name='advice_detail'),
+    path('consejos/modificar/<str:pk>/', AdviceUpdateView.as_view(), name='advice_update'),
+    path('consejos/eliminar/', advice_delete, name='advice_delete'),
+
 
 
 

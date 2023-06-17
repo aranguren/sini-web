@@ -8,3 +8,4 @@ pip install djangorestframework-simplejwt
 pip install Pillow
 pip install passlib
 pip install six
+pip install django-ckeditor

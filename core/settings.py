@@ -31,6 +31,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'leaflet',
     'djgeojson',
+    'ckeditor',
+    'ckeditor_uploader',
     'sini',
     'rest_framework',
     'rest_framework_gis',
@@ -193,3 +195,13 @@ PASSWORD_RESET_TIMEOUT = int(os.getenv( 'PASSWORD_RESET_TIMEOUT',  259200))
 #DJANGO_EMAIL_USE_TLS=False
 #DJANGO_EMAIL_USE_SSL=False
 #DEFAULT_FROM_EMAIL="GeoNode <no-reply@geonode.org>"
+
+# CKEDITOR
+CKEDITOR_UPLOAD_PATH = "uploads/"
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'height': '700', 
+        'width': 'full', 
+    },
+}

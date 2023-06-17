@@ -1,0 +1,148 @@
+{% extends 'layouts/base.html' %}
+{% load leaflet_tags %}
+{% load geojson_tags %}
+
+{% block title %} Formulario Consejo {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+{% leaflet_js plugins="forms" %}
+{% leaflet_css plugins="forms" %}
+
+<style type="text/css">
+
+
+.django-ckeditor-widget{
+  width: 100%;
+}
+     </style> 
+
+     
+     
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid py-4">
+    {{form.media}}
+    <div class="row">
+      <div class="col-lg-12 col-12 mx-auto">
+        <form enctype="multipart/form-data" method="post">
+          {% csrf_token %}
+          {% if form.errors %}
+          {% for field in form %}
+              {% for error in field.errors %}
+                  <div class="alert alert-danger text-white">
+                      <strong>{{ error|escape }}</strong>
+                        {{ field.label|capfirst }}
+                  </div>
+              {% endfor %}
+          {% endfor %}
+
+          {% for error in form.non_field_errors %}
+              <div class="alert alert-danger text-white">
+                  <strong>{{ error|escape }}</strong>
+              </div>
+          {% endfor %}
+      {% endif %}
+
+
+          <div class="page-header min-height-300 border-radius-xl mt-4"
+               style="background-image: url('/static/assets/img/curved-images/curved0.jpg');
+                      background-position-y: 50%">
+            <span class="mask bg-gradient-primary opacity-6"></span>
+          </div>
+          <div class="card card-body blur shadow-blur mx-4 mt-n6 overflow-hidden">
+            <div class="row gx-4">
+              <!--div class="col-auto">
+            <div class="avatar avatar-xl position-relative">
+              <img src="/static/assets/img/arbol.jpeg" alt="profile_image" class="w-100 border-radius-lg shadow-sm">
+            </div>
+          </div-->
+              <div class="col-auto my-auto">
+                <div class="h-100">
+                  {% if not incidence.id%}
+                    <h3>Nuevo consejo</h3>
+                  {% else %}
+                    <h3>
+                      <h3>Actualizar coonsejo:  <span>'{% firstof advice.name|default_if_none:"-" %}'</span></h3>
+                    </h3>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="col-lg-4 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3 d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary btn-large btn-sm m-b-xm mx-1"><i class="fa fa-save"></i>&nbsp;&nbsp;Guardar</button>
+                
+                {% if not advice.id %}
+                    <a href="{% url 'sini:advice_list' %}" class="btn btn-danger btn-large btn-sm m-b-xm mx-1"><i class="fa fa-undo"></i>&nbsp;&nbsp;Cancelar</a>
+
+                
+                {% else %}
+                <a href="{% url 'sini:advice_detail' advice.id %}" class="btn btn-danger btn-large btn-sm m-b-xm mx-1"><i class="fa fa-undo"></i>&nbsp;&nbsp;Cancelar</a>
+
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        <div class="card card-body mt-4">
+          <!--h6 class="mb-0">New Project</h6>
+          <p class="text-sm mb-0">Create new project</p-->
+
+          <div class="row mb-2">
+            <div class="col-6">
+              <div class="form-group">
+                <h6>{{ form.name.label }} {% if form.name.field.required %}<span>*</span>{% endif %}</h6>
+                {{ form.name }}
+              </div>
+            </div>
+
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <div class="form-group">
+                <h6>{{ form.description.label }} {% if form.description.field.required %}<span>*</span>{% endif %}</h6>
+                {{ form.description }}
+              </div>                
+              
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <div class="form-group">
+                <h6>{{ form.advice.label }} {% if form.advice.field.required %}<span>*</span>{% endif %}</h6>
+                {{ form.advice }}
+              </div>                
+              
+            </div>
+          </div>
+
+          
+          
+        </div>
+
+
+        
+        
+        </div>
+    </div>
+
+  </form>
+    {% include "includes/footer.html" %}
+    
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+
+<script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+
+
+
+
+{% endblock javascripts %}

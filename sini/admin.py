@@ -3,7 +3,7 @@ from leaflet.admin import LeafletGeoAdmin
 
 # Register your models here.
 
-from .models import MobileWarning, Incidence, ApiGroup, ApiUser
+from .models import MobileWarning, Incidence, Advice, ApiGroup, ApiUser
 
 class WarningAdmin(LeafletGeoAdmin):
     #fields = ['name', 'geom']
@@ -56,13 +56,23 @@ class IncidenceAdmin(LeafletGeoAdmin):
 admin.site.register(Incidence, IncidenceAdmin)
 
 
+class AdviceAdmin(admin.ModelAdmin):
+    #fields = ['name', 'geom']
+    list_display = ('name','description')
+    readonly_fields = ['created','created_by','modified','modified_by']
+
+    fields  =[
+        'name','description','advice'
+    ]
+
+admin.site.register(Advice, AdviceAdmin)
 
 class ApiUserAdmin(admin.ModelAdmin):
     #fields = ['name', 'geom']
     list_display = ('name','email','group', 'active')
     readonly_fields = ['password','password_str']
     fields  =[
-        'name','email','token_fcm','group', 'password_str', 'active'
+        'name','description','advice','group', 'password_str', 'active'
     ]
  
 

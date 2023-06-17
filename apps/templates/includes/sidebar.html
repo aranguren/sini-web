@@ -36,16 +36,22 @@
           </a>
           <div class="collapse {% if active_menu == 'sini' %} show {% endif %}" id="siniMenu">
             <ul class="nav ms-4 ps-3">
-              <li class="nav-item ">
+              <li class="nav-item">
                 <a class="nav-link {% if 'warning' in segment %} active {% endif %}" href="{% url 'sini:warning_list' %}">
                   <span class="sidenav-mini-icon"> D </span>
                   <span class="sidenav-normal">Avisos</span>
                 </a>
               </li>
-              <li class="nav-item ">
+              <li class="nav-item">
                 <a class="nav-link {% if 'incidence' in segment %} active {% endif %}" href="{% url 'sini:incidence_list' %}">
                   <span class="sidenav-mini-icon"> I </span>
                   <span class="sidenav-normal">Incidencias</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if 'advice' in segment %} active {% endif %}" href="{% url 'sini:advice_list' %}">
+                  <span class="sidenav-mini-icon"> C </span>
+                  <span class="sidenav-normal">Consejos</span>
                 </a>
               </li>
             </ul>

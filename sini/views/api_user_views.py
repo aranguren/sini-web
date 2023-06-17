@@ -208,7 +208,7 @@ class ApiUserUpdateView(LoginRequiredMixin, UpdateView):
     form_class = ApiUserForm
     
     def get_success_url(self):
-        return reverse_lazy("sini:api_user_detail_detail", kwargs={"pk":self.object.id})   
+        return reverse_lazy("sini:api_user_detail", kwargs={"pk":self.object.id})   
 
     def form_valid(self, form):
         api_user = form.save(commit=False)

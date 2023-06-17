@@ -22,6 +22,7 @@ venv
 package-lock.json
 
 staticfiles/*
+uploads/*
 media/*
 .vscode/
 !staticfiles/.gitkeep 

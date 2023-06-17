@@ -5,6 +5,7 @@ from django.conf import settings
 
 from django.contrib.auth import get_user_model
 from passlib.hash import pbkdf2_sha256 as sha256
+from ckeditor_uploader.fields import RichTextUploadingField
 
 # Create your models here.
 
@@ -150,6 +151,23 @@ class MobileWarning(BasicAuditModel):
         verbose_name =  'Aviso'
         verbose_name_plural =  'Avisos'
 
+
+class Advice(BasicAuditModel):
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+
+    name = models.CharField(_("Nombre"), max_length=254)
+    description = models.TextField(_("Descripción"))
+    advice = RichTextUploadingField(_("Consejo"))
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'sini_advice'
+        managed = True
+        verbose_name = 'Consejo'
+        verbose_name_plural = 'Consejos'
 
 
 
