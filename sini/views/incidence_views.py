@@ -3,7 +3,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DetailView, T
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.conf import settings
-from ..models import Incidence
+from ..models import Incidence, MobileWarning
 from ..forms import IncidenceForm
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -137,6 +137,21 @@ class IncidenceUpdateView(LoginRequiredMixin, UpdateView):
         
         return context
 
+
+class IncidenceManagmentView(LoginRequiredMixin, TemplateView):
+    template_name = 'sini/incidence/incidence_detail2.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)   
+        context['segment'] = ['sini', 'managment']
+        context['active_menu'] = 'sini'
+        incidences = Incidence.objects.filter(active=True)
+        mobile_warnings = MobileWarning.objects.filter(active=True)
+        context['incidences'] = incidences
+        context['mobile_warnings'] = mobile_warnings
+        context['active_menu'] = mobile_warnings
+        
+        return context
 
 @login_required(login_url='/login/')
 def incidence_delete(request):

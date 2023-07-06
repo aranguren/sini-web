@@ -37,6 +37,12 @@
           <div class="collapse {% if active_menu == 'sini' %} show {% endif %}" id="siniMenu">
             <ul class="nav ms-4 ps-3">
               <li class="nav-item">
+                <a class="nav-link {% if 'managment' in segment %} active {% endif %}" href="{% url 'sini:incidence_managment' %}">
+                  <span class="sidenav-mini-icon">MI</span>
+                  <span class="sidenav-normal">Manejo incidencias</span>
+                </a>
+              </li>
+              <li class="nav-item">
                 <a class="nav-link {% if 'warning' in segment %} active {% endif %}" href="{% url 'sini:warning_list' %}">
                   <span class="sidenav-mini-icon"> D </span>
                   <span class="sidenav-normal">Avisos</span>

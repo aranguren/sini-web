@@ -5,7 +5,8 @@ from .views.api_user_views import ApiUserListView, create_api_user, ApiUserDetai
 from .views.warning_views import (WarningListView, WarningDetailView, WarningCreateView,
                                    WarningUpdateView, warning_delete, WarningDiscardView,
                                    warning_assign, warning_create_incidence)
-from .views.incidence_views import IncidenceListView, IncidenceDetailView, IncidenceCreateView, IncidenceUpdateView, incidence_delete
+from .views.incidence_views import (IncidenceListView, IncidenceDetailView, IncidenceCreateView, IncidenceUpdateView, 
+                                    incidence_delete, IncidenceManagmentView)
 from .views.advice_views import AdviceListView, AdviceDetailView, AdviceCreateView, AdviceUpdateView, advice_delete
 app_name = 'sini'
 
@@ -33,6 +34,8 @@ urlpatterns = [
     
     #-------------------------------------------------------------------
     path('incidencias/', IncidenceListView.as_view(), name='incidence_list'),
+    path('incidencias/manejo/', IncidenceManagmentView.as_view(), name='incidence_managment'),
+    
     path('incidencias/crear/', IncidenceCreateView.as_view(), name='incidence_create'),
     path('incidencias/detalles/<str:pk>/', IncidenceDetailView.as_view(), name='incidence_detail'),
     path('incidencias/modificar/<str:pk>/', IncidenceUpdateView.as_view(), name='incidence_update'),
