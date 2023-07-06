@@ -62,7 +62,50 @@
             </div>
           </div>
         </div>
-        <div class="card card-body mt-4">
+        <div class="card card-body mt-2">
+          <div class="row">
+            <div class="col-lg-6 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3 d-flex justify-content-start mr-3">
+              {% if warning.status != 'descartado' %}
+              <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
+              id="asignarB"
+              data-bs-toggle="modal"
+              data-bs-target="#asingModal"
+              value="{{ warning.id }}">&nbsp;&nbsp;Asignar
+            </button>
+              {% endif %}
+
+               {% if warning.status == 'creado' %}
+              <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
+              id="crearB"
+              data-bs-toggle="modal"
+              data-bs-target="#crearIncidenciaModal"
+              value="{{ warning.id }}">&nbsp;&nbsp;Crear incidencia
+            </button>
+            {% endif %}
+            {% if warning.status != 'descartado' %}
+              <form id="filter_form"
+              action="{% url 'sini:warning_deactivate' warning.id %}"
+              class=""
+              method="post"
+              autocomplete="off">
+              {% csrf_token %}
+                
+                <button class="btn btn-danger btn-large btn-sm mx-1 mb-0"
+                  type="submit"
+                  id="descartarB"
+                  value="descartar">&nbsp;&nbsp;Descartar
+                </button>
+               
+              </form>
+              {% endif %}
+            </div>
+            <div class="col-6">
+               <strong>Estado: </strong>{{warning.get_status_display}}
+            </div>  
+          </div>  
+
+        </div>
+        <div class="card card-body mt-1">
           <!--h6 class="mb-0">New Project</h6>
 <p class="text-sm mb-0">Create new project</p-->
           <div class="row mb-2">
@@ -118,6 +161,20 @@
                 <div class="mr-2"><span class="badge badge-success">SI</span></div> 
                 {% else %}
                 <div class="mr-2"><span class="badge badge-danger">NO</span></div>
+                {% endif %}
+               
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group">
+                <h6>Incidencia asignada</h6>
+                {% if warning.assign_incidence %}
+
+                  <div class="mr-2"><a href="{% url 'sini:incidence_detail' warning.assign_incidence.id %}" target="_blank">{{warning.assign_incidence}}</a></div>
+
+                {% else %}
+                <div class="mr-2">{% firstof warning.assign_incidence|default_if_none:"-" %}</div>
+
                 {% endif %}
                
               </div>
@@ -236,7 +293,7 @@
             </p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn bg-success" data-bs-dismiss="modal">
+            <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal">
               Cerrar
             </button>
             <button type="button" class="btn bg-danger text-white" id="aceptar">
@@ -246,6 +303,104 @@
         </div>
       </div>
     </div>
+
+  <div class="modal fade"
+      id="asingModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">
+          Asignar Incidencia
+        </h5>
+        <button type="button"
+                class="btn-close text-dark"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+                id="elim">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="text-sm mb-0 font-weight-bold">
+          Seleccione la incidencia para asignarle el aviso
+        </p>
+        <br>
+          <div class="form-group">
+            <label class="control-label" for="id_incidencia_asignar">Incidencia</label>
+            <select id="id_incidencia_asignar" class="form-select" name="incidencia_asignar">
+               
+                {% for incidence in incidences %}
+                    <option value="{{ incidence.id }}">{{ incidence.name }}</option>
+                {% endfor %}
+
+            </select>
+
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+        <button type="button" class="btn bg-danger text-white" id="asignarIncidencia">
+          Aceptar
+        </button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="modal fade"
+  id="crearIncidenciaModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered" role="document">
+<div class="modal-content">
+  <div class="modal-header">
+    <h5 class="modal-title" id="exampleModalLabel">
+      Crear Incidencia
+    </h5>
+    <button type="button"
+            class="btn-close text-dark"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            id="elim">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p class="text-sm mb-0 font-weight-bold">
+      Se creará una incidencia a partir del aviso actual. Seleccione la prioridad de la nueva incidencia
+    </p>
+    <br>
+      <div class="form-group">
+        <label class="control-label" for="id_prioridad_crear">Prioridad</label>
+        <select id="id_prioridad_crear" class="form-select" name="prioridad_crear">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5" selected>5</option>
+        </select>
+
+      </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal">
+      Cerrar
+    </button>
+    <button type="button" class="btn bg-danger text-white" id="crearIncidencia">
+      Aceptar
+    </button>
+  </div>
+</div>
+</div>
+</div>0
 
     <div class="modal fade"
     id="errorModal"
@@ -347,9 +502,91 @@
         }
     });
 
-});   
+    });   
 
+    document.getElementById("asignarIncidencia").addEventListener('click', function(){
 
+      console.log('ASIGNAR');
+      var avisoId = document.getElementById('asignarB').value;
+      var incidencia = $('#id_incidencia_asignar').find(":selected").val();
+
+   
+      var request = $.ajax({
+          type: "GET",
+          url: "/sini/avisos/asignar/"+avisoId+"/",
+          data: {
+              "incidence_id": incidencia
+          },
+          success: function (response) {
+              console.log(response)
+              $("#asingModal").modal('hide');
+              $(location).attr('href', "{% url 'sini:warning_detail' warning.id %}");
+  
+          },
+          error: function (response, e) {
+              console.log(response);
+              
+              $("#asingModal").modal('hide');
+  
+           
+  
+              $('#errorModal').modal('show');
+               var errorspan = document.getElementById('errorspan');
+              
+              if (response.responseJSON.mensaje =='restricted'){
+                   errorspan.textContent = response.responseJSON.error;
+              }
+              else{
+                errorspan.textContent ='Ha ocurrido un error al asignar, Contacte al Administrador';
+              }
+              
+              
+          }
+      });
+  
+    });  
+
+document.getElementById("crearIncidencia").addEventListener('click', function(){
+
+      console.log('CREAR INCIDENCIA');
+      var avisoId = document.getElementById('crearB').value;
+      var prioridad = $('#id_prioridad_crear').find(":selected").val();
+
+   
+      var request = $.ajax({
+          type: "GET",
+          url: "/sini/avisos/crear-incidencia/"+avisoId+"/",
+          data: {
+              "prioridad": prioridad
+          },
+          success: function (response) {
+              console.log(response)
+              $("#crearIncidenciaModal").modal('hide');
+              $(location).attr('href', "{% url 'sini:warning_detail' warning.id %}");
+  
+          },
+          error: function (response, e) {
+              console.log(response);
+              
+              $("#crearIncidenciaModal").modal('hide');
+  
+           
+  
+              $('#errorModal').modal('show');
+               var errorspan = document.getElementById('errorspan');
+              
+              if (response.responseJSON.mensaje =='restricted'){
+                   errorspan.textContent = response.responseJSON.error;
+              }
+              else{
+                errorspan.textContent ='Ha ocurrido un error al asignar, Contacte al Administrador';
+              }
+              
+              
+          }
+      });
+  
+      });  
 
 
   </script>

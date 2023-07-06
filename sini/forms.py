@@ -63,6 +63,7 @@ class IncidenceForm(forms.ModelForm):
             'incidence_type':forms.Select(attrs={'class': 'form-select form-select-lg'}),
             'description':forms.Textarea(attrs={'class': 'form-control'}),
             'active':forms.CheckboxInput(attrs={'class': 'form-check-input '}),
+            'priority':forms.NumberInput(attrs={'class': 'form-control'}),
             'image1':forms.FileInput(attrs={'class': 'form-control'}),
             'image2':forms.FileInput(attrs={'class': 'form-control'}),
             'image3':forms.FileInput(attrs={'class': 'form-control'}),

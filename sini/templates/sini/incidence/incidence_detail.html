@@ -196,6 +196,79 @@
           <div class="card-body d-sm-flex pt-0">{% leaflet_map "gis" callback="window.our_layers" %}</div>
         </div>
 
+        <div class="card mt-4" id="avisos">
+          <div class="card-header">
+            <h5>Avisos</h5>
+          </div>
+          <div class="card card-body">
+            {% if incidence.get_warnings  %}
+            <table class="table table-bordered table-hover mt-0" id="mydatatable">
+              <thead>
+                <td>
+                  <b>Nombre</b>
+                </td>
+                <td>
+                  <b>Tipo incidente</b>
+                </td>
+                <td>
+                  <b>Estado</b>
+                </td>
+                <td class="text-center">
+                  <b>Acciones</b>
+                </td>
+              </thead>
+              <tbody>
+                {% for mobile_warning in incidence.get_warnings %}
+                  <tr>
+                    <!--tr class="clickable" onclick="window.location='http://localhost:8000/riesgo/centro/detalles/{{center.id }}'"> -->
+                    <td>
+                      {{ mobile_warning.name }}
+                    </td>
+                    <td>
+                      {{ mobile_warning.get_incidence_type_display }}
+                    </td>
+                    <td>
+                      {{ mobile_warning.get_status_display }}
+                    </td>
+                    <td class="text-center">
+                      <a href="{% url 'sini:warning_detail' mobile_warning.id %}"   data-bs-toggle="tooltip"
+                      data-bs-placement="top" title="Detalles"><i class="far fa-eye mx-2" aria-hidden="true"></i></a>
+                     
+                      <a href="{% url 'sini:warning_update' mobile_warning.id %}"   data-bs-toggle="tooltip"
+                      data-bs-placement="top" title="Editar"><i class="far fa-edit mx-2" aria-hidden="true"></i></a>
+                      
+                      <!--span data-bs-toggle="modal" data-bs-target="#deletePeriodoModal">
+                      <button class="btn btn-link text-danger text-gradient px-0 mb-0 deletebin mx-2"
+                              id="eliminarVariable"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="top" title="Eliminar"
+                              value="{{ period.id }}">
+                        <i class="far fa-trash-alt" aria-hidden="true"></i>
+                    </button>
+                  </span>
+
+                    <span data-bs-toggle="modal" data-bs-target="#executeModal">
+                      <button class="btn btn-link text-primary text-gradient px-0 mb-0 executebutton mx-2"
+                      id="eliminarVariable"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top" title="Ejecutar"
+                      value="{{ period.id }}">
+                <i class="fa fa-play" aria-hidden="true"></i>
+              </button>
+                  </span-->
+                  
+                 
+                    </td>
+                  </tr>
+                </tbody>
+              {% endfor %}
+            </table>
+          {% else %}
+            <h5 style="color: red" class="text-center  float-center">No existen avisos</h5>
+          {% endif %}
+          </div>
+        </div>
+
 
 
     <div class="modal fade"

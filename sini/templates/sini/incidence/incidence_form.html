@@ -107,6 +107,12 @@
             </div>
             <div class="col-3">
               <div class="form-group">
+                <h6>{{ form.priority.label }} {% if form.priority.field.required %}<span>*</span>{% endif %}</h6>
+                {{ form.priority }}
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group">
                 <h6>
                   {{ form.active.label }}
                   {% if form.active.field.required %}<span>*</span>{% endif %}

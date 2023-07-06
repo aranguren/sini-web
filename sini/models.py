@@ -2,7 +2,7 @@ from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 import uuid
 from django.conf import settings
-
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth import get_user_model
 from passlib.hash import pbkdf2_sha256 as sha256
 from ckeditor_uploader.fields import RichTextUploadingField
@@ -50,7 +50,7 @@ class Incidence(BasicAuditModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     active = models.BooleanField(_("Activo?"), default=True)
 
-    geom = models.PointField(verbose_name=_("Localización"), srid=4326, blank=True, null=True)
+    geom = models.PointField(verbose_name=_("Localización"), srid=4326, blank=False, null=False)
 
     name = models.CharField(_("Nombre"), max_length=255)
     incidence_type = models.CharField(_("Tipo incidente"), max_length=50, choices=INCIDENCE_TYPE_CHOICES, default="tipo1")
@@ -70,8 +70,13 @@ class Incidence(BasicAuditModel):
     video = models.FileField(verbose_name=_("Video"), upload_to="incidencia_video",
                                                 null=False, blank=False)    
 
+    priority = models.IntegerField(_("Prioridad"), default=1, 
+                                   validators=[MaxValueValidator(5), MinValueValidator(1)])
     def __str__(self):
         return self.name
+    
+    def get_warnings(self):
+        return self.mobile_warnings.all()
 
     class Meta:
         db_table = 'sini_incidence'
@@ -106,7 +111,7 @@ class MobileWarning(BasicAuditModel):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     active = models.BooleanField(_("Activo?"), default=True)
-    geom = models.PointField(verbose_name=_("Localización"), srid=4326, blank=True, null=True)
+    geom = models.PointField(verbose_name=_("Localización"), srid=4326, blank=False, null=False)
 
     name = models.CharField(_("Nombre"), max_length=255)
     incidence_type = models.CharField(_("Tipo incidente"), max_length=50, choices=INCIDENCE_TYPE_CHOICES, default="tipo1")
@@ -126,6 +131,9 @@ class MobileWarning(BasicAuditModel):
     video = models.FileField(verbose_name=_("Video"), upload_to="aviso_video",
                                                null=True, blank=True)
 
+    assign_incidence = models.ForeignKey("sini.Incidence", verbose_name=_("Incidencia asignada"), 
+                      null=True, blank=True, related_name="mobile_warnings", 
+                      on_delete=models.RESTRICT)
 
     creation_origin = models.CharField(_("Creado desde"), max_length=50, choices=CREATION_CHOICES, default="api")
     created_by_api_user = models.ForeignKey("ApiUser", 

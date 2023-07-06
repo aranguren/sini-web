@@ -2,7 +2,9 @@
 from django.urls import path 
 
 from .views.api_user_views import ApiUserListView, create_api_user, ApiUserDetailView, ApiUserUpdateView, activate_user
-from .views.warning_views import WarningListView, WarningDetailView, WarningCreateView, WarningUpdateView, warning_delete
+from .views.warning_views import (WarningListView, WarningDetailView, WarningCreateView,
+                                   WarningUpdateView, warning_delete, WarningDiscardView,
+                                   warning_assign, warning_create_incidence)
 from .views.incidence_views import IncidenceListView, IncidenceDetailView, IncidenceCreateView, IncidenceUpdateView, incidence_delete
 from .views.advice_views import AdviceListView, AdviceDetailView, AdviceCreateView, AdviceUpdateView, advice_delete
 app_name = 'sini'
@@ -23,6 +25,12 @@ urlpatterns = [
     path('avisos/detalles/<str:pk>/', WarningDetailView.as_view(), name='warning_detail'),
     path('avisos/modificar/<str:pk>/', WarningUpdateView.as_view(), name='warning_update'),
     path('avisos/eliminar/', warning_delete, name='warning_delete'),
+    path('avisos/desactivar/<str:pk>/', WarningDiscardView.as_view(), name='warning_deactivate'),
+    path('avisos/asignar/<str:pk>/', warning_assign, name='warning_assign'),
+    path('avisos/crear-incidencia/<str:pk>/', warning_create_incidence, name='warning_create_incidence'),
+    
+    
+    
     #-------------------------------------------------------------------
     path('incidencias/', IncidenceListView.as_view(), name='incidence_list'),
     path('incidencias/crear/', IncidenceCreateView.as_view(), name='incidence_create'),

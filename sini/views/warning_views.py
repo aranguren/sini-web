@@ -1,9 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, TemplateView, View, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.conf import settings
-from ..models import MobileWarning
+from ..models import MobileWarning, Incidence
 from ..forms import WarningForm
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -89,8 +89,21 @@ class WarningDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)   
         context['segment'] = ['sini','warning']
         context['active_menu'] ='sini'
+        incidences = Incidence.objects.filter(active=True)
+        context['incidences'] = incidences
         
         return context
+   
+
+class WarningDiscardView(View):
+    def post(self, request, pk):
+        # <view logic>
+
+        warning = get_object_or_404(MobileWarning, pk=pk)
+        warning.status = 'descartado'
+        warning.save()
+        redirection = reverse_lazy("sini:warning_detail", kwargs={"pk": pk}) 
+        return redirect(redirection)
     
 class WarningCreateView(LoginRequiredMixin, CreateView):
     model = MobileWarning
@@ -163,6 +176,52 @@ def warning_delete(request):
 
     resp['mensaje'] = 'deleted'
     print(resp)
+    return JsonResponse(resp, status=200)
+
+@login_required(login_url='/login/')
+def warning_assign(request, pk):
+    resp = {}
+    #id = request.GET.get('id', None)
+    incidence_id = request.GET.get('incidence_id', None)
+    
+    warning = get_object_or_404(MobileWarning, pk=pk)
+    incidence = get_object_or_404(Incidence, pk=incidence_id)
+    warning.assign_incidence = incidence
+    warning.status = 'asignado'
+    warning.save()
+
+    return JsonResponse(resp, status=200)
+
+@login_required(login_url='/login/')
+def warning_create_incidence(request, pk):
+    resp = {}
+    #id = request.GET.get('id', None)
+    prioridad = int(request.GET.get('prioridad', None))
+    
+    warning = get_object_or_404(MobileWarning, pk=pk)
+    new_incidence = Incidence(
+        name=warning.name,
+        geom=warning.geom,
+        incidence_type=warning.incidence_type,
+        description=warning.description,
+        status='creado',
+        priority=prioridad,
+        image1=warning.image1,
+        image2=warning.image2,
+        image3=warning.image3,
+        audio=warning.audio,
+        video=warning.video,
+        created_by=request.user
+
+    )
+    new_incidence.save()
+    #incidence = get_object_or_404(Incidence, pk=incidence_id)
+    #warning.assign_incidence = incidence
+    #warning.status = 'asignado'
+    warning.assign_incidence = new_incidence
+    warning.status = 'asignado'
+    warning.save()
+
     return JsonResponse(resp, status=200)
 
 """
