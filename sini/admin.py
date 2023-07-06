@@ -72,7 +72,7 @@ class ApiUserAdmin(admin.ModelAdmin):
     list_display = ('name','email','group', 'active')
     readonly_fields = ['password','password_str']
     fields  =[
-        'name','description','advice','group', 'password_str', 'active'
+        'name','email','group', 'password_str', 'active'
     ]
  
 

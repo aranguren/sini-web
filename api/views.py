@@ -4,8 +4,8 @@ from django.shortcuts import render
 from .authentication import SafeJWTAuthentication
 from .permissions import IsUserAuthenticated, IsUserOwner
 from rest_framework import generics
-from sini.models import Incidence, ApiUser, MobileWarning
-from .serializers import IncidenceSerializer, WarningSerializer, UploadWarningFilesSerializer
+from sini.models import Incidence, ApiUser, MobileWarning, Advice
+from .serializers import IncidenceSerializer, WarningSerializer, UploadWarningFilesSerializer, AdviceSerializer
 from django_filters import rest_framework as filters
 from .filters import IncidenceFilterDRF
 
@@ -181,3 +181,11 @@ class FarmAPIDelete(generics.DestroyAPIView):
         return self.destroy(request, *args, **kwargs)
 
 """
+
+
+
+class AdviceAPIList(generics.ListAPIView):
+    authentication_classes = [SafeJWTAuthentication]
+    permission_classes = (IsUserAuthenticated,)
+    queryset = Advice.objects.all()
+    serializer_class = AdviceSerializer

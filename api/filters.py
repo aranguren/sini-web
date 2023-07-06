@@ -9,12 +9,6 @@ class IncidenceFilterDRF(filters.FilterSet):
     status = filters.CharFilter(lookup_expr='exact')
 
 
-    @property
-    def qs(self):
-        parent = super().qs
-        created_by = getattr(self.request, 'user', None)
-
-        return parent.filter(created_by_api_user=created_by)
 
     class Meta:
         model = Incidence

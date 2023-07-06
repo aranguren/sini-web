@@ -1,6 +1,6 @@
 from rest_framework import generics, serializers
 from rest_framework.fields import CharField
-from  sini.models import Incidence, MobileWarning
+from  sini.models import Incidence, MobileWarning, Advice
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 #from django.contrib.auth.models import User
 #from django.conf import settings#
@@ -117,3 +117,12 @@ class PeriodSerializer(serializers.ModelSerializer):
 
 
 """
+
+
+class AdviceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Advice
+        geo_field = "geom"
+        fields = ('id','name','description','advice')
+        read_only_fields = ['id','created_by', 'modified_by', 'created','modified']

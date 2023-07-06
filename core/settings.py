@@ -202,6 +202,7 @@ CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_CONFIGS = {
     'default': {
         'height': '700', 
+         'toolbar': 'Full',
         'width': 'full', 
     },
 }
