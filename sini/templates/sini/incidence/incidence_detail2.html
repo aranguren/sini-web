@@ -9,6 +9,7 @@
 {% block stylesheets %}
   {% leaflet_js plugins="forms" %}
   {% leaflet_css plugins="forms" %}
+  <link rel="stylesheet" href="{% static 'assets/markers/css/leaflet.extra-markers.min.css' %}">
   <style type="text/css">
  #gis {
      width:100%;
@@ -42,20 +43,62 @@
 {% block javascripts %}
   <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
 
+  <!--script src="{% static 'assets/js/extra-markers/src/assets/js/leaflet.extra-markers.min.jss' %}" ></script-->
+
+  <script src="{% static 'assets/markers/js/leaflet.extra-markers.js' %}"></script>
+
   <script type="text/javascript">
-  
+
+
+    function style(feature) {
+
+      var redMarker = L.ExtraMarkers.icon({
+        icon: 'fa-coffee',
+        markerColor: 'red',
+        shape: 'square',
+        prefix: 'fa'
+      });
+
+   
+          return {
+              icon: redMarker,
+          }
+
+
+
+  }
+ function redIcon (point, latlng) {
+  //https://github.com/coryasilva/Leaflet.ExtraMarkers#icons
+  var redMarker = L.ExtraMarkers.icon({
+    icon: 'fa-warning',
+    markerColor: 'red',
+    shape: 'circle',
+    prefix: 'fa'
+  });
+    return L.marker(latlng, { icon: redMarker })
+  }
+
+  function blueIcon (point, latlng) {
+    var redMarker = L.ExtraMarkers.icon({
+      icon: 'fa-warning',
+      markerColor: 'orange',
+      shape: 'circle',
+      prefix: 'fa'
+    });
+      return L.marker(latlng, { icon: redMarker })
+    }
+
+
     function our_layers(map,options){
       console.log('Layer');
+
+ 
+      
       var geom_incidence = {{ incidences|geojsonfeature|safe }};
-      var feature_incidence = L.geoJson(geom_incidence);//.addTo(map);
-      //var geom2 = {{ mobile_warnings|geojsonfeature|safe }};
-      //var mobile_warnings = L.geoJson(geom2).addTo(map);
-
+      var feature_incidence = L.geoJson(geom_incidence , { pointToLayer:redIcon});//.addTo(map);
       var geom_warnings = {{ mobile_warnings|geojsonfeature|safe }};
-      var feature_warnings = L.geoJson(geom_warnings);
+      var feature_warnings = L.geoJson(geom_warnings, { pointToLayer:blueIcon});
 
-
-    
       var basemaps = {
 
         "osmHOT" : L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
@@ -75,14 +118,31 @@
     };
 
     var features = L.control.layers(basemaps, overlayMaps).addTo(map);
+    map.fitBounds(features.getBounds());
 
     feature_incidence.addTo(map);
+    feature_warnings.addTo(map);
     basemaps["Calles"].addTo(map);
 
-
+ 
       
-      map.fitBounds(feature_incidence.getBounds());
-      map.setZoom(12)
+      //map.setZoom(12)
+
+      var legend = L.control({ position: "bottomleft" });
+      let legend_label = "Leyenda";
+      let incidence_label = "Incidencias";
+      let warning_label = "Avisos";
+
+
+      legend.onAdd = function (map) {
+          var div = L.DomUtil.create('div', 'legend');
+          div.style.backgroundColor = "#F2E8F0"
+          div.innerHTML = `<div>&nbsp;&nbsp;&nbsp;<b>${legend_label}</b></div>`;
+          div.innerHTML += `<i style="background:#9F2C31">&nbsp;&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;<strong>${incidence_label}</strong>&nbsp;&nbsp;<br/>`;
+          div.innerHTML += `<i style="background:#EF8E20">&nbsp;&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;<strong>${warning_label}</strong>&nbsp;&nbsp;<br/>`;
+          return div
+      }
+      legend.addTo(map);
   };
   
   
