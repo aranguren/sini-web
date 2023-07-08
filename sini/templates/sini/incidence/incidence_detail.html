@@ -398,7 +398,8 @@
              var errorspan = document.getElementById('errorspan');
             
             if (response.responseJSON.mensaje =='restricted'){
-                 errorspan.textContent = response.responseJSON.error;
+               errorspan.textContent = "El registro no puede ser eliminado ya que existen otras entidades que dependen de él. Intente archivarlo en su lugar"
+              //errorspan.textContent = response.responseJSON.error;
             }
             else{
               errorspan.textContent ='Ha ocurrido un error al eliminar, Contacte al Administrador';

@@ -222,6 +222,41 @@ def warning_create_incidence(request, pk):
     warning.status = 'asignado'
     warning.save()
 
+    incidence_feature = {
+      "type": "Feature",
+        "id": new_incidence.id,
+      "properties": {
+          "name": new_incidence.name,
+          "description": new_incidence.description,
+          "incidence_type": new_incidence.incidence_type,
+          "status": new_incidence.status,
+          "priority": new_incidence.priority
+
+      },
+      "geometry": {
+          "type": "Point",
+          "coordinates": [new_incidence.geom.x, new_incidence.geom.y ]
+      }
+    };
+    warning_feature = {
+      "type": "Feature",
+        "id": warning.id,
+      "properties": {
+          "name": warning.name,
+          "description": warning.description,
+          "incidence_type": warning.incidence_type,
+          "status": warning.status,
+
+      },
+      "geometry": {
+          "type": "Point",
+          "coordinates": [new_incidence.geom.x, new_incidence.geom.y ]
+      }
+    };
+    resp['incidenceFeature'] = incidence_feature
+    resp['warningFeature'] = warning_feature
+
+
     return JsonResponse(resp, status=200)
 
 """

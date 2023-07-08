@@ -149,7 +149,7 @@ class IncidenceManagmentView(LoginRequiredMixin, TemplateView):
         mobile_warnings = MobileWarning.objects.filter(active=True)
         context['incidences'] = incidences
         context['mobile_warnings'] = mobile_warnings
-        context['active_menu'] = mobile_warnings
+       
         
         return context
 

@@ -31,8 +31,60 @@
           <div class="card-header">
             <h5>Manejo incidencias</h5>
           </div>
-          <div class="card-body d-sm-flex pt-0">{% leaflet_map "gis" callback="window.our_layers" %}</div>
+          <div class="card-body d-sm-flex pt-0">{% leaflet_map "gis" callback="window.init_map" %}</div>
         </div>
+
+        <input type="hidden" id="selectedWarning" name="selectedWarningName"/>
+
+
+<div class="modal fade"
+id="crearIncidenciaModal"
+tabindex="-1"
+role="dialog"
+aria-labelledby="exampleModalLabel"
+aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered" role="document">
+<div class="modal-content">
+<div class="modal-header">
+  <h5 class="modal-title" id="exampleModalLabel">
+    Crear Incidencia
+  </h5>
+  <button type="button"
+          class="btn-close text-dark"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          id="elim">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <p class="text-sm mb-0 font-weight-bold">
+    Se creará una incidencia a partir del aviso actual. Seleccione la prioridad de la nueva incidencia
+  </p>
+  <br>
+    <div class="form-group">
+      <label class="control-label" for="id_prioridad_crear">Prioridad</label>
+      <select id="id_prioridad_crear" class="form-select" name="prioridad_crear">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5" selected>5</option>
+      </select>
+
+    </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal">
+    Cerrar
+  </button>
+  <button type="button" class="btn bg-danger text-white" id="crearIncidencia">
+    Aceptar
+  </button>
+</div>
+</div>
+</div>
+</div>
 
       </div>
       {% include "includes/footer.html" %}
@@ -46,58 +98,22 @@
   <!--script src="{% static 'assets/js/extra-markers/src/assets/js/leaflet.extra-markers.min.jss' %}" ></script-->
 
   <script src="{% static 'assets/markers/js/leaflet.extra-markers.js' %}"></script>
+  <script src="{% static 'sini/js/map_managment.js' %}"></script>
+
 
   <script type="text/javascript">
-
-
-    function style(feature) {
-
-      var redMarker = L.ExtraMarkers.icon({
-        icon: 'fa-coffee',
-        markerColor: 'red',
-        shape: 'square',
-        prefix: 'fa'
-      });
-
-   
-          return {
-              icon: redMarker,
-          }
-
-
-
-  }
- function redIcon (point, latlng) {
-  //https://github.com/coryasilva/Leaflet.ExtraMarkers#icons
-  var redMarker = L.ExtraMarkers.icon({
-    icon: 'fa-warning',
-    markerColor: 'red',
-    shape: 'circle',
-    prefix: 'fa'
-  });
-    return L.marker(latlng, { icon: redMarker })
-  }
-
-  function blueIcon (point, latlng) {
-    var redMarker = L.ExtraMarkers.icon({
-      icon: 'fa-warning',
-      markerColor: 'orange',
-      shape: 'circle',
-      prefix: 'fa'
-    });
-      return L.marker(latlng, { icon: redMarker })
-    }
-
-
-    function our_layers(map,options){
+    var feature_incidence = false;
+    var feature_warnings = false;
+    var map_copy = False
+    function init_map(map,options){
       console.log('Layer');
 
  
       
-      var geom_incidence = {{ incidences|geojsonfeature|safe }};
-      var feature_incidence = L.geoJson(geom_incidence , { pointToLayer:redIcon});//.addTo(map);
-      var geom_warnings = {{ mobile_warnings|geojsonfeature|safe }};
-      var feature_warnings = L.geoJson(geom_warnings, { pointToLayer:blueIcon});
+      var geom_incidence = {{ incidences|geojsonfeature:"id,name,incidence_type,description,status,active"|safe }};
+      feature_incidence = L.geoJson(geom_incidence , { pointToLayer:redIcon, onEachFeature:onEachFeatureIncidence});//.addTo(map);
+      var geom_warnings = {{ mobile_warnings|geojsonfeature:"id,name,incidence_type,description,status,active,assign_incidence"|safe }};
+      feature_warnings = L.geoJson(geom_warnings, { pointToLayer:orangeIcon, onEachFeature:onEachFeatureWarning});
 
       var basemaps = {
 
@@ -118,7 +134,12 @@
     };
 
     var features = L.control.layers(basemaps, overlayMaps).addTo(map);
-    map.fitBounds(features.getBounds());
+    //map.fitBounds(feature_warnings.getBounds());
+
+    var bounds1 = feature_warnings.getBounds();
+    var bounds2 = feature_incidence.getBounds();
+
+    map.fitBounds(bounds1.extend(bounds2));
 
     feature_incidence.addTo(map);
     feature_warnings.addTo(map);
@@ -143,6 +164,12 @@
           return div
       }
       legend.addTo(map);
+
+
+      //console.log(feature_warnings._layers[51].feature.id);
+
+      //console.log(feature_warnings._layers[51]._popup._content);
+      map_copy = map
   };
   
   
