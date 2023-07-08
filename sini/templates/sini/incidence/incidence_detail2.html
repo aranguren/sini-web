@@ -86,6 +86,176 @@ aria-hidden="true">
 </div>
 </div>
 
+      <div class="modal fade"
+      id="asingModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">
+          Asignar Incidencia
+        </h5>
+        <button type="button"
+                class="btn-close text-dark"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+                id="elim">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="text-sm mb-0 font-weight-bold">
+          Esta acción asignará el aviso a la incidencia más cercana. ¿Desea continuar?
+        </p>
+        <br>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+        <button type="button" class="btn bg-danger text-white" id="asignarIncidencia">
+          Aceptar
+        </button>
+      </div>
+      </div>
+      </div>
+      </div>
+
+      <div class="modal fade"
+      id="createdSuccessModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">
+          Incidencia creada
+        </h5>
+        <button type="button"
+                class="btn-close text-dark"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+                id="cerrarModal">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div  class="row">
+          <div class="col-2 text-center text-success">
+            <i class="fa fa-3x fa-thumbs-up"></i>
+           </div>
+           <div class="col-10">
+            <p class="text-sm mb-0 font-weight-bold">
+               Se ha creado con éxito la incidencia a partir del aviso seleccionado<br>
+            </p>
+            
+           </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+      </div>
+      </div>
+      </div>
+      </div>
+
+
+
+      <div class="modal fade"
+      id="errorModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+       <div class="modal-header">
+         <h5 class="modal-title" id="exampleModalLabel">
+           Error</span>
+         </h5>
+         <button type="button"
+                 class="btn-close text-dark"
+                 data-bs-dismiss="modal"
+                 aria-label="Close"
+                 id="closemodalerror">
+      
+           <span aria-hidden="true">&times;</span>
+         </button>
+       </div>
+       <div class="modal-body">
+         <div  class="row">
+           <div class="col-2 text-center text-danger">
+             <i class="fa fa-3x fa-exclamation-circle "></i>
+            </div>
+            <div class="col-10">
+             <p class="text-sm mb-0 font-weight-bold">
+                Han ocurrido errores<br>
+                <span id="errorspan"></span>
+             </p>
+             
+            </div>
+         </div>
+       </div>
+       <div class="modal-footer">
+         <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal" >
+           Cerrar
+         </button>
+       </div>
+      </div>
+      </div>
+    </div>
+
+      <div class="modal fade"
+      id="assignSuccessModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+       <div class="modal-header">
+         <h5 class="modal-title" id="exampleModalLabel">
+           Aviso asignado</span>
+         </h5>
+         <button type="button"
+                 class="btn-close text-dark"
+                 data-bs-dismiss="modal"
+                 aria-label="Close"
+                 id="closemodalerror">
+      
+           <span aria-hidden="true">&times;</span>
+         </button>
+       </div>
+       <div class="modal-body">
+         <div  class="row">
+           <div class="col-2 text-center text-success">
+             <i class="fa fa-3x fa-thumbs-up"></i>
+            </div>
+            <div class="col-10">
+             <p class="text-sm mb-0 font-weight-bold">
+                Se ha asignado el aviso a la incidencia más cercana<br>
+                <strong>Nombre incidencia: </strong><span id="successSpan"></span><br>
+             </p>
+             
+            </div>
+         </div>
+       </div>
+       <div class="modal-footer">
+         <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal" >
+           Cerrar
+         </button>
+       </div>
+      </div>
+      </div>
+    </div>
+
       </div>
       {% include "includes/footer.html" %}
     </div>

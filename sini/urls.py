@@ -4,7 +4,7 @@ from django.urls import path
 from .views.api_user_views import ApiUserListView, create_api_user, ApiUserDetailView, ApiUserUpdateView, activate_user
 from .views.warning_views import (WarningListView, WarningDetailView, WarningCreateView,
                                    WarningUpdateView, warning_delete, WarningDiscardView,
-                                   warning_assign, warning_create_incidence)
+                                   warning_assign, warning_create_incidence, warning_assign_closest)
 from .views.incidence_views import (IncidenceListView, IncidenceDetailView, IncidenceCreateView, IncidenceUpdateView, 
                                     incidence_delete, IncidenceManagmentView)
 from .views.advice_views import AdviceListView, AdviceDetailView, AdviceCreateView, AdviceUpdateView, advice_delete
@@ -29,6 +29,9 @@ urlpatterns = [
     path('avisos/desactivar/<str:pk>/', WarningDiscardView.as_view(), name='warning_deactivate'),
     path('avisos/asignar/<str:pk>/', warning_assign, name='warning_assign'),
     path('avisos/crear-incidencia/<str:pk>/', warning_create_incidence, name='warning_create_incidence'),
+    
+    path('avisos/asignar-cercana/<str:pk>/', warning_assign_closest, name='warning_assign_closest'),
+
     
     
     

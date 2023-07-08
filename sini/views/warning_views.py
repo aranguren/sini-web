@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import RestrictedError
 import json 
+from django.contrib.gis.db.models.functions import Distance
 
 
 class WarningListView(LoginRequiredMixin, ListView):
@@ -250,7 +251,7 @@ def warning_create_incidence(request, pk):
       },
       "geometry": {
           "type": "Point",
-          "coordinates": [new_incidence.geom.x, new_incidence.geom.y ]
+          "coordinates": [warning.geom.x, warning.geom.y ]
       }
     };
     resp['incidenceFeature'] = incidence_feature
@@ -259,6 +260,64 @@ def warning_create_incidence(request, pk):
 
     return JsonResponse(resp, status=200)
 
+
+@login_required(login_url='/login/')
+def warning_assign_closest(request, pk):
+    resp = {}
+    #id = request.GET.get('id', None)
+    
+    
+    warning = get_object_or_404(MobileWarning, pk=pk)
+    incidence = Incidence.objects.annotate(
+                    distance=Distance('geom', warning.geom)
+                ).order_by('distance').first()
+    if incidence:
+        warning.assign_incidence = incidence
+        warning.status = 'asignado'
+        warning.save()
+
+        incidence_feature = {
+            "type": "Feature",
+                "id": incidence.id,
+            "properties": {
+                "name": incidence.name,
+                "description": incidence.description,
+                "incidence_type": incidence.incidence_type,
+                "status": incidence.status,
+                "priority": incidence.priority
+
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [incidence.geom.x, incidence.geom.y ]
+            }
+            };
+        warning_feature = {
+        "type": "Feature",
+            "id": warning.id,
+        "properties": {
+            "name": warning.name,
+            "description": warning.description,
+            "incidence_type": warning.incidence_type,
+            "status": warning.status,
+
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [warning.geom.x, warning.geom.y ]
+        }
+        };
+    
+        resp['incidenceFeature'] = incidence_feature
+        resp['warningFeature'] = warning_feature
+
+    else:
+        resp['mensaje'] = 'no_incidence'
+        return JsonResponse(resp, status=400)
+
+    
+
+    return JsonResponse(resp, status=200)
 """
 class ApiUserDetailView(LoginRequiredMixin, DetailView):
     model = ApiUser
