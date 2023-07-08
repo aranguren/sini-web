@@ -268,7 +268,8 @@ def warning_assign_closest(request, pk):
     
     
     warning = get_object_or_404(MobileWarning, pk=pk)
-    incidence = Incidence.objects.annotate(
+    active_incidences = Incidence.objects.filter(active=True).exclude(status__iexact='finalizado')
+    incidence = active_incidences.annotate(
                     distance=Distance('geom', warning.geom)
                 ).order_by('distance').first()
     if incidence:
@@ -318,6 +319,19 @@ def warning_assign_closest(request, pk):
     
 
     return JsonResponse(resp, status=200)
+
+
+@login_required(login_url='/login/')
+def warning_archive(request, pk):
+    resp = {}
+    
+    warning = get_object_or_404(MobileWarning, pk=pk)
+
+    warning.active = False
+    warning.save()
+
+    return JsonResponse(resp, status=200)
+
 """
 class ApiUserDetailView(LoginRequiredMixin, DetailView):
     model = ApiUser

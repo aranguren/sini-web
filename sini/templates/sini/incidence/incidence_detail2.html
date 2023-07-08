@@ -222,7 +222,7 @@ aria-hidden="true">
       <div class="modal-content">
        <div class="modal-header">
          <h5 class="modal-title" id="exampleModalLabel">
-           Aviso asignado</span>
+           Aviso asignado
          </h5>
          <button type="button"
                  class="btn-close text-dark"
@@ -255,6 +255,87 @@ aria-hidden="true">
       </div>
       </div>
     </div>
+
+    <div class="modal fade"
+    id="archiveWarningModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="exampleModalLabel">
+        Archivar aviso
+      </h5>
+      <button type="button"
+              class="btn-close text-dark"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+              id="elim">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="text-sm mb-0 font-weight-bold">
+        ¿Desea archivar el aviso? Los avisos archivados no se mostrarán en el mapa
+      </p>
+      <br>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal">
+        Cerrar
+      </button>
+      <button type="button" class="btn bg-danger text-white" id="archivarAviso">
+        Aceptar
+      </button>
+    </div>
+    </div>
+    </div>
+    </div>
+
+    <div class="modal fade"
+    id="operationSuccessModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+     <div class="modal-header">
+       <h5 class="modal-title" id="successTitlelabel">
+        
+       </h5>
+       <button type="button"
+               class="btn-close text-dark"
+               data-bs-dismiss="modal"
+               aria-label="Close"
+               id="closemodalerror">
+    
+         <span aria-hidden="true">&times;</span>
+       </button>
+     </div>
+     <div class="modal-body">
+       <div  class="row">
+         <div class="col-2 text-center text-success">
+           <i class="fa fa-3x fa-thumbs-up"></i>
+          </div>
+          <div class="col-10">
+           <p class="text-sm mb-0 font-weight-bold">
+              <span id="successSpanLabel"></span>
+           </p>
+           
+          </div>
+       </div>
+     </div>
+     <div class="modal-footer">
+       <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal" >
+         Cerrar
+       </button>
+     </div>
+    </div>
+    </div>
+  </div>
 
       </div>
       {% include "includes/footer.html" %}

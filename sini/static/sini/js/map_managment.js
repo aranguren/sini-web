@@ -19,13 +19,14 @@ function onEachFeatureWarning(feature, layer) {
             <i id="assignicon_${feature.properties.id}" class="fas fa-search-location fa-3x" aria-hidden="true"></i>
         </button>
     </span>`
-  var boton_archivar = `<span data-bs-toggle="modal" data-bs-target="#archiveModal">
+  var boton_archivar = `<span data-bs-toggle="modal" data-bs-target="#archiveWarningModal">
         <button class="btn btn-link text-danger text-gradient px-0 mb-0 deletebin mx-2"
             id="eliminarVariable"
+            onclick="clicked_archive_warning(event)"
             data-bs-toggle="tooltip"
             data-bs-placement="top" title="Archivar"
             value="${feature.properties.id}">
-            <i id="archiveicon_${feature.properties.id}" class="fa fa-archive fa-3x" aria-hidden="true"></i>
+            <i id="archivicon_${feature.properties.id}" class="fa fa-archive fa-3x" aria-hidden="true"></i>
         </button>
         </span>`
   tipos = {
@@ -130,6 +131,16 @@ function clicked(e) {
   // if(!confirm('Seguro de que desea guardar los cambios?')) {
   //     e.preventDefault();
   //}
+}
+
+function clicked_archive_warning(e) {
+  console.log('clickedo elemento')
+  var id_crear = e.target.id
+  var result = id_crear.substring(11)
+  var selectedwarning = document.getElementById('selectedWarning')
+  selectedwarning.value = result
+  console.log(selectedwarning.value)
+
 }
 
 
@@ -271,7 +282,7 @@ document
           console.log(key)
           console.log(feature_warnings._layers[key].feature.id)
           if (feature_warnings._layers[key].feature.id == avisoId) {
-            var boton_archivar = `<span data-bs-toggle="modal" data-bs-target="#archiveModal">
+            var boton_archivar = `<span data-bs-toggle="modal" data-bs-target="#archiveWarningModal">
                   <button class="btn btn-link text-danger text-gradient px-0 mb-0 deletebin mx-2"
                       id="eliminarVariable"
                       data-bs-toggle="tooltip"
@@ -321,7 +332,12 @@ document
           }
         }
         map_copy.closePopup()
-        $('#createdSuccessModal').modal('show')
+        var successTitlelabel = document.getElementById('successTitlelabel')
+        var successSpanLabel = document.getElementById('successSpanLabel')
+        successTitlelabel.textContent = "Incidencia creada"
+        successSpanLabel.textContent = " Se ha creado con éxito la incidencia a partir del aviso seleccionado"
+        $('#operationSuccessModal').modal('show')
+        //$('#createdSuccessModal').modal('show')
       },
       error: function (response, e) {
         console.log(response)
@@ -359,4 +375,63 @@ document
     console.log(toadd)
     feature_incidence.addLayer(toadd);
 */
+  })
+
+
+  document
+  .getElementById('archivarAviso')
+  .addEventListener('click', function (e) {
+    //var valor = document.getElementById('selectedWarning').value;
+    console.log('ARCHIVAR AVISO')
+    //console.log(valor);
+    //var id_aviso = document.getElementById('selectedWarning').value;
+
+    //feature_warnings._layers.push(marker)
+    //feature_incidence.addLayer(marker);
+    var avisoId = document.getElementById('selectedWarning').value
+
+    var request = $.ajax({
+      type: 'GET',
+      url: '/sini/avisos/archivar/' + avisoId + '/',
+      data: {},
+      success: function (response) {
+        console.log(response)
+        $('#archiveWarningModal').modal('hide')
+
+        console.log(response)
+        console.log('mostrando modal');
+        for (var key in feature_warnings._layers) {
+          // check if the property/key is defined in the object itself, not in parent
+          console.log('mostrando llaves');
+          console.log(key)
+          console.log(feature_warnings._layers[key].feature.id)
+          if (feature_warnings._layers[key].feature.id == avisoId) {
+            console.log("Se va a archivar")
+            feature_warnings.removeLayer(parseInt(key))
+          }
+        }
+        map_copy.closePopup()
+        var successTitlelabel = document.getElementById('successTitlelabel')
+        var successSpanLabel = document.getElementById('successSpanLabel')
+        successTitlelabel.textContent = "Aviso archivado"
+        successSpanLabel.textContent = "El aviso seleccionado ha sido archivado. Por lo tanto se ocultará del mapa"
+        $('#operationSuccessModal').modal('show')
+      },
+      error: function (response, e) {
+        console.log(response)
+
+        $('#crearIncidenciaModal').modal('hide')
+
+        $('#errorModal').modal('show')
+        var errorspan = document.getElementById('errorspan')
+
+        if (response.responseJSON.mensaje == 'restricted') {
+          errorspan.textContent = response.responseJSON.error
+        } else {
+          errorspan.textContent =
+            'Ha ocurrido un error al asignar, Contacte al Administrador'
+        }
+      },
+    })
+
   })
