@@ -96,12 +96,32 @@ class WarningDetailView(LoginRequiredMixin, DetailView):
         return context
    
 
-class WarningDiscardView(View):
+class WarningDiscardView(LoginRequiredMixin, View):
     def post(self, request, pk):
         # <view logic>
 
         warning = get_object_or_404(MobileWarning, pk=pk)
         warning.status = 'descartado'
+        warning.save()
+        redirection = reverse_lazy("sini:warning_detail", kwargs={"pk": pk}) 
+        return redirect(redirection)
+
+class WarningArchiveView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        # <view logic>
+
+        warning = get_object_or_404(MobileWarning, pk=pk)
+        warning.active = False
+        warning.save()
+        redirection = reverse_lazy("sini:warning_detail", kwargs={"pk": pk}) 
+        return redirect(redirection)
+
+class WarningActivateView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        # <view logic>
+
+        warning = get_object_or_404(MobileWarning, pk=pk)
+        warning.active = True
         warning.save()
         redirection = reverse_lazy("sini:warning_detail", kwargs={"pk": pk}) 
         return redirect(redirection)
@@ -128,6 +148,7 @@ class WarningCreateView(LoginRequiredMixin, CreateView):
 
         warning.created_by = self.request.user  # use your own profile here
         warning.creation_origin="web"
+        warning.active=True
         #farm.active = True
         warning.save()
         return super(WarningCreateView, self).form_valid(form)
@@ -143,8 +164,8 @@ class WarningUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy("sini:warning_detail", kwargs={"pk": self.object.id}) 
 
     def form_valid(self, form):
-        api_user = form.save(commit=False)
-        api_user.modified_by = self.request.user 
+        mobilewarning = form.save(commit=False)
+        mobilewarning.modified_by = self.request.user 
         return super(WarningUpdateView, self).form_valid(form)
     
     def get_context_data(self, **kwargs):

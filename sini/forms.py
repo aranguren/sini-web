@@ -33,14 +33,14 @@ class WarningForm(forms.ModelForm):
         model = MobileWarning
         exclude = ("id",'created_by', 'modified_by', 
                    'created_by_api_user', 'modified_by_api_user',
-                    'status','creation_origin' )
+                    'status','creation_origin', 'active' )
         widgets = {
             #'name':forms.TextInput(attrs={'class': 'form-control'}),
             'name':forms.TextInput(attrs={'class': 'form-control'}),
             'geom': LeafletWidget(attrs=LEAFLET_WIDGET_ATTRS),
             'incidence_type':forms.Select(attrs={'class': 'form-select form-select-lg'}),
              'description':forms.Textarea(attrs={'class': 'form-control'}),
-            'active':forms.CheckboxInput(attrs={'class': 'form-check-input '}),
+            #'active':forms.CheckboxInput(attrs={'class': 'form-check-input '}),
             'image1':forms.FileInput(attrs={'class': 'form-control'}),
             'image2':forms.FileInput(attrs={'class': 'form-control'}),
             'image3':forms.FileInput(attrs={'class': 'form-control'}),
@@ -54,7 +54,7 @@ class IncidenceForm(forms.ModelForm):
 
     class Meta:
         model = Incidence
-        exclude = ("id",'created_by', 'modified_by','status')
+        exclude = ("id",'created_by', 'modified_by','status', 'active')
         
         widgets = {
             #'name':forms.TextInput(attrs={'class': 'form-control'}),
@@ -62,7 +62,7 @@ class IncidenceForm(forms.ModelForm):
             'geom': LeafletWidget(attrs=LEAFLET_WIDGET_ATTRS),
             'incidence_type':forms.Select(attrs={'class': 'form-select form-select-lg'}),
             'description':forms.Textarea(attrs={'class': 'form-control'}),
-            'active':forms.CheckboxInput(attrs={'class': 'form-check-input '}),
+            #'active':forms.CheckboxInput(attrs={'class': 'form-check-input '}),
             'priority':forms.NumberInput(attrs={'class': 'form-control'}),
             'image1':forms.FileInput(attrs={'class': 'form-control'}),
             'image2':forms.FileInput(attrs={'class': 'form-control'}),

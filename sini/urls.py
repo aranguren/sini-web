@@ -5,9 +5,9 @@ from .views.api_user_views import ApiUserListView, create_api_user, ApiUserDetai
 from .views.warning_views import (WarningListView, WarningDetailView, WarningCreateView,
                                    WarningUpdateView, warning_delete, WarningDiscardView,
                                    warning_assign, warning_create_incidence, warning_assign_closest,
-                                   warning_archive)
+                                   warning_archive, WarningArchiveView,  WarningActivateView)
 from .views.incidence_views import (IncidenceListView, IncidenceDetailView, IncidenceCreateView, IncidenceUpdateView, 
-                                    incidence_delete, IncidenceManagmentView)
+                                    incidence_delete, IncidenceManagmentView, IncidenceActivateView, IncidenceArchiveView, IncidenceFinalizeView)
 from .views.advice_views import AdviceListView, AdviceDetailView, AdviceCreateView, AdviceUpdateView, advice_delete
 app_name = 'sini'
 
@@ -33,8 +33,9 @@ urlpatterns = [
     
     path('avisos/asignar-cercana/<str:pk>/', warning_assign_closest, name='warning_assign_closest'),
     path('avisos/archivar/<str:pk>/', warning_archive, name='warning_archive'),
-
-    
+    path('avisos/archivar/<str:pk>/', warning_archive, name='warning_archive'),
+    path('avisos/archivar-aviso/<str:pk>/', WarningArchiveView.as_view(), name='warning_archive_warning'),
+    path('avisos/activar/<str:pk>/', WarningActivateView.as_view(), name='warning_activate'),
     
     
     #-------------------------------------------------------------------
@@ -45,6 +46,11 @@ urlpatterns = [
     path('incidencias/detalles/<str:pk>/', IncidenceDetailView.as_view(), name='incidence_detail'),
     path('incidencias/modificar/<str:pk>/', IncidenceUpdateView.as_view(), name='incidence_update'),
     path('incidencias/eliminar/', incidence_delete, name='incidence_delete'),
+
+    path('incidencias/archivar-incidencia/<str:pk>/', IncidenceArchiveView.as_view(), name='incidence_archive_incidence'),
+    path('incidencias/activar/<str:pk>/', IncidenceActivateView.as_view(), name='incidence_activate'),
+    path('incidencias/finalizar/<str:pk>/', IncidenceFinalizeView.as_view(), name='incidence_finalize'),
+
     #------------------------------------------------------------------------------------------------
     path('consejos/', AdviceListView.as_view(), name='advice_list'),
     path('consejos/crear/', AdviceCreateView.as_view(), name='advice_create'),

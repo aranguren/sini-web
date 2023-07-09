@@ -98,10 +98,50 @@
                
               </form>
               {% endif %}
+              {% if warning.active%}
+                <form id="archive_form"
+                action="{% url 'sini:warning_archive_warning' warning.id %}"
+                class=""
+                method="post"
+                autocomplete="off">
+                {% csrf_token %}
+                  
+                  <button class="btn btn-danger btn-large btn-sm mx-1 mb-0"
+                    type="submit"
+                    id="archivarB"
+                    value="archivar">&nbsp;&nbsp;Archivar
+                  </button>
+                
+                </form>
+              {% else %}
+              <form id="ctivate_form"
+              action="{% url 'sini:warning_activate' warning.id %}"
+              class=""
+              method="post"
+              autocomplete="off">
+              {% csrf_token %}
+                
+                <button class="btn btn-danger btn-large btn-sm mx-1 mb-0"
+                  type="submit"
+                  id="archivarB"
+                  value="archivar">&nbsp;&nbsp;Activar
+                </button>
+               
+              </form>
+
+              {% endif %}
             </div>
-            <div class="col-6">
+            <div class="col-3">
                <strong>Estado: </strong>{{warning.get_status_display}}
             </div>  
+            <div class="col-3">
+              <strong>Activo: </strong>                
+              {% if warning.active %}
+              <span class="badge badge-success">SI</span>
+              {% else %}
+              <span class="badge badge-danger">NO</span>
+              {% endif %}
+           </div>  
           </div>  
 
         </div>
@@ -121,12 +161,12 @@
                 <div class="mr-2">{% firstof warning.get_incidence_type_display|default_if_none:"-" %}</div>
               </div>
             </div>
-            <div class="col-3">
+            <!--div class="col-3">
               <div class="form-group">
                 <h6>Status</h6>
                 <div class="mr-2">{% firstof warning.get_status_display|default_if_none:"-" %}</div>
               </div>
-            </div>
+            </div-->
             <div class="col-3">
               <div class="form-group">
                 <h6>Creado por</h6>
@@ -139,22 +179,22 @@
                 {% endif %}
               </div>
             </div>
-            
-          </div>
-          <div class="row">
             <div class="col-3">
               <div class="form-group">
                 <h6>Fecha creación</h6>
                 <div class="mr-2">{% firstof warning.created|default_if_none:"-" %}</div>
               </div>
             </div>
+            
+          </div>
+          <div class="row">
             <div class="col-3">
               <div class="form-group">
                 <h6>Creado desde</h6>
                 <div class="mr-2">{% firstof warning.get_creation_origin_display|default_if_none:"-" %}</div>
               </div>
             </div>
-            <div class="col-3">
+            <!--div class="col-3">
               <div class="form-group">
                 <h6>Activo</h6>
                 {% if warning.active %}
@@ -164,7 +204,7 @@
                 {% endif %}
                
               </div>
-            </div>
+            </div-->
             <div class="col-3">
               <div class="form-group">
                 <h6>Incidencia asignada</h6>

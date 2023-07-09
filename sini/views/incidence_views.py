@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import RestrictedError
 import json 
-
+from django.shortcuts import render, redirect, get_object_or_404
 
 class IncidenceListView(LoginRequiredMixin, ListView):
     model = Incidence
@@ -178,3 +178,33 @@ def incidence_delete(request):
     return JsonResponse(resp, status=200)
 
 
+
+class IncidenceFinalizeView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        # <view logic>
+
+        incidence = get_object_or_404(Incidence, pk=pk)
+        incidence.status = 'finalizado'
+        incidence.save()
+        redirection = reverse_lazy("sini:incidence_detail", kwargs={"pk": pk}) 
+        return redirect(redirection)
+
+class IncidenceArchiveView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        # <view logic>
+
+        incidence = get_object_or_404(Incidence, pk=pk)
+        incidence.active = False
+        incidence.save()
+        redirection = reverse_lazy("sini:incidence_detail", kwargs={"pk": pk}) 
+        return redirect(redirection)
+
+class IncidenceActivateView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        # <view logic>
+
+        incidence = get_object_or_404(Incidence, pk=pk)
+        incidence.active = True
+        incidence.save()
+        redirection = reverse_lazy("sini:incidence_detail", kwargs={"pk": pk}) 
+        return redirect(redirection)
