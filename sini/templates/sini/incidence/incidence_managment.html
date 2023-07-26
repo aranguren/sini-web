@@ -71,7 +71,7 @@
         </div>
         <div class="card mt-0" id="geo">
           <div class="card-header mb-0">
-            <h5 class="mb-0">Manejo Avisos</h5>
+            <h5 class="mb-0">Avisos</h5>
           </div>
           <div class="card-body d-sm-flex p-2 mt-0 pt-2">
             <div class="table-responsive" style="width:100%">
@@ -147,6 +147,73 @@
                             data-bs-placement="top" title="Archivar"
                             value="{{mobile_waring.id}}">
                             <i id="archivicon_{{mobile_waring.id}}" class="fa fa-archive" aria-hidden="true"></i>
+                        </button>
+                        </span>
+
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="card mt-0" id="geo">
+          <div class="card-header mb-0">
+            <h5 class="mb-0">Incidencias</h5>
+          </div>
+          <div class="card-body d-sm-flex p-2 mt-0 pt-2">
+            <div class="table-responsive" style="width:100%">
+              <table class="table table-flush" id="datatable-incidences" style="width:100%">
+                <thead>
+                  <tr>
+                    <td>
+                      <b>Incidencia</b>
+                    </td>
+                    <td>
+                      <b>Tipo</b>
+                    </td>
+                    <td>
+                      <b>Estado</b>
+                    </td>
+                    <td>
+                      <b>Fecha</b>
+                    </td>
+                    <td class="text-center">
+                      <b>Acciones</b>
+                    </td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for incidence in incidences %}
+                    <tr id="row_incidence_{{ incidence.id }}">
+                      <td>{{ incidence.name }}</td>
+                      <td>{{ incidence.get_incidence_type_display }}</td>
+                      <td>{{ incidence.get_status_display }}</td>
+                      <td>{{ incidence.created|default_if_none:'-' }}</td>
+                      <td class="text-center">
+                        <a target="_blank" href="{% url 'sini:incidence_detail' incidence.id %}"  data-bs-toggle="tooltip"
+                        data-bs-placement="top" title="Detalles"><i class="far fa-eye mx-2" aria-hidden="true"></i></a>
+                      
+                        <span data-bs-toggle="modal" data-bs-target="#FinalizeIncidenciaModal">
+                          <button class="finalizarButton btn btn-link text-primary text-gradient px-0 mb-0  mx-2"
+                              id="finalizar_${feature.properties.id}"
+                              onclick="clicked_finalize_incidence(event)"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="top" title="Finalizar incidencia"
+                              value="{{incidence.id}}">
+                              <i id="buttonfina_{{incidence.id}}" class="fa fa-check" aria-hidden="true"></i>
+                          </button>
+                      </span>
+
+                      <span data-bs-toggle="modal" data-bs-target="#ArchivarIncidenciaModal">
+                        <button class="btn btn-link text-danger text-gradient px-0 mb-0 deletebin mx-2"
+                            id="eliminarVariable"
+                            onclick="clicked_archive_incidence(event)"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top" title="Archivar"
+                            value="{{incidence.id}}">
+                            <i id="archivicon_{{incidence.id}}" class="fa fa-archive" aria-hidden="true"></i>
                         </button>
                         </span>
 
@@ -510,6 +577,7 @@
 
   <script type="text/javascript">
     let datatableWarnings = false
+    let datatableIncidences = false
     $(document).ready(function () {
       var langes = {
             "processing": "Procesando...",
@@ -764,6 +832,13 @@
    
 
       datatableWarnings = $('#datatable-warnings').DataTable(
+        {
+          language: langes
+        }
+        
+      );
+
+      datatableIncidences = $('#datatable-incidences').DataTable(
         {
           language: langes
         }

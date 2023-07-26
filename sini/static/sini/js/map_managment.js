@@ -702,6 +702,8 @@ document
             feature_incidence.removeLayer(parseInt(key))
           }
         }
+        var id_row = '#row_incidence_'+avisoId;
+        datatableIncidences.row( id_row ).remove().draw();
         map_copy.closePopup()
         var successTitlelabel = document.getElementById('successTitlelabel')
         var successSpanLabel = document.getElementById('successSpanLabel')
@@ -762,6 +764,8 @@ document
             feature_incidence.removeLayer(parseInt(key))
           }
         }
+        var id_row = '#row_incidence_'+avisoId;
+        datatableIncidences.row( id_row ).remove().draw();
         map_copy.closePopup()
         var successTitlelabel = document.getElementById('successTitlelabel')
         var successSpanLabel = document.getElementById('successSpanLabel')
