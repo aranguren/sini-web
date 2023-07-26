@@ -366,6 +366,8 @@ document
             feature_warnings.removeLayer(parseInt(key))
           }
         }
+        var id_row = '#row_warning_'+avisoId;
+        datatableWarnings.row( id_row ).remove().draw();
         $('#asingModal').modal('hide')
         map_copy.closePopup()
         var successSpan = document.getElementById('successSpan')
@@ -491,6 +493,10 @@ document
             feature_warnings.removeLayer(parseInt(key))
           }
         }
+
+        var id_row = '#row_warning_'+avisoId;
+        datatableWarnings.row( id_row ).remove().draw();
+
         map_copy.closePopup()
         var successTitlelabel = document.getElementById('successTitlelabel')
         var successSpanLabel = document.getElementById('successSpanLabel')
@@ -571,6 +577,11 @@ document
           }
         }
         map_copy.closePopup()
+       
+        var id_row = '#row_warning_'+avisoId;
+        datatableWarnings.row( id_row ).remove().draw();
+    
+        //var rows = table.rows('.priority');
         var successTitlelabel = document.getElementById('successTitlelabel')
         var successSpanLabel = document.getElementById('successSpanLabel')
         successTitlelabel.textContent = "Aviso archivado"
@@ -630,6 +641,8 @@ document
             feature_warnings.removeLayer(parseInt(key))
           }
         }
+        var id_row = '#row_warning_'+avisoId;
+        datatableWarnings.row( id_row ).remove().draw();
         map_copy.closePopup()
         var successTitlelabel = document.getElementById('successTitlelabel')
         var successSpanLabel = document.getElementById('successSpanLabel')

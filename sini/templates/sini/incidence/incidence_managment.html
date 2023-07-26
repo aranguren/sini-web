@@ -97,14 +97,14 @@
                 </thead>
                 <tbody>
                   {% for mobile_waring in mobile_warnings %}
-                    <tr>
+                    <tr id="row_warning_{{ mobile_waring.id }}">
                       <td>{{ mobile_waring.name }}</td>
                       <td>{{ mobile_waring.get_incidence_type_display }}</td>
                       <td>{{ mobile_waring.get_status_display }}</td>
                       <td>{{ mobile_waring.created|default_if_none:'-' }}</td>
                       <td class="text-center">
                         <a target="_blank" href="{% url 'sini:warning_detail' mobile_waring.id %}"  data-bs-toggle="tooltip"
-                        data-bs-placement="top" title="Detalles"><i class="far fa-eye fa-2x me-2 mx-2" aria-hidden="true"></i></a>
+                        data-bs-placement="top" title="Detalles"><i class="far fa-eye mx-2" aria-hidden="true"></i></a>
                       
                         <span data-bs-toggle="modal" data-bs-target="#crearIncidenciaModal">
                           <button class="crearButton btn btn-link text-primary text-gradient px-0 mb-0 executebutton mx-2"
@@ -113,7 +113,7 @@
                               data-bs-toggle="tooltip"
                               data-bs-placement="top" title="Crear incidencia"
                               value="{{mobile_waring.id}}">
-                              <i id="buttonicon_{{mobile_waring.id}}" class="fa fa-plus fa-2x" aria-hidden="true"></i>
+                              <i id="buttonicon_{{mobile_waring.id}}" class="fa fa-plus" aria-hidden="true"></i>
                           </button>
                       </span>
 
@@ -124,7 +124,7 @@
                               data-bs-toggle="tooltip"
                               data-bs-placement="top" title="Asignar a incidencia más cercana"
                               value="{{mobile_waring.id}}">
-                              <i id="assignicon_{{mobile_waring.id}}" class="fas fa-search-location fa-2x" aria-hidden="true"></i>
+                              <i id="assignicon_{{mobile_waring.id}}" class="fas fa-search-location" aria-hidden="true"></i>
                           </button>
                       </span>
 
@@ -135,7 +135,7 @@
                           data-bs-toggle="tooltip"
                           data-bs-placement="top" title="Desechar aviso"
                           value="{{mobile_waring.id}}">
-                          <i id="tossbutton_{{mobile_waring.id}}" class="fa fa-eraser fa-2x" aria-hidden="true"></i>
+                          <i id="tossbutton_{{mobile_waring.id}}" class="fa fa-eraser" aria-hidden="true"></i>
                         </button>
                     </span>
 
@@ -146,7 +146,7 @@
                             data-bs-toggle="tooltip"
                             data-bs-placement="top" title="Archivar"
                             value="{{mobile_waring.id}}">
-                            <i id="archivicon_{{mobile_waring.id}}" class="fa fa-archive fa-2x" aria-hidden="true"></i>
+                            <i id="archivicon_{{mobile_waring.id}}" class="fa fa-archive" aria-hidden="true"></i>
                         </button>
                         </span>
 
@@ -507,8 +507,9 @@
           src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.js"></script>
   <!--script src="{% static 'assets/js/extra-markers/src/assets/js/leaflet.extra-markers.min.jss' %}" ></script -->
   <script src="{% static 'assets/markers/js/leaflet.extra-markers.js' %}"></script>
-  <script src="{% static 'sini/js/map_managment.js' %}"></script>
+
   <script type="text/javascript">
+    let datatableWarnings = false
     $(document).ready(function () {
       var langes = {
             "processing": "Procesando...",
@@ -762,12 +763,14 @@
       //oTable.column(2).search("^"+$(this).val()+"$", true,false,true ).draw()
    
 
-      $('#datatable-warnings').DataTable(
+      datatableWarnings = $('#datatable-warnings').DataTable(
         {
           language: langes
         }
         
       );
+      console.log('datatables');
+      console.log(datatableWarnings);
 /*
       const dataTableSearch = new simpleDatatables.DataTable("#datat", {
         
@@ -856,4 +859,5 @@
 
 
   </script>
+  <script src="{% static 'sini/js/map_managment.js' %}"></script>
 {% endblock javascripts %}
