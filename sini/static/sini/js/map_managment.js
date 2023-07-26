@@ -281,7 +281,7 @@ function clicked_archive_incidence(e) {
 
 
 
-
+// asignar incidencia
 document
   .getElementById('asignarIncidencia')
   .addEventListener('click', function (e) {
@@ -299,7 +299,7 @@ document
 
         //$(location).attr('href', "{% url 'sini:warning_detail' warning.id %}");
         var geojsonFeature = response.incidenceFeature
-
+        /*
         for (var key in feature_warnings._layers) {
           // check if the property/key is defined in the object itself, not in parent
           console.log('mostrando llaves')
@@ -355,6 +355,17 @@ document
             feature_warnings._layers[key]._popup._content = popupContent
           }
         }
+        */
+        for (var key in feature_warnings._layers) {
+          // check if the property/key is defined in the object itself, not in parent
+          console.log('mostrando llaves');
+          console.log(key)
+          console.log(feature_warnings._layers[key].feature.id)
+          if (feature_warnings._layers[key].feature.id == avisoId) {
+            console.log("Se va a ocultar")
+            feature_warnings.removeLayer(parseInt(key))
+          }
+        }
         $('#asingModal').modal('hide')
         map_copy.closePopup()
         var successSpan = document.getElementById('successSpan')
@@ -401,7 +412,7 @@ document
       success: function (response) {
         console.log(response)
         $('#crearIncidenciaModal').modal('hide')
-
+        
         console.log(response)
         //$(location).attr('href', "{% url 'sini:warning_detail' warning.id %}");
         var geojsonFeature = response.incidenceFeature
@@ -412,7 +423,7 @@ document
         console.log('Adicionando')
         console.log(toadd)
         feature_incidence.addLayer(toadd)
-
+        /*
         for (var key in feature_warnings._layers) {
           // check if the property/key is defined in the object itself, not in parent
           console.log('mostrando llaves')
@@ -469,10 +480,22 @@ document
           }
         }
         map_copy.closePopup()
+        */
+        for (var key in feature_warnings._layers) {
+          // check if the property/key is defined in the object itself, not in parent
+          console.log('mostrando llaves');
+          console.log(key)
+          console.log(feature_warnings._layers[key].feature.id)
+          if (feature_warnings._layers[key].feature.id == avisoId) {
+            console.log("Se va a archivar")
+            feature_warnings.removeLayer(parseInt(key))
+          }
+        }
+        map_copy.closePopup()
         var successTitlelabel = document.getElementById('successTitlelabel')
         var successSpanLabel = document.getElementById('successSpanLabel')
         successTitlelabel.textContent = "Incidencia creada"
-        successSpanLabel.textContent = " Se ha creado con éxito la incidencia a partir del aviso seleccionado"
+        successSpanLabel.textContent = " Se ha creado con éxito la incidencia a partir del aviso seleccionado. El aviso se ocultará"
         $('#operationSuccessModal').modal('show')
         //$('#createdSuccessModal').modal('show')
       },
@@ -488,7 +511,7 @@ document
           errorspan.textContent = response.responseJSON.error
         } else {
           errorspan.textContent =
-            'Ha ocurrido un error al asignar, Contacte al Administrador'
+            'Ha ocurrido un error al crear, Contacte al Administrador'
         }
       },
     })
