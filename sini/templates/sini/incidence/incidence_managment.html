@@ -160,6 +160,8 @@
         </div>
         <input type="hidden" id="selectedWarning" name="selectedWarningName" />
         <input type="hidden" id="selectedIncidence" name="selectedIncidenceName" />
+        
+        
         <div class="modal fade"
              id="crearIncidenciaModal"
              tabindex="-1"
@@ -239,6 +241,40 @@
         </div>
 
         <div class="modal fade"
+             id="DescartarAvisoModal"
+             tabindex="-1"
+             role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Descartar aviso</h5>
+                <button type="button"
+                        class="btn-close text-dark"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        id="elim">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p class="text-sm mb-0 font-weight-bold">
+                  Esta acción descartará el aviso y lo ocultará. ¿Desea continuar?
+                </p>
+                <br>
+              </div>
+              <div class="modal-footer">
+                <button type="button"
+                        class="btn bg-success text-white"
+                        data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn bg-danger text-white" id="desecharAviso">Aceptar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade"
              id="FinalizeIncidenciaModal"
              tabindex="-1"
              role="dialog"
@@ -281,7 +317,7 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Finalizar Incidencia</h5>
+              <h5 class="modal-title" id="exampleModalLabel">Archivar Incidencia</h5>
               <button type="button"
                       class="btn-close text-dark"
                       data-bs-dismiss="modal"

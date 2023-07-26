@@ -353,6 +353,17 @@ def warning_archive(request, pk):
 
     return JsonResponse(resp, status=200)
 
+@login_required(login_url='/login/')
+def warning_toss(request, pk):
+    resp = {}
+    
+    warning = get_object_or_404(MobileWarning, pk=pk)
+
+    warning.status = 'descartado'
+    warning.save()
+
+    return JsonResponse(resp, status=200)
+
 """
 class ApiUserDetailView(LoginRequiredMixin, DetailView):
     model = ApiUser

@@ -1,4 +1,7 @@
 function onEachFeatureWarning(feature, layer) {
+  var boton_detalles = `<a target="_blank" href="/sini/avisos/detalles/${feature.properties.id}/"  data-bs-toggle="tooltip"
+  data-bs-placement="top" title="Detalles"><i class="far fa-eye fa-3x me-2 mx-2" aria-hidden="true"></i></a>`
+
   var boton_crear = `<span data-bs-toggle="modal" data-bs-target="#crearIncidenciaModal">
         <button class="crearButton btn btn-link text-primary text-gradient px-0 mb-0 executebutton mx-2"
             id="eliminarVariable"
@@ -19,6 +22,18 @@ function onEachFeatureWarning(feature, layer) {
             <i id="assignicon_${feature.properties.id}" class="fas fa-search-location fa-3x" aria-hidden="true"></i>
         </button>
     </span>`
+
+  var boton_desechar = `<span data-bs-toggle="modal" data-bs-target="#DescartarAvisoModal">
+    <button class="btn btn-link text-primary text-gradient px-0 mb-0 mx-2"
+        id="asignar"
+        onclick="clicked_toss(event)"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top" title="Desechar aviso"
+        value="${feature.properties.id}">
+        <i id="tossbutton_${feature.properties.id}" class="fa fa-eraser fa-2x" aria-hidden="true"></i>
+      </button>
+  </span>`
+
   var boton_archivar = `<span data-bs-toggle="modal" data-bs-target="#archiveWarningModal">
         <button class="btn btn-link text-danger text-gradient px-0 mb-0 deletebin mx-2"
             id="eliminarVariable"
@@ -69,9 +84,11 @@ function onEachFeatureWarning(feature, layer) {
     <div class="row">
     <div class="col-12">`
 
+    popupContent +=  boton_detalles
   if (feature.properties.status == 'creado') {
     popupContent += boton_crear
     popupContent += boton_asignar
+    popupContent += boton_desechar
   }
   popupContent += boton_archivar
 
@@ -229,6 +246,17 @@ function clicked_archive_warning(e) {
   console.log(selectedwarning.value)
 
 }
+function clicked_toss(e) {
+  console.log('desechando elmento elemento')
+  var id_crear = e.target.id
+  var result = id_crear.substring(11)
+  var selectedwarning = document.getElementById('selectedWarning')
+  selectedwarning.value = result
+  console.log(selectedwarning.value)
+
+}
+
+
 
 // clic functions for incidence
 
@@ -305,7 +333,7 @@ document
             status_value =
               status_dict[response.warningFeature.properties.status]
 
-            var popupContent = `<h6>Aviso: ${response.warningFeature.properties.name}!!</h6>
+            var popupContent = `<h6>Aviso: ${response.warningFeature.properties.name}</h6>
               <div class="row mb-1 ">
                 <div class="col-5"><b>Tipo incidente:</b></div>
                 <div class="col-7">${tipo}</div>
@@ -418,7 +446,7 @@ document
             status_value =
               status_dict[response.warningFeature.properties.status]
 
-            var popupContent = `<h6>Aviso: ${response.warningFeature.properties.name}!!</h6>
+            var popupContent = `<h6>Aviso: ${response.warningFeature.properties.name}</h6>
                 <div class="row mb-1 ">
                   <div class="col-5"><b>Tipo incidente:</b></div>
                   <div class="col-7">${tipo}</div>
@@ -545,6 +573,66 @@ document
 
   })
 
+  // Desechar aviso
+
+  document
+  .getElementById('desecharAviso')
+  .addEventListener('click', function (e) {
+    //var valor = document.getElementById('selectedWarning').value;
+    console.log('ARCHIVAR AVISO')
+    //console.log(valor);
+    //var id_aviso = document.getElementById('selectedWarning').value;
+
+    //feature_warnings._layers.push(marker)
+    //feature_incidence.addLayer(marker);
+    var avisoId = document.getElementById('selectedWarning').value
+
+    var request = $.ajax({
+      type: 'GET',
+      url: '/sini/avisos/descartar/' + avisoId + '/',
+      data: {},
+      success: function (response) {
+        console.log(response)
+        $('#DescartarAvisoModal').modal('hide')
+
+        console.log(response)
+        console.log('mostrando modal');
+        for (var key in feature_warnings._layers) {
+          // check if the property/key is defined in the object itself, not in parent
+          console.log('mostrando llaves');
+          console.log(key)
+          console.log(feature_warnings._layers[key].feature.id)
+          if (feature_warnings._layers[key].feature.id == avisoId) {
+            console.log("Se va a archivar")
+            feature_warnings.removeLayer(parseInt(key))
+          }
+        }
+        map_copy.closePopup()
+        var successTitlelabel = document.getElementById('successTitlelabel')
+        var successSpanLabel = document.getElementById('successSpanLabel')
+        successTitlelabel.textContent = "Aviso descartado"
+        successSpanLabel.textContent = "El aviso seleccionado ha sido descartado. Por lo tanto se ocultará del mapa"
+        $('#operationSuccessModal').modal('show')
+      },
+      error: function (response, e) {
+        console.log(response)
+
+        $('#crearIncidenciaModal').modal('hide')
+
+        $('#errorModal').modal('show')
+        var errorspan = document.getElementById('errorspan')
+
+        if (response.responseJSON.mensaje == 'restricted') {
+          errorspan.textContent = response.responseJSON.error
+        } else {
+          errorspan.textContent =
+            'Ha ocurrido un error al asignar, Contacte al Administrador'
+        }
+      },
+    })
+
+  })
+
   // Finalizar Incidencia
   document
   .getElementById('finalizarIncidencia')
@@ -582,7 +670,7 @@ document
         var successTitlelabel = document.getElementById('successTitlelabel')
         var successSpanLabel = document.getElementById('successSpanLabel')
         successTitlelabel.textContent = "Incidencia finalizada"
-        successSpanLabel.textContent = "La incidencia seleccionada ha sido archivada. Por lo tanto se ocultará del mapa"
+        successSpanLabel.textContent = "La incidencia seleccionada ha sido finalizada. Por lo tanto se ocultará del mapa"
         $('#operationSuccessModal').modal('show')
       },
       error: function (response, e) {
@@ -641,7 +729,7 @@ document
         map_copy.closePopup()
         var successTitlelabel = document.getElementById('successTitlelabel')
         var successSpanLabel = document.getElementById('successSpanLabel')
-        successTitlelabel.textContent = "Aviso archivado"
+        successTitlelabel.textContent = "Incidencia archivada"
         successSpanLabel.textContent = "La incidencia seleccionada ha sido archivada. Por lo tanto se ocultará del mapa"
         $('#operationSuccessModal').modal('show')
       },

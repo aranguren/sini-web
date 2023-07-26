@@ -5,7 +5,7 @@ from .views.api_user_views import ApiUserListView, create_api_user, ApiUserDetai
 from .views.warning_views import (WarningListView, WarningDetailView, WarningCreateView,
                                    WarningUpdateView, warning_delete, WarningDiscardView,
                                    warning_assign, warning_create_incidence, warning_assign_closest,
-                                   warning_archive, WarningArchiveView,  WarningActivateView)
+                                   warning_archive, warning_toss, WarningArchiveView,  WarningActivateView)
 from .views.incidence_views import (IncidenceListView, IncidenceDetailView, IncidenceCreateView, IncidenceUpdateView, 
                                     incidence_delete,incidence_finalize, incidence_archive, IncidenceManagmentView, IncidenceActivateView, IncidenceArchiveView, IncidenceFinalizeView)
 from .views.advice_views import AdviceListView, AdviceDetailView, AdviceCreateView, AdviceUpdateView, advice_delete
@@ -32,6 +32,8 @@ urlpatterns = [
     path('avisos/crear-incidencia/<str:pk>/', warning_create_incidence, name='warning_create_incidence'),
     
     path('avisos/asignar-cercana/<str:pk>/', warning_assign_closest, name='warning_assign_closest'),
+    path('avisos/descartar/<str:pk>/', warning_toss, name='warning_toss'),
+
 
     path('avisos/archivar/<str:pk>/', warning_archive, name='warning_archive'),
     path('avisos/archivar-aviso/<str:pk>/', WarningArchiveView.as_view(), name='warning_archive_warning'),
