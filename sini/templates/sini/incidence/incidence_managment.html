@@ -1,46 +1,823 @@
 {% extends 'layouts/base.html' %}
-{% load l10n %}
-{% load i18n %}
+{% load static %}
+{% load leaflet_tags %}
+{% load geojson_tags %}
 {% block title %}
-  Gestión Incidencias
+  Detalles Incidencia
 {% endblock title %}
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
-  <link href="/static/assets/js/plugins/datatables/jquery.dataTables.css"
-        rel="stylesheet">
-  <style>
-  .clickable{
-       cursor: pointer;
-  }
-  .btn-close {
-    color: red; 
-    opacity: 1;
+  {% leaflet_js plugins="forms" %}
+  {% leaflet_css plugins="forms" %}
+  <link rel="stylesheet"
+        href="{% static 'assets/markers/css/leaflet.extra-markers.min.css' %}">
+  <link rel="stylesheet"
+        type="text/css"
+        href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.css">
+  <style type="text/css">
+//  .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+//    background: red;
+//}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  color: white !important;
+  border: 1px solid #111;
+  background-color: #585858;
+  background: #21ac8d;
+ 
 }
+/*
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  color: white !important;
+  border: 1px solid #111;
+  background-color: #585858;
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #585858), color-stop(100%, #111));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #ffffff 0%, #48be1d 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -moz-linear-gradient(top, #ffffff 0%, #48be1d 100%);
+  /* FF3.6+ */
+  background: -ms-linear-gradient(top, #ffffff 0%, #48be1d 100%);
+  /* IE10+ */
+  background: -o-linear-gradient(top, #ffffff 0%, #48be1d 100%);
+  /* Opera 11.10+ */
+  background: linear-gradient(to bottom, #ffffff 0%, #48be1d 100%);
+  /* W3C */
+}
+*/
+  </style>
+  <style type="text/css">
+ #gis {
+     width:100%;
+     height:400px;
+     margin-top:0;
+     }
+  .clickable{
+      cursor: pointer;
+ }
+
   </style>
 {% endblock stylesheets %}
-{% block body_class %}g-sidenav-show  bg-gray-100{% endblock %}
+{% block body_class %}g-sidenav-show bg-gray-100{% endblock %}
 {% block content %}
-  <div class="container-fluid py-4">
-    <div class="row mt-4">
-      <div class="col-12">
-        <div class="card">
-          <!-- Card header -->
-          <div class="card-header">
-            <h3 class="mb-1">Manejo Incidencias</h3>
-            <hr class="horizontal dark my-2">            
+  <div class="container-fluid py-1">
+    <div class="row">
+      <div class="col-lg-12 col-12 mx-auto">
+        <div class="card mt-0" id="geo">
+          <div class="card-header mb-0">
+            <h5 class="mb-0">Manejo incidencias</h5>
           </div>
-          <div class="card-body mt-0">
+          <div class="card-body d-sm-flex p-0 mt-0 pt-0">{% leaflet_map "gis" callback="window.init_map" %}</div>
+        </div>
+        <div class="card mt-0" id="geo">
+          <div class="card-header mb-0">
+            <h5 class="mb-0">Manejo incidencias</h5>
+          </div>
+          <div class="card-body d-sm-flex p-2 mt-0 pt-2">
+            <div class="table-responsive" style="width:100%">
+              <table class="table table-flush" id="datatable-warnings" style="width:100%">
+                <thead>
+                  <tr>
+                    <td>
+                      <b>Aviso</b>
+                    </td>
+                    <td>
+                      <b>Tipo</b>
+                    </td>
+                    <td>
+                      <b>Estado</b>
+                    </td>
+                    <td>
+                      <b>Fecha</b>
+                    </td>
+                    <td class="text-center">
+                      <b>Acciones</b>
+                    </td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for mobile_waring in mobile_warnings %}
+                    <tr>
+                      <td>{{ mobile_waring.name }}</td>
+                      <td>{{ mobile_waring.get_incidence_type_display }}</td>
+                      <td>{{ mobile_waring.get_status_display }}</td>
+                      <td>{{ mobile_waring.created|default_if_none:'-' }}</td>
+                      <td class="text-center">
+                        <a target="_blank" href="{% url 'sini:warning_detail' mobile_waring.id %}"  data-bs-toggle="tooltip"
+                        data-bs-placement="top" title="Detalles"><i class="far fa-eye fa-2x me-2 mx-2" aria-hidden="true"></i></a>
+                      
+                        <span data-bs-toggle="modal" data-bs-target="#crearIncidenciaModal">
+                          <button class="crearButton btn btn-link text-primary text-gradient px-0 mb-0 executebutton mx-2"
+                              id="eliminarVariable"
+                              onclick="clicked(event)"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="top" title="Crear incidencia"
+                              value="{{mobile_waring.id}}">
+                              <i id="buttonicon_{{mobile_waring.id}}" class="fa fa-plus fa-2x" aria-hidden="true"></i>
+                          </button>
+                      </span>
 
+                        <span data-bs-toggle="modal" data-bs-target="#asingModal">
+                          <button class="btn btn-link text-primary text-gradient px-0 mb-0 executebutton mx-2"
+                              id="asignar"
+                              onclick="clicked_assign_closest(event)"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="top" title="Asignar a incidencia más cercana"
+                              value="{{mobile_waring.id}}">
+                              <i id="assignicon_{{mobile_waring.id}}" class="fas fa-search-location fa-2x" aria-hidden="true"></i>
+                          </button>
+                      </span>
+
+                    <span data-bs-toggle="modal" data-bs-target="#tossModal">
+                      <button class="btn btn-link text-primary text-gradient px-0 mb-0 executebutton mx-2"
+                          id="asignar"
+                          onclick="clicked_tosst(event)"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top" title="Desechar aviso"
+                          value="{{mobile_waring.id}}">
+                          <i id="tossicon_{{mobile_waring.id}}" class="fa fa-eraser fa-2x" aria-hidden="true"></i>
+                        </button>
+                    </span>
+
+                      <span data-bs-toggle="modal" data-bs-target="#archiveWarningModal">
+                        <button class="btn btn-link text-danger text-gradient px-0 mb-0 deletebin mx-2"
+                            id="eliminarVariable"
+                            onclick="clicked_archive_warning(event)"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top" title="Archivar"
+                            value="{{mobile_waring.id}}">
+                            <i id="archivicon_{{mobile_waring.id}}" class="fa fa-archive fa-2x" aria-hidden="true"></i>
+                        </button>
+                        </span>
+
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <input type="hidden" id="selectedWarning" name="selectedWarningName" />
+        <input type="hidden" id="selectedIncidence" name="selectedIncidenceName" />
+        <div class="modal fade"
+             id="crearIncidenciaModal"
+             tabindex="-1"
+             role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Crear Incidencia</h5>
+                <button type="button"
+                        class="btn-close text-dark"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        id="elim">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p class="text-sm mb-0 font-weight-bold">
+                  Se creará una incidencia a partir del aviso actual. Seleccione la prioridad de la nueva incidencia
+                </p>
+                <br>
+                <div class="form-group">
+                  <label class="control-label" for="id_prioridad_crear">Prioridad</label>
+                  <select id="id_prioridad_crear" class="form-select" name="prioridad_crear">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5" selected>5</option>
+                  </select>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button"
+                        class="btn bg-success text-white"
+                        data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn bg-danger text-white" id="crearIncidencia">Aceptar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal fade"
+             id="asingModal"
+             tabindex="-1"
+             role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Asignar Incidencia</h5>
+                <button type="button"
+                        class="btn-close text-dark"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        id="elim">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p class="text-sm mb-0 font-weight-bold">
+                  Esta acción asignará el aviso a la incidencia más cercana. ¿Desea continuar?
+                </p>
+                <br>
+              </div>
+              <div class="modal-footer">
+                <button type="button"
+                        class="btn bg-success text-white"
+                        data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn bg-danger text-white" id="asignarIncidencia">Aceptar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade"
+             id="FinalizeIncidenciaModal"
+             tabindex="-1"
+             role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Finalizar Incidencia</h5>
+                <button type="button"
+                        class="btn-close text-dark"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        id="elim">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p class="text-sm mb-0 font-weight-bold">
+                  Esta acción finalizará la incidencia y la ocultará. ¿Desea continuar?
+                </p>
+                <br>
+              </div>
+              <div class="modal-footer">
+                <button type="button"
+                        class="btn bg-success text-white"
+                        data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn bg-danger text-white" id="finalizarIncidencia">Aceptar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade"
+            id="ArchivarIncidenciaModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Finalizar Incidencia</h5>
+              <button type="button"
+                      class="btn-close text-dark"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                      id="elim">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p class="text-sm mb-0 font-weight-bold">
+                Esta acción archivará la incidencia y la ocultará. ¿Desea continuar?
+              </p>
+              <br>
+            </div>
+            <div class="modal-footer">
+              <button type="button"
+                      class="btn bg-success text-white"
+                      data-bs-dismiss="modal">Cerrar</button>
+              <button type="button" class="btn bg-danger text-white" id="archivarIncidencia">Aceptar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+        <div class="modal fade"
+             id="errorModal"
+             tabindex="-1"
+             role="dialog"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">
+                Error</span>
+              </h5>
+              <button type="button"
+                      class="btn-close text-dark"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                      id="closemodalerror">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-2 text-center text-danger">
+                  <i class="fa fa-3x fa-exclamation-circle "></i>
+                </div>
+                <div class="col-10">
+                  <p class="text-sm mb-0 font-weight-bold">
+                    Han ocurrido errores
+                    <br>
+                    <span id="errorspan"></span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button"
+                      class="btn bg-success text-white"
+                      data-bs-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade"
+           id="assignSuccessModal"
+           tabindex="-1"
+           role="dialog"
+           aria-labelledby="exampleModalLabel"
+           aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Aviso asignado</h5>
+              <button type="button"
+                      class="btn-close text-dark"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                      id="closemodalerror">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-2 text-center text-success">
+                  <i class="fa fa-3x fa-thumbs-up"></i>
+                </div>
+                <div class="col-10">
+                  <p class="text-sm mb-0 font-weight-bold">
+                    Se ha asignado el aviso a la incidencia más cercana
+                    <br>
+                    <strong>Nombre incidencia:</strong><span id="successSpan"></span>
+                    <br>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button"
+                      class="btn bg-success text-white"
+                      data-bs-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade"
+           id="archiveWarningModal"
+           tabindex="-1"
+           role="dialog"
+           aria-labelledby="exampleModalLabel"
+           aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Archivar aviso</h5>
+              <button type="button"
+                      class="btn-close text-dark"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                      id="elim">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p class="text-sm mb-0 font-weight-bold">¿Desea archivar el aviso? Los avisos archivados no se mostrarán en el mapa</p>
+              <br>
+            </div>
+            <div class="modal-footer">
+              <button type="button"
+                      class="btn bg-success text-white"
+                      data-bs-dismiss="modal">Cerrar</button>
+              <button type="button" class="btn bg-danger text-white" id="archivarAviso">Aceptar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade"
+           id="operationSuccessModal"
+           tabindex="-1"
+           role="dialog"
+           aria-labelledby="exampleModalLabel"
+           aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="successTitlelabel"></h5>
+              <button type="button"
+                      class="btn-close text-dark"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                      id="closemodalerror">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-2 text-center text-success">
+                  <i class="fa fa-3x fa-thumbs-up"></i>
+                </div>
+                <div class="col-10">
+                  <p class="text-sm mb-0 font-weight-bold">
+                    <span id="successSpanLabel"></span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button"
+                      class="btn bg-success text-white"
+                      data-bs-dismiss="modal">Cerrar</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-   
     {% include "includes/footer.html" %}
   </div>
+</div>
 {% endblock content %}
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
   <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+  <script type="text/javascript"
+          charset="utf8"
+          src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.js"></script>
+  <!--script src="{% static 'assets/js/extra-markers/src/assets/js/leaflet.extra-markers.min.jss' %}" ></script -->
+  <script src="{% static 'assets/markers/js/leaflet.extra-markers.js' %}"></script>
+  <script src="{% static 'sini/js/map_managment.js' %}"></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+      var langes = {
+            "processing": "Procesando...",
+            "lengthMenu": "Mostrar _MENU_ registros",
+            "zeroRecords": "No se encontraron resultados",
+            "emptyTable": "Ningún dato disponible en esta tabla",
+            "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "infoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "search": "Buscar:",
+            "infoThousands": ",",
+            "loadingRecords": "Cargando...",
+            "paginate": {
+                "first": "Primero",
+                "last": "Último",
+                "next": "Siguiente",
+                "previous": "Anterior"
+            },
+            "aria": {
+                "sortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sortDescending": ": Activar para ordenar la columna de manera descendente"
+            },
+            "buttons": {
+                "copy": "Copiar",
+                "colvis": "Visibilidad",
+                "collection": "Colección",
+                "colvisRestore": "Restaurar visibilidad",
+                "copyKeys": "Presione ctrl o u2318 + C para copiar los datos de la tabla al portapapeles del sistema. <br \ /> <br \ /> Para cancelar, haga clic en este mensaje o presione escape.",
+                "copySuccess": {
+                    "1": "Copiada 1 fila al portapapeles",
+                    "_": "Copiadas %ds fila al portapapeles"
+                },
+                "copyTitle": "Copiar al portapapeles",
+                "csv": "CSV",
+                "excel": "Excel",
+                "pageLength": {
+                    "-1": "Mostrar todas las filas",
+                    "_": "Mostrar %d filas"
+                },
+                "pdf": "PDF",
+                "print": "Imprimir",
+                "renameState": "Cambiar nombre",
+                "updateState": "Actualizar",
+                "createState": "Crear Estado",
+                "removeAllStates": "Remover Estados",
+                "removeState": "Remover",
+                "savedStates": "Estados Guardados",
+                "stateRestore": "Estado %d"
+            },
+            "autoFill": {
+                "cancel": "Cancelar",
+                "fill": "Rellene todas las celdas con <i>%d<\/i>",
+                "fillHorizontal": "Rellenar celdas horizontalmente",
+                "fillVertical": "Rellenar celdas verticalmentemente"
+            },
+            "decimal": ",",
+            "searchBuilder": {
+                "add": "Añadir condición",
+                "button": {
+                    "0": "Constructor de búsqueda",
+                    "_": "Constructor de búsqueda (%d)"
+                },
+                "clearAll": "Borrar todo",
+                "condition": "Condición",
+                "conditions": {
+                    "date": {
+                        "after": "Despues",
+                        "before": "Antes",
+                        "between": "Entre",
+                        "empty": "Vacío",
+                        "equals": "Igual a",
+                        "notBetween": "No entre",
+                        "notEmpty": "No Vacio",
+                        "not": "Diferente de"
+                    },
+                    "number": {
+                        "between": "Entre",
+                        "empty": "Vacio",
+                        "equals": "Igual a",
+                        "gt": "Mayor a",
+                        "gte": "Mayor o igual a",
+                        "lt": "Menor que",
+                        "lte": "Menor o igual que",
+                        "notBetween": "No entre",
+                        "notEmpty": "No vacío",
+                        "not": "Diferente de"
+                    },
+                    "string": {
+                        "contains": "Contiene",
+                        "empty": "Vacío",
+                        "endsWith": "Termina en",
+                        "equals": "Igual a",
+                        "notEmpty": "No Vacio",
+                        "startsWith": "Empieza con",
+                        "not": "Diferente de",
+                        "notContains": "No Contiene",
+                        "notStartsWith": "No empieza con",
+                        "notEndsWith": "No termina con"
+                    },
+                    "array": {
+                        "not": "Diferente de",
+                        "equals": "Igual",
+                        "empty": "Vacío",
+                        "contains": "Contiene",
+                        "notEmpty": "No Vacío",
+                        "without": "Sin"
+                    }
+                },
+                "data": "Data",
+                "deleteTitle": "Eliminar regla de filtrado",
+                "leftTitle": "Criterios anulados",
+                "logicAnd": "Y",
+                "logicOr": "O",
+                "rightTitle": "Criterios de sangría",
+                "title": {
+                    "0": "Constructor de búsqueda",
+                    "_": "Constructor de búsqueda (%d)"
+                },
+                "value": "Valor"
+            },
+            "searchPanes": {
+                "clearMessage": "Borrar todo",
+                "collapse": {
+                    "0": "Paneles de búsqueda",
+                    "_": "Paneles de búsqueda (%d)"
+                },
+                "count": "{total}",
+                "countFiltered": "{shown} ({total})",
+                "emptyPanes": "Sin paneles de búsqueda",
+                "loadMessage": "Cargando paneles de búsqueda",
+                "title": "Filtros Activos - %d",
+                "showMessage": "Mostrar Todo",
+                "collapseMessage": "Colapsar Todo"
+            },
+            "select": {
+                "cells": {
+                    "1": "1 celda seleccionada",
+                    "_": "%d celdas seleccionadas"
+                },
+                "columns": {
+                    "1": "1 columna seleccionada",
+                    "_": "%d columnas seleccionadas"
+                },
+                "rows": {
+                    "1": "1 fila seleccionada",
+                    "_": "%d filas seleccionadas"
+                }
+            },
+            "thousands": ".",
+            "datetime": {
+                "previous": "Anterior",
+                "next": "Proximo",
+                "hours": "Horas",
+                "minutes": "Minutos",
+                "seconds": "Segundos",
+                "unknown": "-",
+                "amPm": [
+                    "AM",
+                    "PM"
+                ],
+                "months": {
+                    "0": "Enero",
+                    "1": "Febrero",
+                    "10": "Noviembre",
+                    "11": "Diciembre",
+                    "2": "Marzo",
+                    "3": "Abril",
+                    "4": "Mayo",
+                    "5": "Junio",
+                    "6": "Julio",
+                    "7": "Agosto",
+                    "8": "Septiembre",
+                    "9": "Octubre"
+                },
+                "weekdays": [
+                    "Dom",
+                    "Lun",
+                    "Mar",
+                    "Mie",
+                    "Jue",
+                    "Vie",
+                    "Sab"
+                ]
+            },
+            "editor": {
+                "close": "Cerrar",
+                "create": {
+                    "button": "Nuevo",
+                    "title": "Crear Nuevo Registro",
+                    "submit": "Crear"
+                },
+                "edit": {
+                    "button": "Editar",
+                    "title": "Editar Registro",
+                    "submit": "Actualizar"
+                },
+                "remove": {
+                    "button": "Eliminar",
+                    "title": "Eliminar Registro",
+                    "submit": "Eliminar",
+                    "confirm": {
+                        "_": "¿Está seguro que desea eliminar %d filas?",
+                        "1": "¿Está seguro que desea eliminar 1 fila?"
+                    }
+                },
+                "error": {
+                    "system": "Ha ocurrido un error en el sistema (<a target=\"\\\" rel=\"\\ nofollow\" href=\"\\\">Más información&lt;\\\/a&gt;).<\/a>"
+                },
+                "multi": {
+                    "title": "Múltiples Valores",
+                    "info": "Los elementos seleccionados contienen diferentes valores para este registro. Para editar y establecer todos los elementos de este registro con el mismo valor, hacer click o tap aquí, de lo contrario conservarán sus valores individuales.",
+                    "restore": "Deshacer Cambios",
+                    "noMulti": "Este registro puede ser editado individualmente, pero no como parte de un grupo."
+                }
+            },
+            "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            "stateRestore": {
+                "creationModal": {
+                    "button": "Crear",
+                    "name": "Nombre:",
+                    "order": "Clasificación",
+                    "paging": "Paginación",
+                    "search": "Busqueda",
+                    "select": "Seleccionar",
+                    "columns": {
+                        "search": "Búsqueda de Columna",
+                        "visible": "Visibilidad de Columna"
+                    },
+                    "title": "Crear Nuevo Estado",
+                    "toggleLabel": "Incluir:"
+                },
+                "emptyError": "El nombre no puede estar vacio",
+                "removeConfirm": "¿Seguro que quiere eliminar este %s?",
+                "removeError": "Error al eliminar el registro",
+                "removeJoiner": "y",
+                "removeSubmit": "Eliminar",
+                "renameButton": "Cambiar Nombre",
+                "renameLabel": "Nuevo nombre para %s",
+                "duplicateError": "Ya existe un Estado con este nombre.",
+                "emptyStates": "No hay Estados guardados",
+                "removeTitle": "Remover Estado",
+                "renameTitle": "Cambiar Nombre Estado"
+            }
+        }  
 
+        var oTable = $('#datatable-variables').DataTable(
+        {
+          language: langes
+        }
+        
+      );
+      //oTable.column(2).search("^"+$(this).val()+"$", true,false,true ).draw()
+   
+
+      $('#datatable-warnings').DataTable(
+        {
+          language: langes
+        }
+        
+      );
+/*
+      const dataTableSearch = new simpleDatatables.DataTable("#datat", {
+        
+        searchable: true,
+        fixedHeight: true,
+
+      });
+    
+  */
+  
+  });
+
+
+
+    var feature_incidence = false;
+    var feature_warnings = false;
+    var map_copy = False
+    function init_map(map,options){
+      console.log('Layer');
+
+ 
+      
+      var geom_incidence = {{ incidences|geojsonfeature:"id,name,incidence_type,description,status,active"|safe }};
+      feature_incidence = L.geoJson(geom_incidence , { pointToLayer:redIcon, onEachFeature:onEachFeatureIncidence});//.addTo(map);
+      var geom_warnings = {{ mobile_warnings|geojsonfeature:"id,name,incidence_type,description,status,active,assign_incidence"|safe }};
+      feature_warnings = L.geoJson(geom_warnings, { pointToLayer:orangeIcon, onEachFeature:onEachFeatureWarning});
+
+      var basemaps = {
+
+        "osmHOT" : L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '© OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team hosted by OpenStreetMap France'
+        }),
+        "Calles": L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        })
+    };
+
+    var overlayMaps = {
+        "Incidencias": feature_incidence,
+        "Avisos":feature_warnings
+
+    };
+
+    var features = L.control.layers(basemaps, overlayMaps).addTo(map);
+    //map.fitBounds(feature_warnings.getBounds());
+
+    var bounds1 = feature_warnings.getBounds();
+    var bounds2 = feature_incidence.getBounds();
+
+    map.fitBounds(bounds1.extend(bounds2));
+
+    feature_incidence.addTo(map);
+    feature_warnings.addTo(map);
+    basemaps["Calles"].addTo(map);
+
+ 
+      
+      //map.setZoom(12)
+
+      var legend = L.control({ position: "bottomleft" });
+      let legend_label = "Leyenda";
+      let incidence_label = "Incidencias";
+      let warning_label = "Avisos";
+
+
+      legend.onAdd = function (map) {
+          var div = L.DomUtil.create('div', 'legend');
+          div.style.backgroundColor = "#F2E8F0"
+          div.innerHTML = `<div>&nbsp;&nbsp;&nbsp;<b>${legend_label}</b></div>`;
+          div.innerHTML += `<i style="background:#9F2C31">&nbsp;&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;<strong>${incidence_label}</strong>&nbsp;&nbsp;<br />`;
+          div.innerHTML += `<i style="background:#EF8E20">&nbsp;&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;<strong>${warning_label}</strong>&nbsp;&nbsp;<br />`;
+          return div
+      }
+      legend.addTo(map);
+
+
+      //console.log(feature_warnings._layers[51].feature.id);
+
+      //console.log(feature_warnings._layers[51]._popup._content);
+      map_copy = map
+  };
+  
+  
+
+
+  </script>
 {% endblock javascripts %}

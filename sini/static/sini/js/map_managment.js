@@ -45,6 +45,15 @@ function onEachFeatureWarning(feature, layer) {
   }
   tipo = tipos[feature.properties.incidence_type]
   status_value = status_dict[feature.properties.status]
+  descripcion_str = feature.properties.description
+  if (descripcion_str.length>90) {
+    description = descripcion_str.slice(0,90)
+    
+  }
+  else{
+    description = descripcion_str
+  }
+  
   var popupContent = `<h6>Aviso: ${feature.properties.name}</h6>
     <div class="row mb-1 ">
       <div class="col-5"><b>Tipo incidente:</b></div>
@@ -55,7 +64,7 @@ function onEachFeatureWarning(feature, layer) {
       <div class="col-7">${status_value}</div>
     </div>
     <strong>Descripción</strong><br>
-    <p class="mt-1 mb-2">${feature.properties.description}</p>
+    <p class="mt-1 mb-2">${description}</p>
     <strong>Acciones</strong><br>
     <div class="row">
     <div class="col-12">`
@@ -72,8 +81,86 @@ function onEachFeatureWarning(feature, layer) {
   layer.bindTooltip(feature.properties.name, { permanent: false })
 }
 function onEachFeatureIncidence(feature, layer) {
-  layer.bindPopup(feature.properties.name)
-  layer.bindTooltip(feature.properties.name, { permanent: false })
+
+
+  var boton_detalles = `<a target="_blank" href="/sini/incidencias/detalles/${feature.properties.id}/"  data-bs-toggle="tooltip"
+  data-bs-placement="top" title="Detalles"><i class="far fa-eye fa-3x me-2 mx-2" aria-hidden="true"></i></a>`
+
+    var boton_finalizar = `<span data-bs-toggle="modal" data-bs-target="#FinalizeIncidenciaModal">
+          <button class="finalizarButton btn btn-link text-primary text-gradient px-0 mb-0 executebutton mx-2"
+              id="finalizar_${feature.properties.id}"
+              onclick="clicked_finalize_incidence(event)"
+              data-bs-toggle="tooltip"
+              data-bs-placement="top" title="Finalizar incidencia"
+              value="${feature.properties.id}">
+              <i id="buttonfina_${feature.properties.id}" class="fa fa-check fa-3x" aria-hidden="true"></i>
+          </button>
+      </span>`
+
+    var boton_archivar = `<span data-bs-toggle="modal" data-bs-target="#ArchivarIncidenciaModal">
+          <button class="btn btn-link text-danger text-gradient px-0 mb-0 deletebin mx-2"
+              id="eliminarVariable"
+              onclick="clicked_archive_incidence(event)"
+              data-bs-toggle="tooltip"
+              data-bs-placement="top" title="Archivar"
+              value="${feature.properties.id}">
+              <i id="archivicon_${feature.properties.id}" class="fa fa-archive fa-3x" aria-hidden="true"></i>
+          </button>
+          </span>`
+    tipos = {
+      accidente_aereo: 'Accidente aéreo',
+      accidente_transito: 'Accidente de tránsito',
+      colapso_puente: 'Alerta por colapso de puente',
+      arbol_caido: 'Árbo caído',
+      asfixia_inmersion: 'Asfixia por inmersión',
+      aumento_cauce: 'Aumento de cauce',
+      aumento_caudal: 'Aumento  de caudal',
+    }
+    status_dict = {
+      creado: 'Creado',
+      finalizado: 'Finalizado',
+    }
+    tipo = tipos[feature.properties.incidence_type]
+    status_value = status_dict[feature.properties.status]
+    descripcion_str = feature.properties.description
+    if (descripcion_str.length>90) {
+      description = descripcion_str.slice(0,90)
+      
+    }
+    else{
+      description = descripcion_str
+    }
+    
+    var popupContent = `<h6>Incidencia: ${feature.properties.name}</h6>
+      <div class="row mb-1 ">
+        <div class="col-5"><b>Tipo incidente:</b></div>
+        <div class="col-7">${tipo}</div>
+      </div>
+      <div class="row mb-3 text-right">
+        <div class="col-5"><b>Status:</b></div>
+        <div class="col-7">${status_value}</div>
+      </div>
+      <strong>Descripción</strong><br>
+      <p class="mt-1 mb-2">${description}</p>
+      <strong>Acciones</strong><br>
+      <div class="row">
+      <div class="col-12">`
+
+    //if (feature.properties.status == 'creado') {
+    //  popupContent += boton_crear
+    //  popupContent += boton_asignar
+    //}
+    popupContent +=boton_detalles
+    popupContent += boton_finalizar
+    popupContent += boton_archivar
+
+
+    popupContent += `</div>
+                  </div>`
+    layer.bindPopup(popupContent, { minWidth: 300 })
+    layer.bindTooltip(feature.properties.name, { permanent: false })
+
+
 }
 
 function style(feature) {
@@ -142,6 +229,28 @@ function clicked_archive_warning(e) {
   console.log(selectedwarning.value)
 
 }
+
+// clic functions for incidence
+
+function clicked_finalize_incidence(e) {
+  console.log('clickedo elemento a finalizar')
+  var id_crear = e.target.id
+  var result = id_crear.substring(11)
+  var selectedIncidence = document.getElementById('selectedIncidence')
+  selectedIncidence.value = result
+  console.log(selectedIncidence.value)
+
+}
+function clicked_archive_incidence(e) {
+  console.log('clickedo elemento a finalizar')
+  var id_crear = e.target.id
+  var result = id_crear.substring(11)
+  var selectedIncidence = document.getElementById('selectedIncidence')
+  selectedIncidence.value = result
+  console.log(selectedIncidence.value)
+
+}
+
 
 
 
@@ -415,6 +524,125 @@ document
         var successSpanLabel = document.getElementById('successSpanLabel')
         successTitlelabel.textContent = "Aviso archivado"
         successSpanLabel.textContent = "El aviso seleccionado ha sido archivado. Por lo tanto se ocultará del mapa"
+        $('#operationSuccessModal').modal('show')
+      },
+      error: function (response, e) {
+        console.log(response)
+
+        $('#crearIncidenciaModal').modal('hide')
+
+        $('#errorModal').modal('show')
+        var errorspan = document.getElementById('errorspan')
+
+        if (response.responseJSON.mensaje == 'restricted') {
+          errorspan.textContent = response.responseJSON.error
+        } else {
+          errorspan.textContent =
+            'Ha ocurrido un error al asignar, Contacte al Administrador'
+        }
+      },
+    })
+
+  })
+
+  // Finalizar Incidencia
+  document
+  .getElementById('finalizarIncidencia')
+  .addEventListener('click', function (e) {
+    //var valor = document.getElementById('selectedWarning').value;
+    console.log('Finalizar Incidencia')
+    //console.log(valor);
+    //var id_aviso = document.getElementById('selectedWarning').value;
+
+    //feature_warnings._layers.push(marker)
+    //feature_incidence.addLayer(marker);
+    var avisoId = document.getElementById('selectedIncidence').value
+
+    var request = $.ajax({
+      type: 'GET',
+      url: '/sini/incidencias/finalizar/' + avisoId + '/',
+      data: {},
+      success: function (response) {
+        console.log(response)
+        $('#FinalizeIncidenciaModal').modal('hide')
+
+        console.log(response)
+        console.log('mostrando modal');
+        for (var key in feature_incidence._layers) {
+          // check if the property/key is defined in the object itself, not in parent
+          console.log('mostrando llaves');
+          console.log(key)
+          console.log(feature_incidence._layers[key].feature.id)
+          if (feature_incidence._layers[key].feature.id == avisoId) {
+            console.log("Se va a finalizar")
+            feature_incidence.removeLayer(parseInt(key))
+          }
+        }
+        map_copy.closePopup()
+        var successTitlelabel = document.getElementById('successTitlelabel')
+        var successSpanLabel = document.getElementById('successSpanLabel')
+        successTitlelabel.textContent = "Incidencia finalizada"
+        successSpanLabel.textContent = "La incidencia seleccionada ha sido archivada. Por lo tanto se ocultará del mapa"
+        $('#operationSuccessModal').modal('show')
+      },
+      error: function (response, e) {
+        console.log(response)
+
+        $('#crearIncidenciaModal').modal('hide')
+
+        $('#errorModal').modal('show')
+        var errorspan = document.getElementById('errorspan')
+
+        if (response.responseJSON.mensaje == 'restricted') {
+          errorspan.textContent = response.responseJSON.error
+        } else {
+          errorspan.textContent =
+            'Ha ocurrido un error al asignar, Contacte al Administrador'
+        }
+      },
+    })
+
+  })
+
+  // Archivar incidencia
+
+  document
+  .getElementById('archivarIncidencia')
+  .addEventListener('click', function (e) {
+    //var valor = document.getElementById('selectedWarning').value;
+    console.log('ARCHIVAR AVISO')
+    //console.log(valor);
+    //var id_aviso = document.getElementById('selectedWarning').value;
+
+    //feature_warnings._layers.push(marker)
+    //feature_incidence.addLayer(marker);
+    var avisoId = document.getElementById('selectedIncidence').value
+
+    var request = $.ajax({
+      type: 'GET',
+      url: '/sini/incidencias/archivar-map/' + avisoId + '/',
+      data: {},
+      success: function (response) {
+        console.log(response)
+        $('#ArchivarIncidenciaModal').modal('hide')
+
+        console.log(response)
+        console.log('mostrando modal');
+        for (var key in feature_incidence._layers) {
+          // check if the property/key is defined in the object itself, not in parent
+          console.log('mostrando llaves');
+          console.log(key)
+          console.log(feature_incidence._layers[key].feature.id)
+          if (feature_incidence._layers[key].feature.id == avisoId) {
+            console.log("Se va a archivar")
+            feature_incidence.removeLayer(parseInt(key))
+          }
+        }
+        map_copy.closePopup()
+        var successTitlelabel = document.getElementById('successTitlelabel')
+        var successSpanLabel = document.getElementById('successSpanLabel')
+        successTitlelabel.textContent = "Aviso archivado"
+        successSpanLabel.textContent = "La incidencia seleccionada ha sido archivada. Por lo tanto se ocultará del mapa"
         $('#operationSuccessModal').modal('show')
       },
       error: function (response, e) {

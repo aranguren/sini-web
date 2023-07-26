@@ -77,7 +77,7 @@ class IncidenciaListView(LoginRequiredMixin, ListView):
 
         
 
-        query_result =  Incidence.objects.order_by('name')
+        query_result =  Incidence.objects.order_by('-created')
 
 
         if query['name'] and query['name'] != '':

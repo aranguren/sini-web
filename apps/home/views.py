@@ -8,14 +8,17 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
+from django.urls import reverse, reverse_lazy
+from django.shortcuts import render, redirect
 
 
 @login_required(login_url="/login/")
 def index(request):
-    context = {'segment': 'index'}
+    return redirect(reverse_lazy("sini:incidence_managment", kwargs={}))
+    #context = {'segment': 'index'}
 
-    html_template = loader.get_template('home/index.html')
-    return HttpResponse(html_template.render(context, request))
+    #html_template = loader.get_template('home/index.html')
+    #return HttpResponse(html_template.render(context, request))
 
 
 @login_required(login_url="/login/")

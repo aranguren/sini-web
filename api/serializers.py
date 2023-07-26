@@ -40,7 +40,7 @@ class WarningSerializer(GeoFeatureModelSerializer):
         fields = ('id','geom','name','incidence_type',
         'description',)
         extra_kwargs = {'geom': {'required': True}} 
-        read_only_fields = ['id','created_by', 'modified_by', 'created','modified', 'created_by_api_user', 'modified_by_api_user']
+        read_only_fields = ['id','created_by', 'modified_by', 'created','modified', 'created_by_api_user', 'modified_by_api_user', 'active']
 
 """
 class PeriodSerializer(serializers.ModelSerializer):

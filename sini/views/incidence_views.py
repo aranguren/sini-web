@@ -69,7 +69,7 @@ class IncidenceListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         query = {'name': self.request.GET.get('name', None)}
 
-        query_result =  Incidence.objects.order_by('name')
+        query_result =  Incidence.objects.order_by('-created')
 
 
         if query['name'] and query['name'] != '':
@@ -139,7 +139,7 @@ class IncidenceUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class IncidenceManagmentView(LoginRequiredMixin, TemplateView):
-    template_name = 'sini/incidence/incidence_detail2.html'
+    template_name = 'sini/incidence/incidence_managment.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)   
@@ -208,3 +208,26 @@ class IncidenceActivateView(LoginRequiredMixin, View):
         incidence.save()
         redirection = reverse_lazy("sini:incidence_detail", kwargs={"pk": pk}) 
         return redirect(redirection)
+    
+
+@login_required(login_url='/login/')
+def incidence_archive(request, pk):
+    resp = {}
+    
+    incidence = get_object_or_404(Incidence, pk=pk)
+
+    incidence.active = False
+    incidence.save()
+
+    return JsonResponse(resp, status=200)
+
+@login_required(login_url='/login/')
+def incidence_finalize(request, pk):
+    resp = {}
+    
+    incidence = get_object_or_404(Incidence, pk=pk)
+
+    incidence.status = 'finalizado'
+    incidence.save()
+
+    return JsonResponse(resp, status=200)

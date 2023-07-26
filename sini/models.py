@@ -81,6 +81,7 @@ class Incidence(BasicAuditModel):
     class Meta:
         db_table = 'sini_incidence'
         managed = True
+        ordering = ["-created"]
         verbose_name =  'Incidencia'
         verbose_name_plural =  'Incidencias'
 
@@ -156,6 +157,7 @@ class MobileWarning(BasicAuditModel):
     class Meta:
         db_table = 'sini_warning'
         managed = True
+        ordering = ["-created"]
         verbose_name =  'Aviso'
         verbose_name_plural =  'Avisos'
 

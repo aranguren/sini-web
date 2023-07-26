@@ -70,7 +70,7 @@ class WarningListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         query = {'name': self.request.GET.get('name', None)}
 
-        query_result =  MobileWarning.objects.order_by('name')
+        query_result =  MobileWarning.objects.order_by('-created')
 
 
         if query['name'] and query['name'] != '':
