@@ -55,7 +55,7 @@ urlpatterns = [
 
     path('incidencias/archivar-incidencia/<str:pk>/', IncidenceArchiveView.as_view(), name='incidence_archive_incidence'),
     path('incidencias/activar/<str:pk>/', IncidenceActivateView.as_view(), name='incidence_activate'),
-    path('incidencias/finalizar/<str:pk>/', IncidenceFinalizeView.as_view(), name='incidence_finalize'),
+    path('incidencias/finalizar-incidencia/<str:pk>/', IncidenceFinalizeView.as_view(), name='incidence_finalize_form'),
 
     #------------------------------------------------------------------------------------------------
     path('consejos/', AdviceListView.as_view(), name='advice_list'),
