@@ -85,3 +85,27 @@ class AdviceForm(forms.ModelForm):
             'advice':CKEditorWidget(attrs={'class': 'form-control'}),
 
             }
+
+
+
+
+class NotificationForm(forms.ModelForm):
+
+
+    class Meta:
+        model = Notification
+        exclude = ("id",'created_by', 'modified_by')
+        
+        widgets = {
+            #'name':forms.TextInput(attrs={'class': 'form-control'}),
+            'subject':forms.TextInput(attrs={'class': 'form-control'}),
+            'geom': LeafletWidget(attrs=LEAFLET_WIDGET_ATTRS),
+            'send_to':forms.Select(attrs={'class': 'form-select form-select-lg'}),
+            'message':forms.Textarea(attrs={'class': 'form-control'}),
+            #'active':forms.CheckboxInput(attrs={'class': 'form-check-input '}),
+            'url_noticia':forms.URLInput(attrs={'class': 'form-control'}),
+            'url_imagen':forms.URLInput(attrs={'class': 'form-control'}),
+             'api_user':forms.Select(attrs={'class': 'form-select form-select-lg'}),
+             'api_group':forms.Select(attrs={'class': 'form-select form-select-lg'}),
+
+            }

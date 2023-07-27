@@ -286,3 +286,34 @@ class BlacklistedToken(models.Model):
         managed = True
         verbose_name = 'Token'
         verbose_name_plural = 'Token'
+
+class Notification(BasicAuditModel):
+
+    SENDTO_CHOICES = (
+        ("todos","Todos"),
+        ("grupo","Grupo"),
+        ("uno","Uno"),
+    )
+
+    send_to = models.CharField(_("Enviar a"), max_length=254, choices=SENDTO_CHOICES, 
+                               blank=False, null=False, default='todos' )
+    subject = models.CharField(_("Asunto"), max_length=254)
+    message = models.TextField(_("Mensaje"))
+
+    url_noticia = models.URLField(_("URL noticia"))
+    url_imagen = models.URLField(_("URL imagen"))
+
+    geom = models.PolygonField(verbose_name=_("Localización"), srid=4326, blank=True, null=True)
+    api_user =  models.ForeignKey('ApiUser', verbose_name=_("Usuario"), related_name='notifications', on_delete=models.CASCADE, blank=True, null=True)
+    api_group =  models.ForeignKey('ApiGroup',verbose_name=_("Grupo"), related_name='notifications', on_delete=models.CASCADE, blank=True, null=True)
+
+
+
+    def __str__(self):
+        return self.subject
+
+    class Meta:
+        db_table = 'sini_notificacion'
+        managed = True
+        verbose_name = 'Notificación'
+        verbose_name_plural = 'Notificaciones'

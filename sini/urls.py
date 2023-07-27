@@ -9,6 +9,8 @@ from .views.warning_views import (WarningListView, WarningDetailView, WarningCre
 from .views.incidence_views import (IncidenceListView, IncidenceDetailView, IncidenceCreateView, IncidenceUpdateView, 
                                     incidence_delete,incidence_finalize, incidence_archive, IncidenceManagmentView, IncidenceActivateView, IncidenceArchiveView, IncidenceFinalizeView)
 from .views.advice_views import AdviceListView, AdviceDetailView, AdviceCreateView, AdviceUpdateView, advice_delete
+from .views.notification_views import NotificationListView, NotificationDetailView, NotificationCreateView
+
 app_name = 'sini'
 
 urlpatterns = [
@@ -64,7 +66,12 @@ urlpatterns = [
     path('consejos/eliminar/', advice_delete, name='advice_delete'),
 
 
+    # Gestión de notificaciones
+
+    path('notificaciones/', NotificationListView.as_view(), name='notification_list'),
+
+    path('notificaciones/detalles/<str:pk>/', NotificationDetailView.as_view(), name='notification_detail'),
 
 
-
+    path('notificaciones/crear/', NotificationCreateView.as_view(), name='notification_create'),
 ]
