@@ -188,6 +188,8 @@
       $("#id_api_user").prop('disabled', true);
       $("#div_api_user").hide();
       $("#div_api_group").hide();
+      document.getElementById("id_api_user").value = "";
+      document.getElementById("id_api_group").value = "";
 
     }
     else if (send_to=='grupo'){
@@ -196,12 +198,18 @@
     $("#div_api_user").hide();
     $("#div_api_group").show();
 
+    document.getElementById("id_api_user").value = "";
+    document.getElementById("id_api_group").value = "";
+
     }
     else if (send_to=='uno'){
       $("#id_api_group").prop('disabled', true);
       $("#id_api_user").prop('disabled', false);
       $("#div_api_user").show();
       $("#div_api_group").hide();
+
+      document.getElementById("id_api_user").value = "";
+      document.getElementById("id_api_group").value = "";
 
     }
   });
