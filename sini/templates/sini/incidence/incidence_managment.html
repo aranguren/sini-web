@@ -171,6 +171,9 @@
                       <b>Incidencia</b>
                     </td>
                     <td>
+                      <b>ID</b>
+                    </td>
+                    <td>
                       <b>Tipo</b>
                     </td>
                     <td>
@@ -188,6 +191,7 @@
                   {% for incidence in incidences %}
                     <tr id="row_incidence_{{ incidence.id }}">
                       <td>{{ incidence.name }}</td>
+                      <td>{{ incidence.id }}</td>
                       <td>{{ incidence.get_incidence_type_display }}</td>
                       <td>{{ incidence.get_status_display }}</td>
                       <td>{{ incidence.created|default_if_none:'-' }}</td>
@@ -840,12 +844,36 @@
 
       datatableIncidences = $('#datatable-incidences').DataTable(
         {
-          language: langes
+          language: langes,
+          columnDefs: [
+                        {
+                            target: 1,
+                            visible: false,
+                            searchable: false,
+                        },],
+          columns: [
+                        { "name": "incidencia" },
+                        { "name": "incidenceId" },
+                        { "name": "tipo" },
+                        { "name": "estado" },
+                        { "name": "fecha" },
+                        { "name": "acciones" },
+                      ]
         }
-        
       );
-      console.log('datatables');
-      console.log(datatableWarnings);
+      console.log('DATATABLE INCIDENCES')
+      console.log(datatableIncidences.data());
+      //datatableIncidences.column( 0 ).name( 'id' );
+      //var id = 'c865d769-16ae-478e-b5ae-16d7781cf9e8'
+      //var columnData = datatableIncidences.column( 'c865d769-16ae-478e-b5ae-16d7781cf9e8:incidenceId' ).data();
+      console.log('obteniendo datos de la columna');
+      console.log(datatableIncidences.row(0).data())
+      //console.log(row.data());
+      //console.log(columnData);
+
+      //console.log(datatableIncidences.column(0).name())
+      //console.log('datatables');
+      //console.log(datatableWarnings);
 /*
       const dataTableSearch = new simpleDatatables.DataTable("#datat", {
         

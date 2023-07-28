@@ -252,7 +252,9 @@ def warning_create_incidence(request, pk):
           "description": new_incidence.description,
           "incidence_type": new_incidence.incidence_type,
           "status": new_incidence.status,
-          "priority": new_incidence.priority
+          "priority": new_incidence.priority,
+          "id": new_incidence.id,
+          "date": new_incidence.created.strftime("%d/%m/%Y, %H:%M:%S")
 
       },
       "geometry": {

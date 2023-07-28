@@ -418,6 +418,7 @@ document
         console.log(response)
         //$(location).attr('href', "{% url 'sini:warning_detail' warning.id %}");
         var geojsonFeature = response.incidenceFeature
+
         var toadd = L.geoJSON(geojsonFeature, {
           pointToLayer: redIcon,
           onEachFeature: onEachFeatureIncidence,
@@ -425,6 +426,8 @@ document
         console.log('Adicionando')
         console.log(toadd)
         feature_incidence.addLayer(toadd)
+        console.log('/*/*/*/*/*/*/*/*/*/*/*/')
+        console.log(toadd)
         /*
         for (var key in feature_warnings._layers) {
           // check if the property/key is defined in the object itself, not in parent
@@ -496,6 +499,58 @@ document
 
         var id_row = '#row_warning_'+avisoId;
         datatableWarnings.row( id_row ).remove().draw();
+        // ADICIONANDO A LA TABLA
+        tipos = {
+          accidente_aereo: 'Accidente aéreo',
+          accidente_transito: 'Accidente de tránsito',
+          colapso_puente: 'Alerta por colapso de puente',
+          arbol_caido: 'Árbo caído',
+          asfixia_inmersion: 'Asfixia por inmersión',
+          aumento_cauce: 'Aumento de cauce',
+          aumento_caudal: 'Aumento  de caudal',
+        }
+        status_dict = {
+          creado: 'Creado',
+          finalizado: 'Finalizado',
+        }
+        tipo = tipos[geojsonFeature.properties.incidence_type]
+        status_value = status_dict[geojsonFeature.properties.status]
+
+        var new_row_html = `<tr id="row_incidence_${geojsonFeature.properties.id}">
+                      <td>${geojsonFeature.properties.name}</td>
+                      <td>${geojsonFeature.properties.id}</td>
+                      <td>${tipo}</td>
+                      <td>${status_value}</td>
+                      <td>${geojsonFeature.properties.date}</td>
+                      <td class="text-center">
+                        <a target="_blank" href="/sini/incidencias/detalles/${geojsonFeature.properties.id}/"  data-bs-toggle="tooltip"
+                        data-bs-placement="top" title="Detalles"><i class="far fa-eye mx-2" aria-hidden="true"></i></a>
+                      
+                        <span data-bs-toggle="modal" data-bs-target="#FinalizeIncidenciaModal">
+                          <button class="finalizarButton btn btn-link text-primary text-gradient px-0 mb-0  mx-2"
+                              id="finalizar_${geojsonFeature.properties.id}"
+                              onclick="clicked_finalize_incidence(event)"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="top" title="Finalizar incidencia"
+                              value="${geojsonFeature.properties.id}">
+                              <i id="buttonfina_${geojsonFeature.properties.id}" class="fa fa-check" aria-hidden="true"></i>
+                          </button>
+                      </span>
+
+                      <span data-bs-toggle="modal" data-bs-target="#ArchivarIncidenciaModal">
+                        <button class="btn btn-link text-danger text-gradient px-0 mb-0 deletebin mx-2"
+                            id="eliminarVariable"
+                            onclick="clicked_archive_incidence(event)"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top" title="Archivar"
+                            value="${geojsonFeature.properties.id}">
+                            <i id="archivicon_${geojsonFeature.properties.id}" class="fa fa-archive" aria-hidden="true"></i>
+                        </button>
+                        </span>
+
+                      </td>
+                    </tr>`
+        datatableIncidences.row.add($(new_row_html)).draw();
 
         map_copy.closePopup()
         var successTitlelabel = document.getElementById('successTitlelabel')
@@ -691,19 +746,25 @@ document
         $('#FinalizeIncidenciaModal').modal('hide')
 
         console.log(response)
-        console.log('mostrando modal');
+        console.log("mostrando todas las capas")
+        console.log(feature_incidence._layers)
         for (var key in feature_incidence._layers) {
           // check if the property/key is defined in the object itself, not in parent
-          console.log('mostrando llaves');
           console.log(key)
-          console.log(feature_incidence._layers[key].feature.id)
-          if (feature_incidence._layers[key].feature.id == avisoId) {
+          //console.log(feature_incidence._layers[key].feature.id)
+          console.log('*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-')
+          console.log('Mostrando propiedades')
+          console.log(feature_incidence._layers[key])
+          console.log(feature_incidence._layers[key].feature)
+          if (feature_incidence._layers[key].feature.properties.id == avisoId) {
             console.log("Se va a finalizar")
             feature_incidence.removeLayer(parseInt(key))
+            break;
           }
         }
-        var id_row = '#row_incidence_'+avisoId;
-        datatableIncidences.row( id_row ).remove().draw();
+        //var id_row = '#row_incidence_'+avisoId;
+        var rowTodelete = datatableIncidences.row({incidenceId:avisoId})
+        rowTodelete.remove().draw();
         map_copy.closePopup()
         var successTitlelabel = document.getElementById('successTitlelabel')
         var successSpanLabel = document.getElementById('successSpanLabel')
@@ -764,8 +825,10 @@ document
             feature_incidence.removeLayer(parseInt(key))
           }
         }
-        var id_row = '#row_incidence_'+avisoId;
-        datatableIncidences.row( id_row ).remove().draw();
+        //var id_row = '#row_incidence_'+avisoId;
+        //datatableIncidences.row( id_row ).remove().draw();
+        var rowTodelete = datatableIncidences.row({incidenceId:avisoId});
+        rowTodelete.remove().draw();
         map_copy.closePopup()
         var successTitlelabel = document.getElementById('successTitlelabel')
         var successSpanLabel = document.getElementById('successSpanLabel')
