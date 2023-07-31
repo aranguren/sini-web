@@ -10,3 +10,4 @@ pip install passlib
 pip install six
 pip install django-ckeditor
 pip install djlint
+pip install fcm-django

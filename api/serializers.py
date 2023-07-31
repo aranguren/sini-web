@@ -4,6 +4,7 @@ from  sini.models import Incidence, MobileWarning, Advice
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 #from django.contrib.auth.models import User
 #from django.conf import settings#
+from fcm_django.models import FCMDevice
 
 
 
@@ -123,6 +124,37 @@ class AdviceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Advice
-        geo_field = "geom"
         fields = ('id','name','description','advice')
         read_only_fields = ['id','created_by', 'modified_by', 'created','modified']
+
+DEVICE_TYPE_CHOICES = (
+    ("ios", "ios"),
+    ("android", "android"),
+    ("web", "web")
+)
+class FCMDeviceSerializer(serializers.Serializer):
+    #device_id max_length=255,blank=True,null=True, verbose_name=_("Device ID"),
+    # name -> max_length=255, verbose_name=_("Name"), blank=True, null=True
+    #date_created
+    registration_id = serializers.CharField()
+    type = serializers.ChoiceField(choices=DEVICE_TYPE_CHOICES)
+
+    def create(self, validated_data):
+        return FCMDevice.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.registration_id = validated_data.get('registration_id', instance.registration_id)
+        instance.type = validated_data.get('type', instance.type)
+        instance.save()
+        return instance
+
+    
+
+"""
+class AdviceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FCMDevice
+        fields = ('id','type','description','advice')
+        read_only_fields = ['id','created_by', 'modified_by', 'created','modified']
+"""

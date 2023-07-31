@@ -6,7 +6,8 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from .views import (IncidenceAPIList, IncidenceAPICreate, IncidenceAPIRetrieve, 
-                    login_view, WarningAPICreate, WarningAPIUpdate, AdviceAPIList)
+                    login_view, WarningAPICreate, WarningAPIUpdate, AdviceAPIList,
+                    FCMTokenView)
 app_name = 'api'
 
 urlpatterns = [
@@ -23,6 +24,7 @@ urlpatterns = [
     path('incidencias/detalles/<str:pk>/', IncidenceAPIRetrieve.as_view(),name='incidence_detail'),
     path('consejos/', AdviceAPIList.as_view(), name='advice_list'),
 
+    path('token/crear/', FCMTokenView.as_view(),name='token_import'),
 
     
 

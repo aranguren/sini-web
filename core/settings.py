@@ -6,6 +6,8 @@ Copyright (c) 2019 - present AppSeed.us
 import os
 from decouple import config
 from unipath import Path
+import firebase_admin
+from firebase_admin import credentials
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).parent
@@ -29,6 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'fcm_django',
     'leaflet',
     'djgeojson',
     'ckeditor',
@@ -207,3 +210,9 @@ CKEDITOR_CONFIGS = {
         'width': 'full', 
     },
 }
+
+BASE_DIR_CREDENTIALS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_APP = os.path.basename(BASE_DIR_CREDENTIALS)
+
+cred = credentials.Certificate(os.path.join(PROJECT_APP, '../credentials.json'))
+firebase_admin.initialize_app(cred)

@@ -6,6 +6,11 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth import get_user_model
 from passlib.hash import pbkdf2_sha256 as sha256
 from ckeditor_uploader.fields import RichTextUploadingField
+from fcm_django.models import FCMDevice
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+# requeridos para enviar mensajes
+from firebase_admin.messaging import Message
 
 # Create your models here.
 
@@ -194,6 +199,10 @@ class ApiUser(BasicAuditModel):
 
     group = models.ForeignKey("ApiGroup", verbose_name=_("Grupo"), on_delete=models.RESTRICT, related_name="usuarios")
 
+    device = models.OneToOneField(FCMDevice, verbose_name=_("Dispositivo"), 
+                               on_delete=models.CASCADE, blank=True, null=True,
+                               related_name="api_user")
+
     def check_password(self,password):
         return sha256.verify(password, self.password)
 
@@ -294,6 +303,11 @@ class Notification(BasicAuditModel):
         ("grupo","Grupo"),
         ("uno","Uno"),
     )
+    STATUS_CHOICES = (
+        ("enviado","Enviado"),
+        ("fallido","Fallido"),
+        ("enviado_parcialmente","Enviado (Parcialmente)"),
+    )
 
     send_to = models.CharField(_("Enviar a"), max_length=254, choices=SENDTO_CHOICES, 
                                blank=False, null=False, default='todos' )
@@ -307,8 +321,8 @@ class Notification(BasicAuditModel):
     api_user =  models.ForeignKey('ApiUser', verbose_name=_("Usuario"), related_name='notifications', on_delete=models.CASCADE, blank=True, null=True)
     api_group =  models.ForeignKey('ApiGroup',verbose_name=_("Grupo"), related_name='notifications', on_delete=models.CASCADE, blank=True, null=True)
 
-
-
+    status = models.CharField(_("Status"), max_length=50, blank=True, null=True, choices=STATUS_CHOICES)
+    status_description  = models.TextField(_("Descripción"), blank=True, null=True)
     def __str__(self):
         return self.subject
 
@@ -317,3 +331,90 @@ class Notification(BasicAuditModel):
         managed = True
         verbose_name = 'Notificación'
         verbose_name_plural = 'Notificaciones'
+
+@receiver(post_save, sender=Notification)
+def created_notification_send_push(sender, instance, created,  **kwargs):
+    if created:
+        data={
+                "subject" : instance.subject,
+                "body" : instance.message,
+                "url_noticia" : instance.url_noticia,
+                "url_imagen": instance.url_imagen,
+            }
+        if instance.geom:
+            data['geom'] = instance.geom.wkt
+        mensaje = Message(data)
+        if instance.send_to=='uno':
+            device = FCMDevice.objects.filter(api_user=instance.api_user).first()
+            if device and device.active:
+                try:
+                    device.send_message(mensaje)
+                except Exception as e:
+                    instance.status='fallido'
+                    instance.status_description=str(e)
+                    instance.save()
+                else:
+                    instance.status='enviado'
+
+            else:
+                instance.status='fallido'
+                instance.status_description='El usuario seleccionado no tiene dispositivos asignados o el dispositivo no está activo'
+                instance.save()
+        elif instance.send_to =='grupo':
+            grupo = instance.api_group
+            usuarios = ApiUser.objects.filter(group=grupo, active=True)
+            texto=""
+            fallidos=False
+            devices = FCMDevice.objects.filter(api_user__group=grupo, api_user__active=True, active=True)
+            if(devices and len(devices)>0):
+                try:
+                    devices.send_message(mensaje)
+                except Exception as e:
+                    instance.status='fallido'
+                    instance.status_description=str(e)
+                    instance.save()
+                else:
+                    instance.status='enviado'
+                    for usuario in usuarios:
+                        if not usuario.device or (usuario.device and not usuario.device.active):
+                            texto+=f"El usuario '{usuario.name}' no tiene dispositivos activos\n"
+                            fallidos=True
+                    if fallidos:
+                        instance.status="enviado_parcialmente"
+                        instance.status_description=texto  
+            else:
+                instance.status='fallido'
+                instance.status_description='No existen usuarios activos en el grupo que cuenten con dispositivos'
+            
+            instance.save()
+
+        elif instance.send_to=='todos':
+            usuarios = ApiUser.objects.filter(active=True)
+            texto=""
+            fallidos=False
+            devices = FCMDevice.objects.filter(api_user__active=True, active=True)
+            if(devices and len(devices)>0):
+                try:
+                    devices.send_message(mensaje)
+                except Exception as e:
+                    instance.status='fallido'
+                    instance.status_description=str(e)
+                else:
+                    instance.status='enviado'
+
+                    for usuario in usuarios:
+                        if not usuario.device or (usuario.device and not usuario.device.active):
+                            texto+=f"El usuario '{usuario.name}' no tiene dispositivos activos\n"
+                            fallidos=True
+                    if fallidos:
+                        instance.status="enviado_parcialmente"
+                        instance.status_description=texto
+            else:
+
+                instance.status='fallido'
+                instance.status_description='No existen usuarios activos que cuenten con dispositivos'
+            
+            instance.save()
+
+        # procedemos a enviar la notificacion mediante FCM
+  
