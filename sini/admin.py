@@ -3,7 +3,7 @@ from leaflet.admin import LeafletGeoAdmin
 
 # Register your models here.
 
-from .models import MobileWarning, Incidence, Advice, ApiGroup, ApiUser, Notification
+from .models import Contact, MobileWarning, Incidence, Advice, ApiGroup, ApiUser, Notification
 
 class WarningAdmin(LeafletGeoAdmin):
     #fields = ['name', 'geom']
@@ -122,7 +122,29 @@ class NotificationAdmin(LeafletGeoAdmin):
         super().save_model(request, obj, form, change)
  
 
-
-
-
 admin.site.register(Notification, NotificationAdmin)
+
+
+class ContactAdmin(admin.ModelAdmin):
+    #fields = ['name', 'geom']
+    list_display = ('name','email',
+        'phone')
+    
+    fields  =[
+        'name',
+        'email',
+        'description',
+        'phone',
+        'address'
+    ]
+
+    def save_model(self, request, obj, form, change):
+        if change:
+            obj.modified_by = request.user
+        else:
+            obj.created_by = request.user
+            obj.modified_by = request.user
+        super().save_model(request, obj, form, change)
+ 
+
+admin.site.register(Contact, ContactAdmin)

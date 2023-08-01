@@ -332,6 +332,25 @@ class Notification(BasicAuditModel):
         verbose_name = 'Notificación'
         verbose_name_plural = 'Notificaciones'
 
+class Contact(BasicAuditModel):
+
+    name = models.CharField(_("Nombre"), max_length=255)
+    email = models.EmailField(_("Email"))
+    description = models.TextField(_("Descripción"), blank=True, null=True)
+    phone = models.CharField(_("Teléfono"), max_length=50, blank=True, null=True)
+    address = models.CharField(_("Dirección"), max_length=255, blank=True, null=True)
+
+
+    def __str__(self):
+        return f"{self.name} ({self.email})"
+
+    class Meta:
+        db_table = 'arbolsaf_contact'
+        managed = True
+        ordering= ["name"]
+        verbose_name = 'Contacto'
+        verbose_name_plural = 'Contactos'
+
 @receiver(post_save, sender=Notification)
 def created_notification_send_push(sender, instance, created,  **kwargs):
     if created:

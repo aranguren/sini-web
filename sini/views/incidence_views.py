@@ -3,13 +3,15 @@ from django.views.generic import ListView, CreateView, UpdateView, DetailView, T
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.conf import settings
-from ..models import Incidence, MobileWarning
+from ..models import Incidence, MobileWarning, Contact
 from ..forms import IncidenceForm
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import RestrictedError
 import json 
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string  
 
 class IncidenceListView(LoginRequiredMixin, ListView):
     model = Incidence
@@ -89,7 +91,9 @@ class IncidenceDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)   
         context['segment'] = ['sini','incidence']
         context['active_menu'] ='sini'
-        
+
+        contactos = Contact.objects.all()
+        context['contactos'] = contactos
         return context
 
 
@@ -229,5 +233,57 @@ def incidence_finalize(request, pk):
 
     incidence.status = 'finalizado'
     incidence.save()
+
+    return JsonResponse(resp, status=200)
+
+import time
+@login_required(login_url='/login/')
+def incidence_send_email(request):
+    resp = {}
+
+    pk = request.POST.get('id', None)
+    destinatarios = request.POST.get('destinatarios', None)
+
+    destinatarios_obj = json.loads(destinatarios)
+    listado_destinatarios  =[int(id) for id in destinatarios_obj]
+
+    asunto = request.POST.get('asunto', None)
+    mensaje = request.POST.get('mensaje', None)
+    #time.sleep(10)
+   
+    incidence = get_object_or_404(Incidence, pk=pk)
+    contact_list = get_list_or_404(Contact, id__in=listado_destinatarios)
+    email_address_list=[]
+    for contacto in contact_list:
+        email_address_list.append(contacto.email)
+
+    latitud = incidence.geom.y
+    longitud  = incidence.geom.x
+
+    message = render_to_string('sini/incidence/incidence_send_email.html', {  
+                'mensaje':mensaje,
+                'latitud':latitud,
+                'longitud':longitud,
+                'incidence': incidence, 
+
+            })  
+            
+    email_message = EmailMessage(  
+                f"Sistema SINI - {asunto}", message, to=email_address_list, from_email= settings.DEFAULT_FROM_EMAIL # "idec@deneb.io"  
+    )  
+    imagen1 = incidence.image1
+    if imagen1:
+        email_message.attach_file(incidence.image1.path)
+    imagen2 = incidence.image2
+    if imagen2:
+        email_message.attach_file(incidence.image2.path)
+    imagen3 = incidence.image3
+    if imagen3:
+        email_message.attach_file(incidence.image3.path)
+
+    email_message.content_subtype = "html"
+      
+    email_message.send()  
+   
 
     return JsonResponse(resp, status=200)

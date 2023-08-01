@@ -9,6 +9,7 @@
 {% block stylesheets %}
   {% leaflet_js plugins="forms" %}
   {% leaflet_css plugins="forms" %}
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <style type="text/css">
  #gis {
      width:100%;
@@ -65,7 +66,24 @@
         <div class="card card-body mt-2">
           <div class="row">
             <div class="col-lg-6 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3 d-flex justify-content-start mr-3">
-              
+            
+              <!--button class="btn btn-primary btn-large btn-sm m-b-xm"
+              id="sendemailButton"
+              data-bs-toggle="modal"
+              data-bs-target="#sendEmailModal"
+              value="{{ incidence.id }}">
+              <i class="far fa-send" aria-hidden="true"></i>&nbsp;&nbsp;Enviar email
+            </button-->
+
+            <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
+            value="{{ incidence.id }}"
+            id="sendemailButton"
+            data-bs-toggle="modal"
+            data-bs-target="#sendEmailModal"
+            type="button"
+            id="archivarB"
+            value="archivar">&nbsp;&nbsp;Enviar email
+          </button>
             {% if incidence.status != 'finalizado' %}
               <form id="filter_form"
               action="{% url 'sini:incidence_finalize_form' incidence.id %}"
@@ -335,6 +353,64 @@
           </div>
         </div>
 
+    <div class="modal fade"
+        id="sendEmailModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+       <div class="modal-content">
+         <div class="modal-header">
+           <h5 class="modal-title" id="exampleModalLabel">
+             Enviar Email
+           </h5>
+           <button type="button"
+                   class="btn-close text-dark"
+                   data-bs-dismiss="modal"
+                   aria-label="Close"
+                   id="dismissModalEnviar">
+             <span aria-hidden="true">&times;</span>
+           </button>
+         </div>
+         <div class="modal-body">
+          <form id="email-form" name="formmensaje">
+            {% csrf_token %}
+            <input type="hidden" id="instance_id_hidden" value="{{incidence.id}}">
+
+            <div class="form-group mb-0">
+              <label for="recipient-name" class="col-form-label">Destinatarios:</label>
+            </div>
+            <select class="js-example-basic-multiple form-control-lg mb-3" name="states[]" multiple="multiple" style="width: 100%;" id="recipient-name" required>
+              {% for contacto in contactos %}
+              <option value="{{contacto.id}}">{{contacto}}</option>
+              {% endfor %}
+            </select>
+            <div class="form-group mt-3">
+              <label for="subject" class="col-form-label">Asunto:</label>
+              <input type="text" class="form-control" id="subject" required>
+            </div>
+            <div class="form-group">
+              <label for="message-text" class="col-form-label">Mensaje:</label>
+              <textarea class="form-control" id="message-text" rows="10" required></textarea>
+            </div>
+          <!--/form-->
+     
+         </div>
+         <div class="modal-footer">
+           <button type="button" class="btn bg-success" data-bs-dismiss="modal" id="cancelarEnviar">
+             Cerrar
+           </button>
+           <button type="submit" class="btn bg-danger text-white" id="enviar">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" id="spinnerButton" style="display:none;"></span>
+             Enviar
+           </button>
+          </form>
+         </div>
+       </div>
+     </div>
+   </div>
+
 
 
     <div class="modal fade"
@@ -402,7 +478,6 @@
           </div>
           <div class="col-10">
            <p class="text-sm mb-0 font-weight-bold">
-              Han ocurrido errores al eliminar <br>
               <span id="errorspan"></span>
            </p>
            
@@ -427,7 +502,15 @@
 {% block javascripts %}
   <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
   <script type="text/javascript">
+
+    $(document).ready(function() {
+      $('.js-example-basic-multiple').select2();
+      //console.log(`{% csrf_token %}`);
+
+  });
   
     function our_layers(map,options){
       console.log('Layer');
@@ -477,6 +560,130 @@
     });
 
 });   
+
+
+$('#email-form').on('submit', function(event){
+  event.preventDefault();
+  var destinatarios = $('#recipient-name').val();
+  var asunto = $('#subject').val();
+  var mensaje = $('#message-text').val();
+  var id_instancia = $('#instance_id_hidden').val();
+
+  console.log(id_instancia);
+  console.log(destinatarios);
+  console.log(asunto);
+  console.log(mensaje);
+  var element = $("form[name='formmensaje'] input[name='csrfmiddlewaretoken']");
+  console.log(element[0]);
+  var token = element[0].value
+  console.log(token)
+  
+
+  $("#spinnerButton").show();
+  $("#enviar").prop('disabled', true);
+  $("#cancelarEnviar").prop('disabled', true);
+  $("#dismissModalEnviar").prop('disabled', true);
+  
+  
+  var request = $.ajax({
+    type: "POST",
+    headers: {"X-CSRFToken": token},
+    url: "/sini/incidencias/email/",
+    //contentType: 'application/json',
+    data: {
+        "id":id_instancia,
+        "destinatarios": JSON.stringify(destinatarios),
+        "asunto":asunto,
+        "mensaje":mensaje
+
+    },
+    success: function (response) {
+        $("#sendEmailModal").modal('hide');
+        $("#recipient-name").val("");
+        $("#recipient-name").trigger("change");
+        $('#subject').val('');
+        $('#message-text').val('');
+        
+        $("#spinnerButton").hide();
+        $("#enviar").prop('disabled', false);
+        $("#cancelarEnviar").prop('disabled', false);
+        $("#dismissModalEnviar").prop('disabled', false);
+        
+
+    },
+    error: function (response, e) {
+        console.log(response);
+        
+
+        $("#sendEmailModal").modal('hide');
+
+        $("#recipient-name").val("");
+        $("#recipient-name").trigger("change");
+        $('#subject').val('');
+        $('#message-text').val('');
+        
+        $("#spinnerButton").hide();
+        $("#enviar").prop('disabled', false);
+        $("#cancelarEnviar").prop('disabled', false);
+        $("#dismissModalEnviar").prop('disabled', false);
+
+     
+
+        $('#errorModal').modal('show');
+         var errorspan = document.getElementById('errorspan');
+        
+     
+          errorspan.textContent ='Ha ocurrido un error al enviar el email, Contacte al Administrador';
+        
+        
+        
+    }
+});
+
+});
+document.getElementById("enviar22").addEventListener('click', function(){
+
+  console.log('ACEPTAR');
+  var valor = $('#recipient-name').val();
+  console.log("valor "+valor)
+
+
+  /*
+  var request = $.ajax({
+      type: "GET",
+      url: "/sini/incidencias/eliminar/",
+      data: {
+          "id": valor
+      },
+      success: function (response) {
+          console.log(response)
+          $("#deleteModal").modal('hide');
+          $(location).attr('href', "{% url 'sini:incidence_list' %}");
+
+      },
+      error: function (response, e) {
+          console.log(response);
+          
+          $("#deleteModal").modal('hide');
+
+       
+
+          $('#errorModal').modal('show');
+           var errorspan = document.getElementById('errorspan');
+          
+          if (response.responseJSON.mensaje =='restricted'){
+             errorspan.textContent = "El registro no puede ser eliminado ya que existen otras entidades que dependen de él. Intente archivarlo en su lugar"
+            //errorspan.textContent = response.responseJSON.error;
+          }
+          else{
+            errorspan.textContent ='Ha ocurrido un error al eliminar, Contacte al Administrador';
+          }
+          
+          
+      }
+  });*/
+
+}); 
 
 
 

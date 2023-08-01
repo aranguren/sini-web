@@ -7,7 +7,8 @@ from .views.warning_views import (WarningListView, WarningDetailView, WarningCre
                                    warning_assign, warning_create_incidence, warning_assign_closest,
                                    warning_archive, warning_toss, WarningArchiveView,  WarningActivateView)
 from .views.incidence_views import (IncidenceListView, IncidenceDetailView, IncidenceCreateView, IncidenceUpdateView, 
-                                    incidence_delete,incidence_finalize, incidence_archive, IncidenceManagmentView, IncidenceActivateView, IncidenceArchiveView, IncidenceFinalizeView)
+                                    incidence_delete,incidence_finalize, incidence_archive, IncidenceManagmentView, IncidenceActivateView, 
+                                    IncidenceArchiveView, IncidenceFinalizeView, incidence_send_email)
 from .views.advice_views import AdviceListView, AdviceDetailView, AdviceCreateView, AdviceUpdateView, advice_delete
 from .views.notification_views import NotificationListView, NotificationDetailView, NotificationCreateView
 
@@ -49,6 +50,7 @@ urlpatterns = [
     path('incidencias/crear/', IncidenceCreateView.as_view(), name='incidence_create'),
     path('incidencias/detalles/<str:pk>/', IncidenceDetailView.as_view(), name='incidence_detail'),
     path('incidencias/modificar/<str:pk>/', IncidenceUpdateView.as_view(), name='incidence_update'),
+    
     path('incidencias/eliminar/', incidence_delete, name='incidence_delete'),
     path('incidencias/finalizar/<str:pk>/', incidence_finalize, name='incidence_finalize'),
     path('incidencias/archivar-map/<str:pk>/', incidence_archive, name='incidence_archive_map'),
@@ -56,6 +58,7 @@ urlpatterns = [
     path('incidencias/archivar-incidencia/<str:pk>/', IncidenceArchiveView.as_view(), name='incidence_archive_incidence'),
     path('incidencias/activar/<str:pk>/', IncidenceActivateView.as_view(), name='incidence_activate'),
     path('incidencias/finalizar-incidencia/<str:pk>/', IncidenceFinalizeView.as_view(), name='incidence_finalize_form'),
+    path('incidencias/email/', incidence_send_email, name='incidence_email'),
 
     #------------------------------------------------------------------------------------------------
     path('consejos/', AdviceListView.as_view(), name='advice_list'),
