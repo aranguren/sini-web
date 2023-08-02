@@ -191,7 +191,7 @@ class ApiUser(BasicAuditModel):
 
     name = models.CharField(_("Nombre y apellidos"), max_length=254)
     email = models.EmailField(_("Email"), max_length=254, unique=True)
-    token_fcm = models.CharField(_("Token"), max_length=254, blank=True, null=True)
+
     
     password = models.CharField(max_length=250, default="usuario", blank=True, null=True)
     password_str = models.CharField(_("Password STR"), max_length=50, blank=True, null=True)

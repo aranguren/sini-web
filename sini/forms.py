@@ -21,8 +21,6 @@ class ApiUserForm(forms.ModelForm):
             'name':forms.TextInput(attrs={'class': 'form-control'}),
             'email':forms.EmailInput(attrs={'class': 'form-control'}),
             'group':forms.Select(attrs={'class': 'form-select form-select-lg'}),
-            'token_fcm':forms.TextInput(attrs={'class': 'form-control'}),
-
             }
 
 

@@ -3,7 +3,7 @@ function onEachFeatureWarning(feature, layer) {
   data-bs-placement="top" title="Detalles"><i class="far fa-eye fa-3x me-2 mx-2" aria-hidden="true"></i></a>`
 
   var boton_crear = `<span data-bs-toggle="modal" data-bs-target="#crearIncidenciaModal">
-        <button class="crearButton btn btn-link text-primary text-gradient px-0 mb-0 executebutton mx-2"
+        <button class="crearButton btn btn-link text-primary px-0 mb-0 executebutton mx-2"
             id="eliminarVariable"
             onclick="clicked(event)"
             data-bs-toggle="tooltip"
@@ -13,7 +13,7 @@ function onEachFeatureWarning(feature, layer) {
         </button>
     </span>`
   var boton_asignar = `<span data-bs-toggle="modal" data-bs-target="#asingModal">
-        <button class="btn btn-link text-primary text-gradient px-0 mb-0 executebutton mx-2"
+        <button class="btn btn-link text-primary px-0 mb-0 executebutton mx-2"
             id="asignar"
             onclick="clicked_assign_closest(event)"
             data-bs-toggle="tooltip"
@@ -24,7 +24,7 @@ function onEachFeatureWarning(feature, layer) {
     </span>`
 
   var boton_desechar = `<span data-bs-toggle="modal" data-bs-target="#DescartarAvisoModal">
-    <button class="btn btn-link text-primary text-gradient px-0 mb-0 mx-2"
+    <button class="btn btn-link text-primary px-0 mb-0 mx-2"
         id="asignar"
         onclick="clicked_toss(event)"
         data-bs-toggle="tooltip"
@@ -179,8 +179,9 @@ function onEachFeatureIncidence(feature, layer) {
     //}
     popupContent +=boton_detalles
     popupContent += boton_finalizar
-    popupContent += boton_archivar
     popupContent += boton_enviar
+    popupContent += boton_archivar
+
 
 
     popupContent += `</div>

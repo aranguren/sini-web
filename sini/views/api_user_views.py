@@ -113,7 +113,7 @@ def create_api_user(request):
             #apellidos= form.cleaned_data['apellidos'] or ""
             email= form.cleaned_data['email']
             group = form.cleaned_data['group']
-            token_fcm = form.cleaned_data['token_fcm']
+         
 
 
             username_exists = ApiUser.objects.filter(email=email)
@@ -129,7 +129,7 @@ def create_api_user(request):
                 return render(request, 'sini/api_user/api_user_form.html', context)
             
             #api_group = ApiGroup.objects.get(id=int(group))
-            new_user = ApiUser(name=name,email=email, group=group, token_fcm=token_fcm)#, first_name=nombre, last_name=apellidos)
+            new_user = ApiUser(name=name,email=email, group=group)#, first_name=nombre, last_name=apellidos)
             new_user.active = False 
 
             User = get_user_model()

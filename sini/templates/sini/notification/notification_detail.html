@@ -103,7 +103,13 @@
             <div class="col-6">
               <div class="form-group">
                 <h6>URL noticia</h6>
-                <div class="mr-2">{% firstof notification.url_noticia|default_if_none:"-" %}</div>
+                {% if notification.url_noticia %}
+                <!--div class="mr-2">{% firstof notification.url_noticia|default_if_none:"-" %}</div-->
+                <a class="text-secondary" href="{{notification.url_noticia }}" target="_blank">{{notification.url_noticia }}</a>
+                {% else %}
+                <div class="mr-2">-</div>
+                
+                {% endif %}
               </div>
             </div>
             <div class="col-6">
