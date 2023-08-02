@@ -11,40 +11,18 @@
   {% leaflet_css plugins="forms" %}
   <link rel="stylesheet"
         href="{% static 'assets/markers/css/leaflet.extra-markers.min.css' %}">
+
+
   <link rel="stylesheet"
         type="text/css"
         href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.css">
-  <style type="text/css">
-//  .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-//    background: red;
-//}
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  
+        <link rel="stylesheet"
+        href="{% static 'sini/css/select2-custom.css' %}">  
+<style type="text/css">
 
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-  color: white !important;
-  border: 1px solid #111;
-  background-color: #585858;
-  background: #21ac8d;
- 
-}
-/*
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-  color: white !important;
-  border: 1px solid #111;
-  background-color: #585858;
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #585858), color-stop(100%, #111));
-  /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(top, #ffffff 0%, #48be1d 100%);
-  /* Chrome10+,Safari5.1+ */
-  background: -moz-linear-gradient(top, #ffffff 0%, #48be1d 100%);
-  /* FF3.6+ */
-  background: -ms-linear-gradient(top, #ffffff 0%, #48be1d 100%);
-  /* IE10+ */
-  background: -o-linear-gradient(top, #ffffff 0%, #48be1d 100%);
-  /* Opera 11.10+ */
-  background: linear-gradient(to bottom, #ffffff 0%, #48be1d 100%);
-  /* W3C */
-}
-*/
+
   </style>
   <style type="text/css">
  #gis {
@@ -200,7 +178,7 @@
                         data-bs-placement="top" title="Detalles"><i class="far fa-eye mx-2" aria-hidden="true"></i></a>
                       
                         <span data-bs-toggle="modal" data-bs-target="#FinalizeIncidenciaModal">
-                          <button class="finalizarButton btn btn-link text-primary text-gradient px-0 mb-0  mx-2"
+                          <button class="finalizarButton btn btn-link text-primary px-0 mb-0  mx-2"
                               id="finalizar_${feature.properties.id}"
                               onclick="clicked_finalize_incidence(event)"
                               data-bs-toggle="tooltip"
@@ -220,6 +198,17 @@
                             <i id="archivicon_{{incidence.id}}" class="fa fa-archive" aria-hidden="true"></i>
                         </button>
                         </span>
+
+                        <span data-bs-toggle="modal" data-bs-target="#sendEmailModal">
+                          <button class="btn btn-link text-primary px-0 mb-0 deletebin mx-2"
+                              id="enviarEmail_{{incidence.id}}"
+                              onclick="clicked_send_incidence(event)"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="top" title="Enviar email"
+                              value="{{incidence.id}}">
+                              <i id="archivicon_{{incidence.id}}" class="fa fa-send" aria-hidden="true"></i>
+                          </button>
+                          </span>
 
                       </td>
                     </tr>
@@ -413,6 +402,64 @@
         </div>
       </div>
 
+<div class="modal fade"
+      id="sendEmailModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+     <div class="modal-content">
+       <div class="modal-header">
+         <h5 class="modal-title" id="exampleModalLabel">
+           Enviar Email
+         </h5>
+         <button type="button"
+                 class="btn-close text-dark"
+                 data-bs-dismiss="modal"
+                 aria-label="Close"
+                 id="dismissModalEnviar">
+           <span aria-hidden="true">&times;</span>
+         </button>
+       </div>
+       <div class="modal-body">
+        <form id="email-form" name="formmensaje">
+          {% csrf_token %}
+          <input type="hidden" id="instance_id_hidden" value="{{incidence.id}}">
+
+          <div class="form-group mb-0">
+            <label for="recipient-name" class="col-form-label">Destinatarios:</label>
+          </div>
+          <select class="js-example-basic-multiple form-control-lg mb-3" name="states[]" multiple="multiple" style="width: 100%;" id="recipient-name" required>
+            {% for contacto in contactos %}
+            <option value="{{contacto.id}}">{{contacto}}</option>
+            {% endfor %}
+          </select>
+          <div class="form-group mt-3">
+            <label for="subject" class="col-form-label">Asunto:</label>
+            <input type="text" class="form-control" id="subject" required>
+          </div>
+          <div class="form-group">
+            <label for="message-text" class="col-form-label">Mensaje:</label>
+            <textarea class="form-control" id="message-text" rows="10" required></textarea>
+          </div>
+        <!--/form-->
+   
+       </div>
+       <div class="modal-footer">
+         <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal" id="cancelarEnviar">
+           Cerrar
+         </button>
+         <button type="submit" class="btn bg-secondary text-white" id="enviar">
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" id="spinnerButton" style="display:none;"></span>
+           Enviar
+         </button>
+        </form>
+       </div>
+     </div>
+   </div>
+ </div>
+
         <div class="modal fade"
              id="errorModal"
              tabindex="-1"
@@ -578,11 +625,13 @@
           src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.js"></script>
   <!--script src="{% static 'assets/js/extra-markers/src/assets/js/leaflet.extra-markers.min.jss' %}" ></script -->
   <script src="{% static 'assets/markers/js/leaflet.extra-markers.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
   <script type="text/javascript">
     let datatableWarnings = false
     let datatableIncidences = false
     $(document).ready(function () {
+      $('.js-example-basic-multiple').select2();
       var langes = {
             "processing": "Procesando...",
             "lengthMenu": "Mostrar _MENU_ registros",

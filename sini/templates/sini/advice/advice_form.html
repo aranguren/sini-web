@@ -76,11 +76,11 @@
                 <button type="submit" class="btn btn-primary btn-large btn-sm m-b-xm mx-1"><i class="fa fa-save"></i>&nbsp;&nbsp;Guardar</button>
                 
                 {% if not advice.id %}
-                    <a href="{% url 'sini:advice_list' %}" class="btn btn-danger btn-large btn-sm m-b-xm mx-1"><i class="fa fa-undo"></i>&nbsp;&nbsp;Cancelar</a>
+                    <a href="{% url 'sini:advice_list' %}" class="btn btn-secondary btn-large btn-sm m-b-xm mx-1"><i class="fa fa-undo"></i>&nbsp;&nbsp;Cancelar</a>
 
                 
                 {% else %}
-                <a href="{% url 'sini:advice_detail' advice.id %}" class="btn btn-danger btn-large btn-sm m-b-xm mx-1"><i class="fa fa-undo"></i>&nbsp;&nbsp;Cancelar</a>
+                <a href="{% url 'sini:advice_detail' advice.id %}" class="btn btn-secondary btn-large btn-sm m-b-xm mx-1"><i class="fa fa-undo"></i>&nbsp;&nbsp;Cancelar</a>
 
                 {% endif %}
               </div>

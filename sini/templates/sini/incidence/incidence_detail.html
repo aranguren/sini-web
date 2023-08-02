@@ -10,6 +10,8 @@
   {% leaflet_js plugins="forms" %}
   {% leaflet_css plugins="forms" %}
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link rel="stylesheet"
+  href="{% static 'sini/css/select2-custom.css' %}">  
   <style type="text/css">
  #gis {
      width:100%;
@@ -18,6 +20,10 @@
   .clickable{
       cursor: pointer;
  }
+
+
+
+
 
   </style>
 {% endblock stylesheets %}
@@ -51,7 +57,7 @@
               <a href="{% url 'sini:incidence_create' %}"
                  class="btn btn-primary btn-large btn-sm m-b-xm mx-1"><i class="fa fa-plus"></i>&nbsp;&nbsp;Crear</a>
               <a href="{% url 'sini:incidence_update' incidence.id %}"
-                 class="btn btn-info btn-large btn-sm m-b-xm mx-1"><i class="fa fa-edit"></i>&nbsp;&nbsp;Editar</a>
+                 class="btn btn-primary btn-large btn-sm m-b-xm mx-1"><i class="fa fa-edit"></i>&nbsp;&nbsp;Editar</a>
               <!--a class="btn btn-danger btn-large btn-sm m-b-xm"><i class="fa fa-edit"></i>&nbsp;&nbsp;Eliminar</a-->
               <button class="btn btn-danger btn-large btn-sm m-b-xm mx-1"
                       id="eliminarB"
@@ -92,7 +98,7 @@
               autocomplete="off">
               {% csrf_token %}
                 
-                <button class="btn btn-danger btn-large btn-sm mx-1 mb-0"
+                <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
                   type="submit"
                   id="finalizarB"
                   value="finalizar">&nbsp;&nbsp;Finalizar
@@ -123,7 +129,7 @@
               autocomplete="off">
               {% csrf_token %}
                 
-                <button class="btn btn-danger btn-large btn-sm mx-1 mb-0"
+                <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
                   type="submit"
                   id="archivarB"
                   value="archivar">&nbsp;&nbsp;Activar
@@ -398,10 +404,10 @@
      
          </div>
          <div class="modal-footer">
-           <button type="button" class="btn bg-success" data-bs-dismiss="modal" id="cancelarEnviar">
+           <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal" id="cancelarEnviar">
              Cerrar
            </button>
-           <button type="submit" class="btn bg-danger text-white" id="enviar">
+           <button type="submit" class="btn bg-secondary text-white" id="enviar">
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" id="spinnerButton" style="display:none;"></span>
              Enviar
            </button>

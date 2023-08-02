@@ -50,7 +50,7 @@
               <a href="{% url 'sini:warning_create' %}"
                  class="btn btn-primary btn-large btn-sm m-b-xm mx-1"><i class="fa fa-plus"></i>&nbsp;&nbsp;Crear</a>
               <a href="{% url 'sini:warning_update' warning.id %}"
-                 class="btn btn-info btn-large btn-sm m-b-xm mx-1"><i class="fa fa-edit"></i>&nbsp;&nbsp;Editar</a>
+                 class="btn btn-primary btn-large btn-sm m-b-xm mx-1"><i class="fa fa-edit"></i>&nbsp;&nbsp;Editar</a>
               <!--a class="btn btn-danger btn-large btn-sm m-b-xm"><i class="fa fa-edit"></i>&nbsp;&nbsp;Eliminar</a-->
               <button class="btn btn-danger btn-large btn-sm m-b-xm mx-1"
                       id="eliminarB"
@@ -90,7 +90,7 @@
               autocomplete="off">
               {% csrf_token %}
                 
-                <button class="btn btn-danger btn-large btn-sm mx-1 mb-0"
+                <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
                   type="submit"
                   id="descartarB"
                   value="descartar">&nbsp;&nbsp;Descartar
@@ -121,7 +121,7 @@
               autocomplete="off">
               {% csrf_token %}
                 
-                <button class="btn btn-danger btn-large btn-sm mx-1 mb-0"
+                <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
                   type="submit"
                   id="archivarB"
                   value="archivar">&nbsp;&nbsp;Activar

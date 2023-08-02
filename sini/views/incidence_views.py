@@ -153,6 +153,8 @@ class IncidenceManagmentView(LoginRequiredMixin, TemplateView):
         mobile_warnings = MobileWarning.objects.filter(active=True, status='creado')
         context['incidences'] = incidences
         context['mobile_warnings'] = mobile_warnings
+        contactos = Contact.objects.all()
+        context['contactos'] = contactos
        
         
         return context

@@ -104,7 +104,7 @@ function onEachFeatureIncidence(feature, layer) {
   data-bs-placement="top" title="Detalles"><i class="far fa-eye fa-3x me-2 mx-2" aria-hidden="true"></i></a>`
 
     var boton_finalizar = `<span data-bs-toggle="modal" data-bs-target="#FinalizeIncidenciaModal">
-          <button class="finalizarButton btn btn-link text-primary text-gradient px-0 mb-0 executebutton mx-2"
+          <button class="finalizarButton btn btn-link text-primary px-0 mb-0 executebutton mx-2"
               id="finalizar_${feature.properties.id}"
               onclick="clicked_finalize_incidence(event)"
               data-bs-toggle="tooltip"
@@ -122,6 +122,16 @@ function onEachFeatureIncidence(feature, layer) {
               data-bs-placement="top" title="Archivar"
               value="${feature.properties.id}">
               <i id="archivicon_${feature.properties.id}" class="fa fa-archive fa-3x" aria-hidden="true"></i>
+          </button>
+          </span>`
+    var boton_enviar = `<span data-bs-toggle="modal" data-bs-target="#sendEmailModal">
+          <button class="btn btn-link text-primary px-0 mb-0 deletebin mx-2"
+              id="enviarEmail_${feature.properties.id}"
+              onclick="clicked_send_incidence(event)"
+              data-bs-toggle="tooltip"
+              data-bs-placement="top" title="Enviar email"
+              value="${feature.properties.id}">
+              <i id="sendemicon_${feature.properties.id}" class="fa fa-send fa-3x" aria-hidden="true"></i>
           </button>
           </span>`
     tipos = {
@@ -170,6 +180,7 @@ function onEachFeatureIncidence(feature, layer) {
     popupContent +=boton_detalles
     popupContent += boton_finalizar
     popupContent += boton_archivar
+    popupContent += boton_enviar
 
 
     popupContent += `</div>
@@ -270,6 +281,16 @@ function clicked_finalize_incidence(e) {
 
 }
 function clicked_archive_incidence(e) {
+  console.log('clickedo elemento a finalizar')
+  var id_crear = e.target.id
+  var result = id_crear.substring(11)
+  var selectedIncidence = document.getElementById('selectedIncidence')
+  selectedIncidence.value = result
+  console.log(selectedIncidence.value)
+
+}
+
+function clicked_send_incidence(e) {
   console.log('clickedo elemento a finalizar')
   var id_crear = e.target.id
   var result = id_crear.substring(11)
@@ -527,7 +548,7 @@ document
                         data-bs-placement="top" title="Detalles"><i class="far fa-eye mx-2" aria-hidden="true"></i></a>
                       
                         <span data-bs-toggle="modal" data-bs-target="#FinalizeIncidenciaModal">
-                          <button class="finalizarButton btn btn-link text-primary text-gradient px-0 mb-0  mx-2"
+                          <button class="finalizarButton btn btn-link text-primary px-0 mb-0  mx-2"
                               id="finalizar_${geojsonFeature.properties.id}"
                               onclick="clicked_finalize_incidence(event)"
                               data-bs-toggle="tooltip"
@@ -545,6 +566,17 @@ document
                             data-bs-placement="top" title="Archivar"
                             value="${geojsonFeature.properties.id}">
                             <i id="archivicon_${geojsonFeature.properties.id}" class="fa fa-archive" aria-hidden="true"></i>
+                        </button>
+                        </span>
+
+                        <span data-bs-toggle="modal" data-bs-target="#sendEmailModal">
+                        <button class="btn btn-link text-primary px-0 mb-0 deletebin mx-2"
+                            id="enviarEmail_${geojsonFeature.properties.id}"
+                            onclick="clicked_send_incidence(event)"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top" title="Archivar"
+                            value="${geojsonFeature.properties.id}">
+                            <i id="archivicon_${geojsonFeature.properties.id}" class="fa fa-send" aria-hidden="true"></i>
                         </button>
                         </span>
 
@@ -854,3 +886,85 @@ document
     })
 
   })
+
+
+$('#email-form').on('submit', function(event){
+  event.preventDefault();
+  var destinatarios = $('#recipient-name').val();
+  var asunto = $('#subject').val();
+  var mensaje = $('#message-text').val();
+  var id_instancia = document.getElementById('selectedIncidence').value
+  //var id_instancia = $('#instance_id_hidden').val();
+
+  console.log(id_instancia);
+  console.log(destinatarios);
+  console.log(asunto);
+  console.log(mensaje);
+  var element = $("form[name='formmensaje'] input[name='csrfmiddlewaretoken']");
+  console.log(element[0]);
+  var token = element[0].value
+  console.log(token)
+  
+
+  $("#spinnerButton").show();
+  $("#enviar").prop('disabled', true);
+  $("#cancelarEnviar").prop('disabled', true);
+  $("#dismissModalEnviar").prop('disabled', true);
+  
+  
+  var request = $.ajax({
+    type: "POST",
+    headers: {"X-CSRFToken": token},
+    url: "/sini/incidencias/email/",
+    //contentType: 'application/json',
+    data: {
+        "id":id_instancia,
+        "destinatarios": JSON.stringify(destinatarios),
+        "asunto":asunto,
+        "mensaje":mensaje
+
+    },
+    success: function (response) {
+        $("#sendEmailModal").modal('hide');
+        $("#recipient-name").val("");
+        $("#recipient-name").trigger("change");
+        $('#subject').val('');
+        $('#message-text').val('');
+        
+        $("#spinnerButton").hide();
+        $("#enviar").prop('disabled', false);
+        $("#cancelarEnviar").prop('disabled', false);
+        $("#dismissModalEnviar").prop('disabled', false);
+        
+
+    },
+    error: function (response, e) {
+        console.log(response);
+        
+
+        $("#sendEmailModal").modal('hide');
+
+        $("#recipient-name").val("");
+        $("#recipient-name").trigger("change");
+        $('#subject').val('');
+        $('#message-text').val('');
+        
+        $("#spinnerButton").hide();
+        $("#enviar").prop('disabled', false);
+        $("#cancelarEnviar").prop('disabled', false);
+        $("#dismissModalEnviar").prop('disabled', false);
+
+     
+
+        $('#errorModal').modal('show');
+         var errorspan = document.getElementById('errorspan');
+        
+     
+          errorspan.textContent ='Ha ocurrido un error al enviar el email, Contacte al Administrador';
+        
+        
+        
+      }
+  });
+
+});

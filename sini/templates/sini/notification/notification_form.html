@@ -73,11 +73,11 @@
                 <button type="submit" class="btn btn-primary btn-large btn-sm m-b-xm mx-1"><i class="fa fa-send"></i>&nbsp;&nbsp;Enviar</button>
                 
                 {% if not notification.id %}
-                    <a href="{% url 'sini:notification_list' %}" class="btn btn-danger btn-large btn-sm m-b-xm mx-1"><i class="fa fa-undo"></i>&nbsp;&nbsp;Cancelar</a>
+                    <a href="{% url 'sini:notification_list' %}" class="btn btn-secondary btn-large btn-sm m-b-xm mx-1"><i class="fa fa-undo"></i>&nbsp;&nbsp;Cancelar</a>
 
                 
                 {% else %}
-                <a href="{% url 'sini:incidence_detail' incidence.id %}" class="btn btn-danger btn-large btn-sm m-b-xm mx-1"><i class="fa fa-undo"></i>&nbsp;&nbsp;Cancelar</a>
+                <a href="{% url 'sini:incidence_detail' incidence.id %}" class="btn btn-secondary btn-large btn-sm m-b-xm mx-1"><i class="fa fa-undo"></i>&nbsp;&nbsp;Cancelar</a>
 
                 {% endif %}
               </div>
