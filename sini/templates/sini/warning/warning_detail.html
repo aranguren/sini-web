@@ -9,6 +9,9 @@
 {% block stylesheets %}
   {% leaflet_js plugins="forms" %}
   {% leaflet_css plugins="forms" %}
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="{% static 'sini/css/select2-custom.css' %}"> 
+
   <style type="text/css">
  #gis {
      width:100%;
@@ -381,16 +384,14 @@
         </p>
         <br>
           <div class="form-group">
-            <label class="control-label" for="id_incidencia_asignar">Incidencia</label>
-            <select id="id_incidencia_asignar" class="form-select" name="incidencia_asignar">
-               
-                {% for incidence in incidences %}
-                    <option value="{{ incidence.id }}">{{ incidence.name }}</option>
-                {% endfor %}
-
-            </select>
-
+            <label class="control-label mb-0" for="id_incidencia_asignar">Incidencia</label>
           </div>
+          <select id="id_incidencia_asignar" class="js-select2-simple form-select" name="incidencia_asignar" style="width: 100%;" required>
+            {% for incidence in incidences %}
+                <option value="{{ incidence.id }}">{{ incidence.name }}</option>
+            {% endfor %}
+
+        </select>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal">
@@ -503,9 +504,16 @@
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
   <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 
   <script type="text/javascript">
   
+    $(document).ready(function() {
+      $('.js-select2-simple').select2();
+      //console.log(`{% csrf_token %}`);
+
+  });
     function our_layers(map,options){
       console.log('Layer');
       var geom = {{ warning|geojsonfeature|safe }};
@@ -612,6 +620,9 @@ document.getElementById("crearIncidencia").addEventListener('click', function(){
           success: function (response) {
               console.log(response)
               $("#crearIncidenciaModal").modal('hide');
+              $("#id_incidencia_asignar").val("")
+              $("#id_incidencia_asignar").trigger("change");
+              
               $(location).attr('href', "{% url 'sini:warning_detail' warning.id %}");
   
           },
@@ -620,7 +631,8 @@ document.getElementById("crearIncidencia").addEventListener('click', function(){
               
               $("#crearIncidenciaModal").modal('hide');
   
-           
+              $("#id_incidencia_asignar").val("")
+              $("#id_incidencia_asignar").trigger("change");
   
               $('#errorModal').modal('show');
                var errorspan = document.getElementById('errorspan');
