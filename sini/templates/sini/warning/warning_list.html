@@ -189,7 +189,7 @@
                         <td>
                           {{ warning.name }}
                         </td>
-                        <td >{% firstof warning.get_incidence_type_display|default_if_none:"" %}</td>
+                        <td >{% firstof warning.type_incidence|default_if_none:"" %}</td>
                         <td >{% firstof warning.get_status_display|default_if_none:"" %}</td>
                         {% if  warning.creation_origin == 'api'%}
                             <td >{% firstof warning.created_by_api_user|default_if_none:"" %}</td>

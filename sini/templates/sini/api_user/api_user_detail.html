@@ -378,7 +378,8 @@ $('#password-form').on('submit', function(event){
         $("#dismisscambiarPassword").prop('disabled', false);
         $("#newpassword").val("");
         $('#checkShow').prop('checked', false);
-     
+        var x = document.getElementById("newpassword");
+        x.type = "password";
         
 
     },
@@ -393,6 +394,8 @@ $('#password-form').on('submit', function(event){
         $("#dismisscambiarPassword").prop('disabled', false);
         $("#newpassword").val("");
         $('#checkShow').prop('checked', false);
+        var x = document.getElementById("newpassword");
+        x.type = "password";
 
      
 

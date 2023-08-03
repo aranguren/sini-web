@@ -166,7 +166,7 @@
             <div class="col-3">
               <div class="form-group">
                 <h6>Tipo incidente</h6>
-                <div class="mr-2">{% firstof incidence.get_incidence_type_display|default_if_none:"-" %}</div>
+                <div class="mr-2">{% firstof incidence.type_incidence|default_if_none:"-" %}</div>
               </div>
             </div>
             <!--div class="col-3">
@@ -315,7 +315,7 @@
                       {{ mobile_warning.name }}
                     </td>
                     <td>
-                      {{ mobile_warning.get_incidence_type_display }}
+                      {{ mobile_warning.type_incidence }}
                     </td>
                     <td>
                       {{ mobile_warning.get_status_display }}

@@ -44,21 +44,13 @@ function onEachFeatureWarning(feature, layer) {
             <i id="archivicon_${feature.properties.id}" class="fa fa-archive fa-3x" aria-hidden="true"></i>
         </button>
         </span>`
-  tipos = {
-    accidente_aereo: 'Accidente aéreo',
-    accidente_transito: 'Accidente de tránsito',
-    colapso_puente: 'Alerta por colapso de puente',
-    arbol_caido: 'Árbo caído',
-    asfixia_inmersion: 'Asfixia por inmersión',
-    aumento_cauce: 'Aumento de cauce',
-    aumento_caudal: 'Aumento  de caudal',
-  }
+
   status_dict = {
     creado: 'Creado',
     asignado: 'Asignado',
     descartado: 'Descartado',
   }
-  tipo = tipos[feature.properties.incidence_type]
+
   status_value = status_dict[feature.properties.status]
   descripcion_str = feature.properties.description
   if (descripcion_str.length>90) {
@@ -72,7 +64,7 @@ function onEachFeatureWarning(feature, layer) {
   var popupContent = `<h6>Aviso: ${feature.properties.name}</h6>
     <div class="row mb-1 ">
       <div class="col-5"><b>Tipo incidente:</b></div>
-      <div class="col-7">${tipo}</div>
+      <div class="col-7">${feature.properties.type_incidence_str}</div>
     </div>
     <div class="row mb-3 text-right">
       <div class="col-5"><b>Status:</b></div>
@@ -134,20 +126,12 @@ function onEachFeatureIncidence(feature, layer) {
               <i id="sendemicon_${feature.properties.id}" class="fa fa-send fa-3x" aria-hidden="true"></i>
           </button>
           </span>`
-    tipos = {
-      accidente_aereo: 'Accidente aéreo',
-      accidente_transito: 'Accidente de tránsito',
-      colapso_puente: 'Alerta por colapso de puente',
-      arbol_caido: 'Árbo caído',
-      asfixia_inmersion: 'Asfixia por inmersión',
-      aumento_cauce: 'Aumento de cauce',
-      aumento_caudal: 'Aumento  de caudal',
-    }
+
     status_dict = {
       creado: 'Creado',
       finalizado: 'Finalizado',
     }
-    tipo = tipos[feature.properties.incidence_type]
+
     status_value = status_dict[feature.properties.status]
     descripcion_str = feature.properties.description
     if (descripcion_str.length>90) {
@@ -161,7 +145,7 @@ function onEachFeatureIncidence(feature, layer) {
     var popupContent = `<h6>Incidencia: ${feature.properties.name}</h6>
       <div class="row mb-1 ">
         <div class="col-5"><b>Tipo incidente:</b></div>
-        <div class="col-7">${tipo}</div>
+        <div class="col-7">${feature.properties.type_incidence_str}</div>
       </div>
       <div class="row mb-3 text-right">
         <div class="col-5"><b>Status:</b></div>
@@ -351,7 +335,7 @@ document
               'asignado': 'Asignado',
               'descartado': 'Descartado',
             }
-            tipo = tipos[response.warningFeature.properties.incidence_type]
+            tipo = tipos[response.warningFeature.properties.type_incidence]
             status_value =
               status_dict[response.warningFeature.properties.status]
 
@@ -480,7 +464,7 @@ document
               asignado: 'Asignado',
               descartado: 'Descartado',
             }
-            tipo = tipos[response.warningFeature.properties.incidence_type]
+            tipo = tipos[response.warningFeature.properties.type_incidence]
             status_value =
               status_dict[response.warningFeature.properties.status]
 
@@ -522,26 +506,18 @@ document
         var id_row = '#row_warning_'+avisoId;
         datatableWarnings.row( id_row ).remove().draw();
         // ADICIONANDO A LA TABLA
-        tipos = {
-          accidente_aereo: 'Accidente aéreo',
-          accidente_transito: 'Accidente de tránsito',
-          colapso_puente: 'Alerta por colapso de puente',
-          arbol_caido: 'Árbo caído',
-          asfixia_inmersion: 'Asfixia por inmersión',
-          aumento_cauce: 'Aumento de cauce',
-          aumento_caudal: 'Aumento  de caudal',
-        }
+
         status_dict = {
           creado: 'Creado',
           finalizado: 'Finalizado',
         }
-        tipo = tipos[geojsonFeature.properties.incidence_type]
+    
         status_value = status_dict[geojsonFeature.properties.status]
 
         var new_row_html = `<tr id="row_incidence_${geojsonFeature.properties.id}">
                       <td>${geojsonFeature.properties.name}</td>
                       <td>${geojsonFeature.properties.id}</td>
-                      <td>${tipo}</td>
+                      <td>${geojsonFeature.properties.type_incidence_str}</td>
                       <td>${status_value}</td>
                       <td>${geojsonFeature.properties.date}</td>
                       <td class="text-center">

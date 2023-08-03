@@ -186,7 +186,7 @@
                         <td>
                           {{ incidence.name }}
                         </td>
-                        <td >{% firstof incidence.get_incidence_type_display|default_if_none:"" %}</td>
+                        <td >{% firstof incidence.type_incidence|default_if_none:"" %}</td>
                         <td >{% firstof incidence.get_status_display|default_if_none:"" %}</td>
                         <td >{% firstof incidence.created_by|default_if_none:"" %}</td>
                         {% if incidence.active %}

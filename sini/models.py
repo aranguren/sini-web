@@ -11,6 +11,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 # requeridos para enviar mensajes
 from firebase_admin.messaging import Message
+from computedfields.models import ComputedFieldsModel, computed, compute
 
 # Create your models here.
 
@@ -34,7 +35,7 @@ class BasicAuditModel(models.Model):
     class Meta:
         abstract = True
 
-class Incidence(BasicAuditModel):
+class Incidence(BasicAuditModel, ComputedFieldsModel):
 
     INCIDENCE_TYPE_CHOICES = (
         ("accidente_aereo", "Accidente aéreo"),
@@ -58,7 +59,17 @@ class Incidence(BasicAuditModel):
     geom = models.PointField(verbose_name=_("Localización"), srid=4326, blank=False, null=False)
 
     name = models.CharField(_("Nombre"), max_length=255)
-    incidence_type = models.CharField(_("Tipo incidente"), max_length=50, choices=INCIDENCE_TYPE_CHOICES, default="tipo1")
+    #type_incidence = models.CharField(_("Tipo incidente"), max_length=50, choices=INCIDENCE_TYPE_CHOICES, default="tipo1")
+    type_incidence = models.ForeignKey("IncidenceType", verbose_name=_("Tipo incidente"), on_delete=models.RESTRICT)
+    @computed(models.CharField(_("Tipo incidente"), max_length=255),
+                                depends=[('type_incidence', ['name'])])
+    def type_incidence_str(self):
+
+        if self.type_incidence:
+            return self.type_incidence.name
+        else:
+            return ""
+        
     description = models.TextField(_("Descripción"), blank=True, null=True)
     
     status = models.CharField(_("Status"), max_length=50, choices=STATUS_CHOICES, default="creado")
@@ -92,7 +103,7 @@ class Incidence(BasicAuditModel):
 
 
 
-class MobileWarning(BasicAuditModel):
+class MobileWarning(BasicAuditModel, ComputedFieldsModel):
 
     INCIDENCE_TYPE_CHOICES = (
         ("accidente_aereo", "Accidente aéreo"),
@@ -120,7 +131,18 @@ class MobileWarning(BasicAuditModel):
     geom = models.PointField(verbose_name=_("Localización"), srid=4326, blank=False, null=False)
 
     name = models.CharField(_("Nombre"), max_length=255)
-    incidence_type = models.CharField(_("Tipo incidente"), max_length=50, choices=INCIDENCE_TYPE_CHOICES, default="tipo1")
+    #type_incidence = models.CharField(_("Tipo incidente"), max_length=50, choices=INCIDENCE_TYPE_CHOICES, default="tipo1")
+    type_incidence = models.ForeignKey("IncidenceType", verbose_name=_("Tipo incidente"), on_delete=models.RESTRICT)
+
+    @computed(models.CharField(_("Tipo incidente"), max_length=255),
+                                depends=[('type_incidence', ['name'])])
+    def type_incidence_str(self):
+
+        if self.type_incidence:
+            return self.type_incidence.name
+        else:
+            return ""
+    
     description = models.TextField(_("Descripción"), blank=True, null=True)
     
     status = models.CharField(_("Status"), max_length=50, choices=STATUS_CHOICES, default="creado")
@@ -350,6 +372,24 @@ class Contact(BasicAuditModel):
         ordering= ["name"]
         verbose_name = 'Contacto'
         verbose_name_plural = 'Contactos'
+
+class IncidenceType(BasicAuditModel):
+    
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+
+    name = models.CharField(_("Nombre"), max_length=255, unique=True)
+
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'arbolsaf_type_incidence'
+        managed = True
+        ordering= ["name"]
+        verbose_name = 'Tipo Incidencia'
+        verbose_name_plural = 'Tipos Incidencia'
 
 @receiver(post_save, sender=Notification)
 def created_notification_send_push(sender, instance, created,  **kwargs):

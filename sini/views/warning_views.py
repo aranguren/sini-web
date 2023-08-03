@@ -224,7 +224,7 @@ def warning_create_incidence(request, pk):
     new_incidence = Incidence(
         name=warning.name,
         geom=warning.geom,
-        incidence_type=warning.incidence_type,
+        type_incidence=warning.type_incidence,
         description=warning.description,
         status='creado',
         priority=prioridad,
@@ -250,7 +250,7 @@ def warning_create_incidence(request, pk):
       "properties": {
           "name": new_incidence.name,
           "description": new_incidence.description,
-          "incidence_type": new_incidence.incidence_type,
+          "type_incidence_str": new_incidence.type_incidence.name,
           "status": new_incidence.status,
           "priority": new_incidence.priority,
           "id": new_incidence.id,
@@ -268,7 +268,7 @@ def warning_create_incidence(request, pk):
       "properties": {
           "name": warning.name,
           "description": warning.description,
-          "incidence_type": warning.incidence_type,
+          "type_incidence_str": warning.type_incidence.name,
           "status": warning.status,
 
       },
@@ -306,7 +306,7 @@ def warning_assign_closest(request, pk):
             "properties": {
                 "name": incidence.name,
                 "description": incidence.description,
-                "incidence_type": incidence.incidence_type,
+                "type_incidence_str": incidence.type_incidence.name,
                 "status": incidence.status,
                 "priority": incidence.priority
 
@@ -322,7 +322,7 @@ def warning_assign_closest(request, pk):
         "properties": {
             "name": warning.name,
             "description": warning.description,
-            "incidence_type": warning.incidence_type,
+            "type_incidence_str": warning.type_incidence.name,
             "status": warning.status,
 
         },

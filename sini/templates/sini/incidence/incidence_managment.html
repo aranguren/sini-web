@@ -77,7 +77,7 @@
                   {% for mobile_waring in mobile_warnings %}
                     <tr id="row_warning_{{ mobile_waring.id }}">
                       <td>{{ mobile_waring.name }}</td>
-                      <td>{{ mobile_waring.get_incidence_type_display }}</td>
+                      <td>{{ mobile_waring.type_incidence }}</td>
                       <td>{{ mobile_waring.get_status_display }}</td>
                       <td>{{ mobile_waring.created|default_if_none:'-' }}</td>
                       <td class="text-center">
@@ -170,7 +170,7 @@
                     <tr id="row_incidence_{{ incidence.id }}">
                       <td>{{ incidence.name }}</td>
                       <td>{{ incidence.id }}</td>
-                      <td>{{ incidence.get_incidence_type_display }}</td>
+                      <td>{{ incidence.type_incidence }}</td>
                       <td>{{ incidence.get_status_display }}</td>
                       <td>{{ incidence.created|default_if_none:'-' }}</td>
                       <td class="text-center">
@@ -947,9 +947,11 @@
 
  
       
-      var geom_incidence = {{ incidences|geojsonfeature:"id,name,incidence_type,description,status,active"|safe }};
+      var geom_incidence = {{ incidences|geojsonfeature:"id,name,type_incidence_str,description,status,active"|safe }};
       feature_incidence = L.geoJson(geom_incidence , { pointToLayer:redIcon, onEachFeature:onEachFeatureIncidence});//.addTo(map);
-      var geom_warnings = {{ mobile_warnings|geojsonfeature:"id,name,incidence_type,description,status,active,assign_incidence"|safe }};
+      var geom_warnings = {{ mobile_warnings|geojsonfeature:"id,name,type_incidence_str,description,status,active,assign_incidence"|safe }};
+      console.log('/*/*/*/*/*/*/*/');
+      console.log(geom_warnings)
       feature_warnings = L.geoJson(geom_warnings, { pointToLayer:orangeIcon, onEachFeature:onEachFeatureWarning});
 
       var basemaps = {

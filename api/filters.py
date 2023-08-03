@@ -5,14 +5,14 @@ class IncidenceFilterDRF(filters.FilterSet):
 
     name = filters.CharFilter(lookup_expr='icontains')
     description = filters.CharFilter(lookup_expr='icontains')
-    incidence_type = filters.CharFilter(lookup_expr='exact')
+    type_incidence = filters.CharFilter(lookup_expr='exact')
     status = filters.CharFilter(lookup_expr='exact')
 
 
 
     class Meta:
         model = Incidence
-        fields = ['name', 'description', 'incidence_type', 'status']
+        fields = ['name', 'description', 'type_incidence', 'status']
         """
         fields = {
                     'name': ['icontains',],

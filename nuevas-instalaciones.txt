@@ -11,3 +11,4 @@ pip install six
 pip install django-ckeditor
 pip install djlint
 pip install fcm-django
+pip install django-computedfields

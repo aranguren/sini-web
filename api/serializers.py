@@ -18,7 +18,7 @@ class IncidenceSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Incidence
         geo_field = "geom"
-        fields = ('id','geom','name','incidence_type',
+        fields = ('id','geom','name','type_incidence',
         'description','status', 'image1', 'image2', 'image3', 'audio', 'video')
         extra_kwargs = {'geom': {'required': True}} 
         read_only_fields = ['id','created_by', 'modified_by', 'created','modified']
@@ -38,7 +38,7 @@ class WarningSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = MobileWarning
         geo_field = "geom"
-        fields = ('id','geom','name','incidence_type',
+        fields = ('id','geom','name','type_incidence',
         'description',)
         extra_kwargs = {'geom': {'required': True}} 
         read_only_fields = ['id','created_by', 'modified_by', 'created','modified', 'created_by_api_user', 'modified_by_api_user', 'active']

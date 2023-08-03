@@ -1,17 +1,19 @@
 from django.contrib import admin
 from leaflet.admin import LeafletGeoAdmin
+from import_export import fields, resources
+from import_export.admin import ImportExportModelAdmin
 
 # Register your models here.
 
-from .models import Contact, MobileWarning, Incidence, Advice, ApiGroup, ApiUser, Notification
+from .models import Contact, MobileWarning, Incidence, Advice, ApiGroup, ApiUser, Notification, IncidenceType
 
 class WarningAdmin(LeafletGeoAdmin):
     #fields = ['name', 'geom']
-    list_display = ('name','incidence_type','status','created','created_by_api_user','modified','modified_by_api_user')
+    list_display = ('name','type_incidence','status','created','created_by_api_user','modified','modified_by_api_user')
     readonly_fields = ['created','created_by','modified','modified_by', 'created_by_api_user', 'modified_by_api_user','creation_origin']
     fieldsets = [
         #(None,               {'fields': ['question_text']}),
-         ('Información Incidencia', {'fields': ['name','incidence_type','status','description', 'geom']}),
+         ('Información Incidencia', {'fields': ['name','type_incidence','status','description', 'geom']}),
         ('Archivos', {'fields': ['image1','image2','image3','audio', 'video']}),
          ('Informacion registro BD', {'fields': ['creation_origin', 'created','created_by','modified','modified_by','created_by_api_user', 'modified_by_api_user']}),
          
@@ -34,11 +36,11 @@ admin.site.register(MobileWarning, WarningAdmin)
 
 class IncidenceAdmin(LeafletGeoAdmin):
     #fields = ['name', 'geom']
-    list_display = ('name','incidence_type','status','created','created_by','modified','modified_by')
+    list_display = ('name','type_incidence','status','created','created_by','modified','modified_by')
     readonly_fields = ['created','created_by','modified','modified_by']
     fieldsets = [
         #(None,               {'fields': ['question_text']}),
-         ('Información Incidencia', {'fields': ['name','incidence_type','status','description', 'geom']}),
+         ('Información Incidencia', {'fields': ['name','type_incidence','status','description', 'geom']}),
         ('Archivos', {'fields': ['image1','image2','image3','audio', 'video']}),
          ('Informacion registro BD', {'fields': ['created','created_by','modified','modified_by']}),
          
@@ -148,3 +150,36 @@ class ContactAdmin(admin.ModelAdmin):
  
 
 admin.site.register(Contact, ContactAdmin)
+
+
+class IncidenceTypeResource(resources.ModelResource):
+    class Meta:
+        model = IncidenceType
+        skip_unchanged = True
+        report_skipped = True
+        exclude = ('created','created_by','modified','modified_by',)
+        import_id_fields = ('name',)
+
+
+
+
+
+class IncidenceTypeAdmin(ImportExportModelAdmin):
+    resource_classes = [IncidenceTypeResource]
+    #fields = ['name', 'geom']
+    list_display = ('id','name')
+    
+    fields  =[
+        'name'
+    ]
+
+    def save_model(self, request, obj, form, change):
+        if change:
+            obj.modified_by = request.user
+        else:
+            obj.created_by = request.user
+            obj.modified_by = request.user
+        super().save_model(request, obj, form, change)
+ 
+
+admin.site.register(IncidenceType, IncidenceTypeAdmin)
