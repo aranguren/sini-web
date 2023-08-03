@@ -1,6 +1,6 @@
 from rest_framework import generics, serializers
 from rest_framework.fields import CharField
-from  sini.models import Incidence, MobileWarning, Advice
+from  sini.models import Incidence, MobileWarning, Advice, IncidenceType
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 #from django.contrib.auth.models import User
 #from django.conf import settings#
@@ -147,6 +147,14 @@ class FCMDeviceSerializer(serializers.Serializer):
         instance.type = validated_data.get('type', instance.type)
         instance.save()
         return instance
+    
+
+class IncidenceTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = IncidenceType
+        fields = ('id','name','created','modified')
+        read_only_fields = ['id','created_by', 'modified_by', 'created','modified']
 
     
 

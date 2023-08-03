@@ -4,8 +4,8 @@ from django.shortcuts import render
 from .authentication import SafeJWTAuthentication
 from .permissions import IsUserAuthenticated, IsUserOwner
 from rest_framework import generics
-from sini.models import Incidence, ApiUser, MobileWarning, Advice
-from .serializers import FCMDeviceSerializer, IncidenceSerializer, WarningSerializer, UploadWarningFilesSerializer, AdviceSerializer
+from sini.models import Incidence, ApiUser, MobileWarning, Advice, IncidenceType
+from .serializers import FCMDeviceSerializer, IncidenceSerializer, WarningSerializer, UploadWarningFilesSerializer, AdviceSerializer, IncidenceTypeSerializer
 from django_filters import rest_framework as filters
 from .filters import IncidenceFilterDRF
 
@@ -134,6 +134,12 @@ class IncidenceAPICreate(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user, 
         modified_by=self.request.user,  )
+
+class IncidenceTypeAPIRetrieve(generics.ListAPIView):
+    authentication_classes = []
+    permission_classes = ()
+    queryset = IncidenceType.objects.all()
+    serializer_class = IncidenceTypeSerializer
 
 
 
