@@ -386,13 +386,14 @@
           <div class="form-group">
             <label class="control-label mb-0" for="id_incidencia_asignar">Incidencia</label>
           </div>
-          <select id="id_incidencia_asignar" class="js-select2-simple form-select" name="incidencia_asignar" style="width: 100%;" required>
+          <select id="id_incidencia_asignar" name="incidencia_asignar" style="width: 100%;" required>
+       
             {% for incidence in incidences %}
                 <option value="{{ incidence.id }}">{{ incidence.name }}</option>
             {% endfor %}
 
         </select>
-      </div>
+      </div> 
       <div class="modal-footer">
         <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal">
           Cerrar

@@ -47,6 +47,21 @@
                   </span>
                 </h6>
               {% endif %}
+              <form id="export_form"
+              action="{% url 'sini:incidence_export_csv'%}"
+              class=""
+              method="post"
+              autocomplete="off">
+              {% csrf_token %}
+                
+                <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
+                  type="submit"
+                  id="descartarB"
+                  value="descartar">&nbsp;&nbsp;Exportar
+                </button>
+               
+              </form>
+            
             </div>
             
           </div>

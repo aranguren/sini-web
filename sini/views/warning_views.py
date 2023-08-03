@@ -10,6 +10,8 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import RestrictedError
 import json 
 from django.contrib.gis.db.models.functions import Distance
+import csv
+from django.http import HttpResponse
 
 
 class WarningListView(LoginRequiredMixin, ListView):
@@ -365,6 +367,29 @@ def warning_toss(request, pk):
     warning.save()
 
     return JsonResponse(resp, status=200)
+
+
+class ExportCsvWarningView(LoginRequiredMixin, View):
+
+    def post(self, request):
+
+        query_result = MobileWarning.objects.order_by('name')
+
+
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={"Content-Disposition": 'attachment; filename="avisos.csv"'},
+            )
+        writer = csv.writer(response)
+        #writer.writerow([])
+        writer.writerow(['Nombre','Fecha creación','Tipo incidente','Status','Incidencia', 'Activo','Latitud','Longitud','Descripción'])
+
+        for item in query_result:
+          
+            writer.writerow([item.name,item.created, item.type_incidence.name, item.status, item.assign_incidence.name if item.assign_incidence else "",
+                             "SI" if item.active else "NO", item.geom.y, item.geom.x, item.description])
+      
+        return response
 
 """
 class ApiUserDetailView(LoginRequiredMixin, DetailView):

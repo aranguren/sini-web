@@ -12,6 +12,8 @@ import json
 from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string  
+import csv
+from django.http import HttpResponse
 
 class IncidenceListView(LoginRequiredMixin, ListView):
     model = Incidence
@@ -294,3 +296,27 @@ def incidence_send_email(request):
    
 
     return JsonResponse(resp, status=200)
+
+
+
+class ExportCsvIncidenceView(LoginRequiredMixin, View):
+
+    def post(self, request):
+
+        query_result = Incidence.objects.order_by('name')
+
+
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={"Content-Disposition": 'attachment; filename="incidencias.csv"'},
+            )
+        writer = csv.writer(response)
+        #writer.writerow([])
+        writer.writerow(['Nombre','Fecha creación', 'Prioridad','Tipo incidente','Status', 'Activo','Latitud','Longitud','Descripción'])
+
+        for item in query_result:
+          
+            writer.writerow([item.name, item.created,  item.priority, item.type_incidence.name, item.status, 
+                             "SI" if item.active else "NO", item.geom.y, item.geom.x, item.description])
+      
+        return response
