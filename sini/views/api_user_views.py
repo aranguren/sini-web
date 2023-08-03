@@ -3,12 +3,14 @@ from django.views.generic import ListView, CreateView, UpdateView, DetailView, T
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.conf import settings
-
+from django.http import JsonResponse
 from django.contrib.sites.shortcuts import get_current_site  
 from django.utils.encoding import force_bytes, force_text  
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode  
 from django.template.loader import render_to_string  
-
+from django.contrib.auth.decorators import login_required
+import json
+from django.shortcuts import get_object_or_404, get_list_or_404,  redirect
 from django.http import HttpResponseRedirect
 from django.contrib.auth import get_user_model
 from passlib.hash import pbkdf2_sha256 as sha256
@@ -258,3 +260,68 @@ def activate_user(request, uidb64, token):
 
 
     return render(request, 'sini/api_user/api_user_activate.html', context)  
+
+
+class ApiUserArchiveView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        # <view logic>
+
+        user = get_object_or_404(ApiUser, pk=pk)
+        user.active = False
+        user.save()
+        redirection = reverse_lazy("sini:api_user_detail", kwargs={"pk": pk}) 
+        return redirect(redirection)
+
+class ApiUserActivateView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        # <view logic>
+
+        user = get_object_or_404(ApiUser, pk=pk)
+        user.active = True
+        user.save()
+        redirection = reverse_lazy("sini:api_user_detail", kwargs={"pk": pk}) 
+        return redirect(redirection)
+    
+
+    import time
+
+@login_required(login_url='/login/')
+def user_change_password(request):
+    resp = {}
+
+    pk = int(request.POST.get('id', None))
+    newpassword = request.POST.get('newpassword', None)
+
+    user = get_object_or_404(ApiUser, pk=pk)
+
+
+    newpasswordHash = sha256.hash(newpassword)
+    user.password = newpasswordHash
+
+    user.save()  
+
+    current_site = get_current_site(request) #"localhost:8000" #get_current_site(request)  
+    mail_subject = 'Nueva contraseña para su cuenta en SINI'  
+
+
+
+
+    message = render_to_string('sini/api_user/new_password_email.html', {  
+        'user': user,  
+        'domain': current_site.domain,  
+        'email': user.email,
+        'newpassword':newpassword
+    })  
+    
+    email_message = EmailMessage(  
+                mail_subject, message, to=[user.email], from_email= settings.DEFAULT_FROM_EMAIL # "idec@deneb.io"  
+    )  
+    email_message.content_subtype = "html"  
+    try:
+        email_message.send()
+    except Exception as e:
+        resp['error'] = "Error al enviar el email"
+        resp['error_description'] = str(e)
+        return JsonResponse(resp, status=500)
+    
+    return JsonResponse(resp, status=200)

@@ -1,7 +1,7 @@
 
 from django.urls import path 
 
-from .views.api_user_views import ApiUserListView, create_api_user, ApiUserDetailView, ApiUserUpdateView, activate_user
+from .views.api_user_views import user_change_password, ApiUserActivateView, ApiUserArchiveView, ApiUserListView, create_api_user, ApiUserDetailView, ApiUserUpdateView, activate_user
 from .views.warning_views import (WarningListView, WarningDetailView, WarningCreateView,
                                    WarningUpdateView, warning_delete, WarningDiscardView,
                                    warning_assign, warning_create_incidence, warning_assign_closest,
@@ -16,9 +16,16 @@ app_name = 'sini'
 
 urlpatterns = [
     path('usuarios-moviles/', ApiUserListView.as_view(), name='api_user_list'),
+     path('usuarios-moviles/cambiar-password/', user_change_password, name='api_user_change_password'),
+    
     path('usuarios-moviles/crear/', create_api_user, name='api_user_create'),
     path('usuarios-moviles/detalles/<str:pk>/', ApiUserDetailView.as_view(), name='api_user_detail'),
     path('usuarios-moviles/modificar/<str:pk>/', ApiUserUpdateView.as_view(), name='api_user_update'),
+
+
+    path('usuarios-moviles/activar/<str:pk>/', ApiUserActivateView.as_view(), name='api_user_activate'),
+    path('usuarios-moviles/archivar/<str:pk>/', ApiUserArchiveView.as_view(), name='api_user_archive'),
+    
     #path('finca/listado', FarmListView.as_view(),name='farm_list'),
 
     path('activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/',  

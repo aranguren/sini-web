@@ -35,20 +35,22 @@ class SafeJWTAuthentication(BaseAuthentication):
                 access_token, settings.SECRET_KEY, algorithms=['HS256'])
 
         except jwt.ExpiredSignatureError:
-            raise exceptions.AuthenticationFailed('access_token expired')
+            raise exceptions.AuthenticationFailed('El token ha expirado')
         except IndexError:
             raise exceptions.AuthenticationFailed('Token prefix missing')
 
         apiuser = ApiUser.objects.filter(id=payload['user_id']).first()
         if apiuser is None:
-            raise exceptions.AuthenticationFailed('User not found')
+            raise exceptions.AuthenticationFailed('Usuario no encontrado')
+        if not apiuser.active:
+            raise exceptions.AuthenticationFailed('Usuario no activo')
        
         authorization = request.META.get("HTTP_AUTHORIZATION")
         token = authorization.split(" ")[1]
         is_logout = BlacklistedToken.objects.filter(token=token).first()
 
         if is_logout:
-            raise exceptions.PermissionDenied("El token esta en lista negra debe loguearse")
+            raise exceptions.PermissionDenied("El token no es válido debe loguearse")
         #if not user.is_active:
         #    raise exceptions.AuthenticationFailed('user is inactive')
 

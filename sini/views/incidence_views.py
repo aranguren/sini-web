@@ -285,7 +285,12 @@ def incidence_send_email(request):
 
     email_message.content_subtype = "html"
       
-    email_message.send()  
+    try:
+        email_message.send()
+    except Exception as e:
+        resp['error'] = "Error al enviar el email"
+        resp['error_description'] = str(e)
+        return JsonResponse(resp, status=500)
    
 
     return JsonResponse(resp, status=200)

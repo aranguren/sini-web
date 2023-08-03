@@ -115,7 +115,14 @@
             <div class="col-6">
               <div class="form-group">
                 <h6>URL imagen</h6>
-                <div class="mr-2">{% firstof notification.url_imagen|default_if_none:"-" %}</div>
+                {% if notification.url_imagen %}
+                <!--div class="mr-2">{% firstof notification.url_noticia|default_if_none:"-" %}</div-->
+                <a class="text-secondary" href="{{notification.url_imagen }}" target="_blank">{{notification.url_imagen }}</a>
+                {% else %}
+                <div class="mr-2">-</div>
+                
+                {% endif %}
+          
               </div>
             </div> 
           </div>

@@ -32,11 +32,6 @@
         </div>
         <div class="card card-body blur shadow-blur mx-4 mt-n6 overflow-hidden">
           <div class="row gx-4">
-            <!--div class="col-auto">
-         <div class="avatar avatar-xl position-relative">
-           <img src="/static/assets/img/arbol.jpeg" alt="profile_image" class="w-100 border-radius-lg shadow-sm">
-         </div>
-       </div-->
             <div class="col-auto my-auto">
               <div class="h-100">
                 <h3>
@@ -62,7 +57,63 @@
             </div>
           </div>
         </div>
-        <div class="card card-body mt-4">
+        <div class="card card-body mt-2">
+          <div class="row">
+            <div class="col-lg-6 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3 d-flex justify-content-start mr-3">
+
+              <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
+              id="cambiarP"
+              data-bs-toggle="modal"
+              data-bs-target="#cambiarPasswordModal"
+              value="{{ api_user.id }}">&nbsp;&nbsp;Cambiar contraseña
+            </button>
+              
+              {% if api_user.active%}
+                <form id="archive_form"
+                action="{% url 'sini:api_user_archive' api_user.id %}"
+                class=""
+                method="post"
+                autocomplete="off">
+                {% csrf_token %}
+                  
+                  <button class="btn btn-secondary btn-large btn-sm mx-1 mb-0"
+                    type="submit"
+                    id="archivarB"
+                    value="archivar">&nbsp;&nbsp;Archivar
+                  </button>
+                
+                </form>
+              {% else %}
+              <form id="ctivate_form"
+              action="{% url 'sini:api_user_activate' api_user.id %}"
+              class=""
+              method="post"
+              autocomplete="off">
+              {% csrf_token %}
+                
+                <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
+                  type="submit"
+                  id="archivarB"
+                  value="archivar">&nbsp;&nbsp;Activar
+                </button>
+               
+              </form>
+
+              {% endif %}
+            </div>
+
+            <div class="col-6">
+              <strong>Activo: </strong>                
+              {% if api_user.active %}
+              <span class="badge badge-success">SI</span>
+              {% else %}
+              <span class="badge badge-danger">NO</span>
+              {% endif %}
+           </div>  
+          </div>  
+
+        </div>
+        <div class="card card-body mt-2">
           <!--h6 class="mb-0">New Project</h6>
 <p class="text-sm mb-0">Create new project</p-->
           <div class="row mb-2">
@@ -89,6 +140,55 @@
           </div>
         </div>
 
+
+  <div class="modal fade"
+        id="cambiarPasswordModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">
+            Cambiar contraseña
+          </h5>
+          <button type="button"
+                  class="btn-close text-dark"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  id="dismisscambiarPassword">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="text-sm mb-0 font-weight-bold">
+            Al cambiar la contraseña se enviará un correo al usuario con las nuevas credenciales.
+          </p>
+          <br>
+          <form id="password-form" name="formpassword">
+            {% csrf_token %}
+            <input type="hidden" id="user_id_hidden" value="{{api_user.id}}">
+            <div class="form-group">
+              <label class="control-label" for="newpassword">Nueva contraseña</label>
+              <input type="password" id="newpassword" name="newpassword" class="form-control" required></input>
+              <input id="checkShow" type="checkbox" class="mt-4" onclick="showpasswordFunction()">&nbsp;<b>Mostrar contraseña</b>
+            </div>
+    
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal" id="cerrarModalPassword">
+            Cerrar
+          </button>
+          <button type="submit" class="btn bg-secondary text-white" id="cambiarPassword">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" id="spinnerButton" style="display:none;"></span>
+            Aceptar
+          </button>
+        </form>
+        </div>
+      </div>
+      </div>
+      </div>
 
     <div class="modal fade"
          id="deleteModal"
@@ -127,6 +227,49 @@
       </div>
     </div>
 
+    <div class="modal fade"
+    id="errorModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+     <div class="modal-header">
+       <h5 class="modal-title" id="exampleModalLabel">
+         Error</span>
+       </h5>
+       <button type="button"
+               class="btn-close text-dark"
+               data-bs-dismiss="modal"
+               aria-label="Close"
+               id="closemodalerror">
+    
+         <span aria-hidden="true">&times;</span>
+       </button>
+     </div>
+     <div class="modal-body">
+       <div  class="row">
+         <div class="col-2 text-center text-danger">
+           <i class="fa fa-3x fa-exclamation-circle "></i>
+          </div>
+          <div class="col-10">
+           <p class="text-sm mb-0 font-weight-bold">
+              <span id="errorspan"></span>
+           </p>
+           
+          </div>
+       </div>
+     </div>
+     <div class="modal-footer">
+       <button type="button" class="btn bg-success text-white" data-bs-dismiss="modal" >
+         Cerrar
+       </button>
+     </div>
+    </div>
+    </div>
+  </div>
+
  
 </div>
     {% include "includes/footer.html" %}
@@ -137,6 +280,30 @@
   <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
 
   <script type="text/javascript">
+
+    function showpasswordFunction() {
+      var x = document.getElementById("newpassword");
+      if (x.type === "password") {
+        x.type = "text";
+      } else {
+        x.type = "password";
+      }
+    }
+
+    $(document).ready(function() {
+      $("#show_hide_password a").on('click', function(event) {
+          event.preventDefault();
+          if($('#show_hide_password input').attr("type") == "text"){
+              $('#show_hide_password input').attr('type', 'password');
+              $('#show_hide_password i').addClass( "fa-eye-slash" );
+              $('#show_hide_password i').removeClass( "fa-eye" );
+          }else if($('#show_hide_password input').attr("type") == "password"){
+              $('#show_hide_password input').attr('type', 'text');
+              $('#show_hide_password i').removeClass( "fa-eye-slash" );
+              $('#show_hide_password i').addClass( "fa-eye" );
+          }
+      });
+  });
   document.getElementById("aceptar").addEventListener('click', function(){
 
     console.log('ACEPTAR');
@@ -172,6 +339,75 @@
 });   
 
 
+
+$('#password-form').on('submit', function(event){
+  event.preventDefault();
+  var newpassword = $('#newpassword').val();
+  var id_user = $('#user_id_hidden').val();
+
+  console.log(id_user);
+  console.log(newpassword);
+
+  var element = $("form[name='formpassword'] input[name='csrfmiddlewaretoken']");
+  console.log(element[0]);
+  var token = element[0].value
+  console.log(token)
+  
+
+  $("#spinnerButton").show();
+  $("#cambiarPassword").prop('disabled', true);
+  $("#cerrarModalPassword").prop('disabled', true);
+  $("#dismisscambiarPassword").prop('disabled', true);
+  
+  
+  var request = $.ajax({
+    type: "POST",
+    headers: {"X-CSRFToken": token},
+    url: "/sini/usuarios-moviles/cambiar-password/",
+    //contentType: 'application/json',
+    data: {
+        "id":id_user,
+        "newpassword":newpassword
+
+    },
+    success: function (response) {
+        $("#cambiarPasswordModal").modal('hide');
+        $("#spinnerButton").hide();
+        $("#cambiarPassword").prop('disabled', false);
+        $("#cerrarModalPassword").prop('disabled', false);
+        $("#dismisscambiarPassword").prop('disabled', false);
+        $("#newpassword").val("");
+        $('#checkShow').prop('checked', false);
+     
+        
+
+    },
+    error: function (response, e) {
+        console.log(response);
+        
+
+        $("#cambiarPasswordModal").modal('hide');
+        $("#spinnerButton").hide();
+        $("#cambiarPassword").prop('disabled', false);
+        $("#cerrarModalPassword").prop('disabled', false);
+        $("#dismisscambiarPassword").prop('disabled', false);
+        $("#newpassword").val("");
+        $('#checkShow').prop('checked', false);
+
+     
+
+        $('#errorModal').modal('show');
+         var errorspan = document.getElementById('errorspan');
+        
+     
+          errorspan.textContent ='Ha ocurrido un error al cambiar la contraseña, Contacte al Administrador';
+        
+        
+        
+    }
+});
+
+});
 
 
   </script>
