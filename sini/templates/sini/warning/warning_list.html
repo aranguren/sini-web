@@ -251,23 +251,62 @@
                   <div class="modal-body">
                     <div class="container">
                       <form id="filter_form"
-                            action="{% url 'sini:api_user_list' %}"
+                            action="{% url 'sini:warning_list' %}"
                             class=""
                             method="get"
                             autocomplete="off">
-                        <div class="form-group">
-                          <label class="control-label" for="id_name">
-                            {% trans 'Nombre' %}
-                          </label>
-                          <div class=" ">
-                            <input id="id_name"
-                                   type="text"
-                                   name="name"
-                                   class="form-control"
-                                   value="{{ value_name }}">
-                          </div>
-                          <br>
-                        </div>
+                            <div class="form-group mb-0">
+                              <label class="control-label" for="id_name">
+                              Nombre
+                              </label>
+                              <div class=" ">
+                                <input id="id_name"
+                                       type="text"
+                                       name="name"
+                                       class="form-control"
+                                       value="{{ value_name }}">
+                              </div>
+                              <br>
+                            </div>
+                            <div class="form-group mt-0 mb-0">
+                              <label class="control-label" for="id_name">
+                              Tipo incidente
+                              </label>
+                      
+                                <select id="id_type" name="type" style="width: 100%;" class="form-control form-select .js-select2-simple">
+                                  <option></option>
+                                  {% for incidence_type in incidences_types %}
+                                      <option value="{{ incidence_type.id }}">{{ incidence_type.name }}</option>
+                                  {% endfor %}
+                      
+                              </select> 
+                            
+                              <br>
+                            </div>
+                            <div class="form-group mt-0 mb-0">
+                              <label class="control-label" for="id_name">
+                              Estado
+                              </label>
+                                <select id="id_status" name="status" style="width: 100%;" class="form-control form-select">
+                                  <option></option>
+                                      <option value="creado">Creado</option>
+                                      <option value="asignado">Asignado</option>
+                                      <option value="descartado">Descartado</option>
+                              </select> 
+                              <br>
+                            </div>
+                            <div class="form-group mt-0 mb-0">
+                              <label class="control-label" for="id_name">
+                              Activo
+                              </label>
+                                <select id="id_active" name="active" style="width: 100%;" class="form-control form-select">
+                                  <option></option>
+                                      <option value="si">SI</option>
+                                      <option value="no">NO</option>
+                                      <option value="si_no">SI o NO</option>
+                              </select> 
+                              <br>
+                            </div>
                         <!--div class="form-group">
                           <label class="control-label" for="id_email">
                             {% trans 'Código' %}
@@ -315,8 +354,21 @@
   <script>
 
 
+    $(document).ready(function() {
+     // $('.js-select2-simple').select2();
+
+
+      document.getElementById("id_type").value = "{{value_type}}";
+      document.getElementById("id_status").value = "{{value_status}}";
+      document.getElementById("id_active").value = "{{value_active}}";
+      //console.log(`{% csrf_token %}`);
+
+  });
   $('#reset_button').click(function () {
       document.getElementById("id_name").value = "";
+      document.getElementById("id_type").value = "";
+      document.getElementById("id_status").value = "";
+      document.getElementById("id_active").value = "";
 
      
   });

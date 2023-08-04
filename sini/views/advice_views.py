@@ -37,6 +37,10 @@ class AdviceListView(LoginRequiredMixin, ListView):
         self.request.session['page_from'] = ""
         self.request.session['referer'] = {}
 
+        context['value_name'] = self.request.GET.get('name', '')
+        context['value_description'] = self.request.GET.get('description', '')
+        context['value_advice_text'] = self.request.GET.get('advice_text', '')
+
         if context['is_paginated']:
             list_pages = []
 
@@ -69,14 +73,22 @@ class AdviceListView(LoginRequiredMixin, ListView):
         return context
 
     def get_queryset(self):
-        query = {'name': self.request.GET.get('name', None)}
+        query = {
+            'name': self.request.GET.get('name', None),
+            'description': self.request.GET.get('description', None),
+            'advice_text': self.request.GET.get('advice_text', None),
+            
+            }
 
         query_result =  Advice.objects.order_by('name')
 
 
         if query['name'] and query['name'] != '':
             query_result = query_result.filter(name__icontains=query['name'])
-
+        if query['description'] and query['description'] != '':
+            query_result = query_result.filter(description__icontains=query['description'])
+        if query['advice_text'] and query['advice_text'] != '':
+            query_result = query_result.filter(advice__icontains=query['advice_text'])
   
         return query_result
     

@@ -207,7 +207,7 @@
                   <div class="modal-body">
                     <div class="container">
                       <form id="filter_form"
-                            action="{% url 'sini:incidence_list' %}"
+                            action="{% url 'sini:advice_list' %}"
                             class=""
                             method="get"
                             autocomplete="off">
@@ -221,6 +221,32 @@
                                    name="name"
                                    class="form-control"
                                    value="{{ value_name }}">
+                          </div>
+                          <br>
+                        </div>
+                        <div class="form-group mt-0 mb-0">
+                          <label class="control-label" for="id_name">
+                            Descripción
+                          </label>
+                          <div class=" ">
+                            <input id="id_description"
+                                   type="text"
+                                   name="description"
+                                   class="form-control"
+                                   value="{{ value_description }}">
+                          </div>
+                          <br>
+                        </div>
+                        <div class="form-group mt-0 mb-0">
+                          <label class="control-label" for="id_name">
+                            Consejo
+                          </label>
+                          <div class=" ">
+                            <input id="id_advice_text"
+                                   type="text"
+                                   name="advice_text"
+                                   class="form-control"
+                                   value="{{ value_advice_text }}">
                           </div>
                           <br>
                         </div>
@@ -273,6 +299,8 @@
 
   $('#reset_button').click(function () {
       document.getElementById("id_name").value = "";
+      document.getElementById("id_description").value = "";
+      document.getElementById("id_advice_text").value = "";
 
      
   });
