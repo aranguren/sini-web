@@ -164,13 +164,19 @@
                 <div class="mr-2">{% firstof warning.type_incidence|default_if_none:"-" %}</div>
               </div>
             </div>
+            <div class="col-3">
+              <div class="form-group">
+                <h6>Creado desde</h6>
+                <div class="mr-2">{% firstof warning.get_creation_origin_display|default_if_none:"-" %}</div>
+              </div>
+            </div>
             <!--div class="col-3">
               <div class="form-group">
                 <h6>Status</h6>
                 <div class="mr-2">{% firstof warning.get_status_display|default_if_none:"-" %}</div>
               </div>
             </div-->
-            <div class="col-3">
+            <!--div class="col-3">
               <div class="form-group">
                 <h6>Creado por</h6>
                 {% if  warning.creation_origin == 'api'%}
@@ -181,7 +187,7 @@
                 -
                 {% endif %}
               </div>
-            </div>
+            </div-->
             <div class="col-3">
               <div class="form-group">
                 <h6>Fecha creación</h6>
@@ -191,12 +197,7 @@
             
           </div>
           <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <h6>Creado desde</h6>
-                <div class="mr-2">{% firstof warning.get_creation_origin_display|default_if_none:"-" %}</div>
-              </div>
-            </div>
+
             <!--div class="col-3">
               <div class="form-group">
                 <h6>Activo</h6>

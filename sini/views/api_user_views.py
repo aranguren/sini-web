@@ -14,7 +14,7 @@ from django.shortcuts import get_object_or_404, get_list_or_404,  redirect
 from django.http import HttpResponseRedirect
 from django.contrib.auth import get_user_model
 from passlib.hash import pbkdf2_sha256 as sha256
-
+from django.db.models import RestrictedError
 from ..tokens import account_activation_token  
 from django.core.mail import EmailMessage  
 
@@ -324,4 +324,29 @@ def user_change_password(request):
         resp['error_description'] = str(e)
         return JsonResponse(resp, status=500)
     
+    return JsonResponse(resp, status=200)
+
+
+@login_required(login_url='/login/')
+def api_user_delete(request):
+    resp = {}
+    query = {'id': request.GET.get('id', None)}
+    id = query['id']
+    print(id)
+   
+    user = ApiUser.objects.get(id=id)
+    #raise RestrictedError("Debe eliminar primero el bla bla ", warning)
+    try:
+        user.delete()
+    except RestrictedError as e:
+        resp['mensaje'] = 'restricted'
+        resp['error'] = "{} {}".format(e.args[0], str(e.args[1]))
+        return JsonResponse(resp, status=500)
+    except Exception as e:
+        resp['mensaje'] = 'error'
+        resp['error'] = json.dumps(e)
+        return JsonResponse(resp, status=500)
+
+    resp['mensaje'] = 'deleted'
+    print(resp)
     return JsonResponse(resp, status=200)

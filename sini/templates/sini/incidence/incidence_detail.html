@@ -178,8 +178,8 @@
             </div-->
             <div class="col-3">
               <div class="form-group">
-                <h6>Creado por</h6>
-                <div class="mr-2">{% firstof incidence.created_by|default_if_none:"-" %}</div>
+                <h6>Prioridad</h6>
+                <div class="mr-2">{% firstof incidence.priority|default_if_none:"-" %}</div>
               </div>
             </div>
             <div class="col-3">

@@ -3,7 +3,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DetailView, T
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.conf import settings
-from ..models import Incidence, MobileWarning, Contact
+from ..models import Incidence, MobileWarning, Contact, IncidenceType
 from ..forms import IncidenceForm
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -39,6 +39,15 @@ class IncidenceListView(LoginRequiredMixin, ListView):
         self.request.session['page_from'] = ""
         self.request.session['referer'] = {}
 
+        incidences_types = IncidenceType.objects.all()
+        context['incidences_types'] = incidences_types
+
+        # aqui ponemos los valores a los filtros
+        context['value_name'] = self.request.GET.get('name', '')
+        context['value_type'] = self.request.GET.get('type', '')
+        context['value_status'] = self.request.GET.get('status', '')
+        context['value_active'] = self.request.GET.get('active', '')
+
         if context['is_paginated']:
             list_pages = []
 
@@ -71,13 +80,33 @@ class IncidenceListView(LoginRequiredMixin, ListView):
         return context
 
     def get_queryset(self):
-        query = {'name': self.request.GET.get('name', None)}
+        query = {
+            'name': self.request.GET.get('name', None),
+            'type': self.request.GET.get('type', None),
+            'status': self.request.GET.get('status', None),
+            'active': self.request.GET.get('active', None),
+            }
 
         query_result =  Incidence.objects.order_by('-created')
+
+        if query['active'] and query['active'] != '':
+            if query['active']=='si':
+                query_result = query_result.filter(active=True)
+            elif query['active']=='no':
+                query_result = query_result.filter(active=False)
+            elif query['active']=='si_no':
+                pass
 
 
         if query['name'] and query['name'] != '':
             query_result = query_result.filter(name__icontains=query['name'])
+        if query['type'] and query['type'] != '':
+            type_id = query['type']
+            type = IncidenceType.objects.get(id=type_id)
+            query_result = query_result.filter(name__icontains=query['name'],type_incidence=type )
+        if query['status'] and query['status'] != '':
+            query_result = query_result.filter(status__exact=query['status'])
+
 
   
         return query_result

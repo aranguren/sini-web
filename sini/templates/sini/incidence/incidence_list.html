@@ -1,4 +1,5 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
 {% load l10n %}
 {% load i18n %}
 {% block title %}
@@ -8,6 +9,9 @@
 {% block stylesheets %}
   <link href="/static/assets/js/plugins/datatables/jquery.dataTables.css"
         rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="{% static 'sini/css/select2-custom.css' %}"> 
   <style>
   .clickable{
        cursor: pointer;
@@ -42,7 +46,7 @@
                 <h6 class="mt-0">
                   <span class="badge badge-pill badge-large badge-danger  mt-0 ml-1 mr-0">Filtros aplicados
                     <button type="button"
-                            onclick="window.location='{% url 'sini:api_user_list' %}'"
+                            onclick="window.location='{% url 'sini:incidence_list' %}'"
                             class="btn-close"></button>
                   </span>
                 </h6>
@@ -246,9 +250,9 @@
                             class=""
                             method="get"
                             autocomplete="off">
-                        <div class="form-group">
+                        <div class="form-group mb-0">
                           <label class="control-label" for="id_name">
-                            {% trans 'Nombre' %}
+                          Nombre
                           </label>
                           <div class=" ">
                             <input id="id_name"
@@ -257,6 +261,44 @@
                                    class="form-control"
                                    value="{{ value_name }}">
                           </div>
+                          <br>
+                        </div>
+                        <div class="form-group mt-0 mb-0">
+                          <label class="control-label" for="id_name">
+                          Tipo Incidencia
+                          </label>
+                  
+                            <select id="id_type" name="type" style="width: 100%;" class="form-control form-select .js-select2-simple">
+                              <option></option>
+                              {% for incidence_type in incidences_types %}
+                                  <option value="{{ incidence_type.id }}">{{ incidence_type.name }}</option>
+                              {% endfor %}
+                  
+                          </select> 
+                        
+                          <br>
+                        </div>
+                        <div class="form-group mt-0 mb-0">
+                          <label class="control-label" for="id_name">
+                          Estado
+                          </label>
+                            <select id="id_status" name="status" style="width: 100%;" class="form-control form-select">
+                              <option></option>
+                                  <option value="creado">Creado</option>
+                                  <option value="finalizado">Finalizado</option>
+                          </select> 
+                          <br>
+                        </div>
+                        <div class="form-group mt-0 mb-0">
+                          <label class="control-label" for="id_name">
+                          Activo
+                          </label>
+                            <select id="id_active" name="active" style="width: 100%;" class="form-control form-select">
+                              <option></option>
+                                  <option value="si">SI</option>
+                                  <option value="no">NO</option>
+                                  <option value="si_no">SI o NO</option>
+                          </select> 
                           <br>
                         </div>
                         <!--div class="form-group">
@@ -303,11 +345,24 @@
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
   <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script>
 
+    $(document).ready(function() {
+      $('.js-select2-simple').select2();
 
+
+      document.getElementById("id_type").value = "{{value_type}}";
+      document.getElementById("id_status").value = "{{value_status}}";
+      document.getElementById("id_active").value = "{{value_active}}";
+      //console.log(`{% csrf_token %}`);
+
+  });
   $('#reset_button').click(function () {
       document.getElementById("id_name").value = "";
+      document.getElementById("id_type").value = "";
+      document.getElementById("id_status").value = "";
+      document.getElementById("id_active").value = "";
 
      
   });

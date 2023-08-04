@@ -1,7 +1,7 @@
 
 from django.urls import path 
 
-from .views.api_user_views import user_change_password, ApiUserActivateView, ApiUserArchiveView, ApiUserListView, create_api_user, ApiUserDetailView, ApiUserUpdateView, activate_user
+from .views.api_user_views import api_user_delete, user_change_password, ApiUserActivateView, ApiUserArchiveView, ApiUserListView, create_api_user, ApiUserDetailView, ApiUserUpdateView, activate_user
 from .views.warning_views import (WarningListView, WarningDetailView, WarningCreateView, ExportCsvWarningView,
                                    WarningUpdateView, warning_delete, WarningDiscardView,
                                    warning_assign, warning_create_incidence, warning_assign_closest,
@@ -22,6 +22,7 @@ urlpatterns = [
     path('usuarios-moviles/crear/', create_api_user, name='api_user_create'),
     path('usuarios-moviles/detalles/<str:pk>/', ApiUserDetailView.as_view(), name='api_user_detail'),
     path('usuarios-moviles/modificar/<str:pk>/', ApiUserUpdateView.as_view(), name='api_user_update'),
+    path('usuarios-moviles/eliminar/', api_user_delete, name='api_user_create'),
 
 
     path('usuarios-moviles/activar/<str:pk>/', ApiUserActivateView.as_view(), name='api_user_activate'),
