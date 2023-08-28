@@ -28,40 +28,63 @@
           <div class="card-header">
             <h3 class="mb-1">Listado Avisos</h3>
             <hr class="horizontal dark my-2">
-            <div class="d-flex justify-content-left">
-              <a href="{% url 'sini:warning_create' %}"
-                 class="btn btn-primary btn-large btn-sm m-b-xm mr-4"><i class="fa fa-plus"></i>&nbsp;&nbsp;Crear</a>
-              <button class="btn bg-secondary text-white btn-large btn-sm m-b-xm mx-1"
-                      id="eliminarB"
-                      data-bs-toggle="modal"
-                      data-bs-target="#deleteModal"
-                      value="{{ farm.id }} ">
-                <i class="fa fa-filter" aria-hidden="true"></i>&nbsp;&nbsp;Filtrar
-              </button>
-              {% if has_filters %}
-                <h6 class="mt-0">
-                  <span class="badge badge-pill badge-large badge-danger  mt-0 ml-1 mr-0">Filtros aplicados
-                    <button type="button"
-                            onclick="window.location='{% url 'sini:warning_list' %}'"
-                            class="btn-close"></button>
-                  </span>
-                </h6>
-              {% endif %}
-              <form id="export_form"
-              action="{% url 'sini:warning_export_csv'%}"
-              class=""
-              method="post"
-              autocomplete="off">
-              {% csrf_token %}
-                
-                <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
-                  type="submit"
-                  id="descartarB"
-                  value="descartar">&nbsp;&nbsp;Exportar
+            <div class="row">
+              <div class="col-6 d-flex justify-content-left">
+                <a href="{% url 'sini:warning_create' %}"
+                   class="btn btn-primary btn-large btn-sm m-b-xm mr-4"><i class="fa fa-plus"></i>&nbsp;&nbsp;Crear</a>
+                <button class="btn bg-secondary text-white btn-large btn-sm m-b-xm mx-1"
+                        id="eliminarB"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteModal"
+                        value="{{ farm.id }} ">
+                  <i class="fa fa-filter" aria-hidden="true"></i>&nbsp;&nbsp;Filtrar
                 </button>
+                {% if has_filters %}
+                  <h6 class="mt-0">
+                    <span class="badge badge-pill badge-large badge-danger  mt-0 ml-1 mr-0">Filtros aplicados
+                      <button type="button"
+                              onclick="window.location='{% url 'sini:warning_list' %}'"
+                              class="btn-close"></button>
+                    </span>
+                  </h6>
+                {% endif %}
                
-              </form>
+                
+              </div>
+              <div class="col-6 d-flex justify-content-end">
+                <form id="export_form"
+                action="{% url 'sini:warning_export_csv'%}"
+                class=""
+                method="post"
+                autocomplete="off">
+                {% csrf_token %}
+                  
+                  <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
+                    type="submit"
+                    id="descartarB"
+                    value="descartar">&nbsp;&nbsp;Exportar CSV
+                  </button>
+                 
+                </form>
+  
+                <form id="export_form"
+                action="{% url 'sini:warning_export_shp'%}"
+                class=""
+                method="post"
+                autocomplete="off">
+                {% csrf_token %}
+                  
+                  <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
+                    type="submit"
+                    id="descartarB"
+                    value="descartar">&nbsp;&nbsp;Exportar SHP
+                  </button>
+                 
+                </form>
+  
+              </div>
             </div>
+
             
           </div>
           <div class="card-body mt-0">

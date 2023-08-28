@@ -42,7 +42,7 @@
                 <h6 class="mt-0">
                   <span class="badge badge-pill badge-large badge-danger  mt-0 ml-1 mr-0">Filtros aplicados
                     <button type="button"
-                            onclick="window.location='{% url 'sini:warning_list' %}'"
+                            onclick="window.location='{% url 'sini:notification_list' %}'"
                             class="btn-close"></button>
                   </span>
                 </h6>
@@ -217,13 +217,13 @@
                   <div class="modal-body">
                     <div class="container">
                       <form id="filter_form"
-                            action="{% url 'sini:api_user_list' %}"
+                            action="{% url 'sini:notification_list' %}"
                             class=""
                             method="get"
                             autocomplete="off">
                         <div class="form-group">
                           <label class="control-label" for="id_subject">
-                            {% trans 'Nombre' %}
+                            Asunto
                           </label>
                           <div class=" ">
                             <input id="id_subject"

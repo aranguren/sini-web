@@ -26,7 +26,7 @@ class NotificationListView(LoginRequiredMixin, ListView):
     
 
 
-        if 'name' not in self.request.GET.keys():
+        if 'subject' not in self.request.GET.keys():
             context['has_filters'] = False
         else:
             context['has_filters'] = True
@@ -34,6 +34,8 @@ class NotificationListView(LoginRequiredMixin, ListView):
         
         self.request.session['page_from'] = ""
         self.request.session['referer'] = {}
+
+        context['value_subject'] = self.request.GET.get('subject', '')
 
         if context['is_paginated']:
             list_pages = []
@@ -73,7 +75,7 @@ class NotificationListView(LoginRequiredMixin, ListView):
 
 
         if query['subject'] and query['subject'] != '':
-            query_result = query_result.filter(subject__icontains=query['name'])
+            query_result = query_result.filter(subject__icontains=query['subject'])
 
   
         return query_result

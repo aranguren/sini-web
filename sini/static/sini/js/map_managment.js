@@ -566,6 +566,7 @@ document
         var successSpanLabel = document.getElementById('successSpanLabel')
         successTitlelabel.textContent = "Incidencia creada"
         successSpanLabel.textContent = " Se ha creado con éxito la incidencia a partir del aviso seleccionado. El aviso se ocultará"
+        location.reload(true);
         $('#operationSuccessModal').modal('show')
         //$('#createdSuccessModal').modal('show')
       },

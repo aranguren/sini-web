@@ -9,9 +9,9 @@
 {% block stylesheets %}
   <link href="/static/assets/js/plugins/datatables/jquery.dataTables.css"
         rel="stylesheet">
-
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="{% static 'sini/css/select2-custom.css' %}"> 
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+        rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'sini/css/select2-custom.css' %}">
   <style>
   .clickable{
        cursor: pointer;
@@ -32,42 +32,52 @@
           <div class="card-header">
             <h3 class="mb-1">Listado Incidencias</h3>
             <hr class="horizontal dark my-2">
-            <div class="d-flex justify-content-left">
-              <a href="{% url 'sini:incidence_create' %}"
-                 class="btn btn-primary btn-large btn-sm m-b-xm mr-4"><i class="fa fa-plus"></i>&nbsp;&nbsp;Crear</a>
-              <button class="btn bg-secondary text-white btn-large btn-sm m-b-xm mx-1"
-                      id="eliminarB"
-                      data-bs-toggle="modal"
-                      data-bs-target="#deleteModal"
-                      value="{{ farm.id }} ">
-                <i class="fa fa-filter" aria-hidden="true"></i>&nbsp;&nbsp;Filtrar
-              </button>
-              {% if has_filters %}
-                <h6 class="mt-0">
-                  <span class="badge badge-pill badge-large badge-danger  mt-0 ml-1 mr-0">Filtros aplicados
-                    <button type="button"
-                            onclick="window.location='{% url 'sini:incidence_list' %}'"
-                            class="btn-close"></button>
-                  </span>
-                </h6>
-              {% endif %}
-              <form id="export_form"
-              action="{% url 'sini:incidence_export_csv'%}"
-              class=""
-              method="post"
-              autocomplete="off">
-              {% csrf_token %}
-                
-                <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
-                  type="submit"
-                  id="descartarB"
-                  value="descartar">&nbsp;&nbsp;Exportar
+            <div class="row">
+              <div class="col-6 d-flex justify-content-left">
+                <a href="{% url 'sini:incidence_create' %}"
+                   class="btn btn-primary btn-large btn-sm m-b-xm mr-4"><i class="fa fa-plus"></i>&nbsp;&nbsp;Crear</a>
+                <button class="btn bg-secondary text-white btn-large btn-sm m-b-xm mx-1"
+                        id="eliminarB"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteModal"
+                        value="{{ farm.id }} ">
+                  <i class="fa fa-filter" aria-hidden="true"></i>&nbsp;&nbsp;Filtrar
                 </button>
-               
-              </form>
-            
+                {% if has_filters %}
+                  <h6 class="mt-0">
+                    <span class="badge badge-pill badge-large badge-danger  mt-0 ml-1 mr-0">Filtros aplicados
+                      <button type="button"
+                              onclick="window.location='{% url 'sini:incidence_list' %}'"
+                              class="btn-close"></button>
+                    </span>
+                  </h6>
+                {% endif %}
+              </div>
+              <div class="col-6 d-flex justify-content-end">
+                <form id="export_form_csv"
+                      action="{% url 'sini:incidence_export_csv' %}"
+                      class=""
+                      method="post"
+                      autocomplete="off">
+                  {% csrf_token %}
+                  <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
+                          type="submit"
+                          id="descartarB"
+                          value="descartar">&nbsp;&nbsp;Exportar CSV</button>
+                </form>
+                <form id="export_form_shp"
+                      action="{% url 'sini:incidence_export_shp' %}"
+                      class=""
+                      method="post"
+                      autocomplete="off">
+                  {% csrf_token %}
+                  <button class="btn btn-primary btn-large btn-sm mx-1 mb-0"
+                          type="submit"
+                          id="descartarB"
+                          value="descartar">&nbsp;&nbsp;Exportar SHP</button>
+                </form>
+              </div>
             </div>
-            
           </div>
           <div class="card-body mt-0">
             <div class="d-flex justify-content-right">
@@ -200,27 +210,23 @@
                     {% for incidence in incidences %}
                       <tr class="clickable"
                           onclick="window.location='{% url 'sini:incidence_detail' incidence.id %}'">
-                        <td >{% firstof incidence.created|default_if_none:"" %}</td>
+                        <td>{% firstof incidence.created|default_if_none:"" %}</td>
                         <!--tr class="clickable" onclick="window.location='http://localhost:8000/riesgo/centro/detalles/{{center.id }}'"> -->
-                        <td>
-                          {{ incidence.name }}
-                        </td>
-                        <td >{% firstof incidence.type_incidence|default_if_none:"" %}</td>
-                        <td >{% firstof incidence.get_status_display|default_if_none:"" %}</td>
-                        <td >{% firstof incidence.created_by|default_if_none:"" %}</td>
+                        <td>{{ incidence.name }}</td>
+                        <td>{% firstof incidence.type_incidence|default_if_none:"" %}</td>
+                        <td>{% firstof incidence.get_status_display|default_if_none:"" %}</td>
+                        <td>{% firstof incidence.created_by|default_if_none:"" %}</td>
                         {% if incidence.active %}
-                        <td>SI</td>
+                          <td>SI</td>
                         {% else %}
-                        <td>NO</td>
+                          <td>NO</td>
                         {% endif %}
                       </tr>
                     </tbody>
                   {% endfor %}
                 </table>
               {% else %}
-                <h3 style="color: red" class="text-center">
-                  {% trans 'No existen incidencias a mostrar' %}
-                </h3>
+                <h3 style="color: red" class="text-center">{% trans 'No existen incidencias a mostrar' %}</h3>
               {% endif %}
             </div>
             <div class="modal fade"
@@ -232,9 +238,7 @@
               <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">
-                      Filtrar
-                    </h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Filtrar</h5>
                     <button type="button"
                             class="btn-close text-dark"
                             data-bs-dismiss="modal"
@@ -251,9 +255,7 @@
                             method="get"
                             autocomplete="off">
                         <div class="form-group mb-0">
-                          <label class="control-label" for="id_name">
-                          Nombre
-                          </label>
+                          <label class="control-label" for="id_name">Nombre</label>
                           <div class=" ">
                             <input id="id_name"
                                    type="text"
@@ -264,41 +266,41 @@
                           <br>
                         </div>
                         <div class="form-group mt-0 mb-0">
-                          <label class="control-label" for="id_name">
-                          Tipo incidente
-                          </label>
-                  
-                            <select id="id_type" name="type" style="width: 100%;" class="form-control form-select .js-select2-simple">
-                              <option></option>
-                              {% for incidence_type in incidences_types %}
-                                  <option value="{{ incidence_type.id }}">{{ incidence_type.name }}</option>
-                              {% endfor %}
-                  
-                          </select> 
-                        
+                          <label class="control-label" for="id_name">Tipo incidente</label>
+                          <select id="id_type"
+                                  name="type"
+                                  style="width: 100%"
+                                  class="form-control form-select .js-select2-simple">
+                            <option></option>
+                            {% for incidence_type in incidences_types %}
+                              <option value="{{ incidence_type.id }}">{{ incidence_type.name }}</option>
+                            {% endfor %}
+                          </select>
                           <br>
                         </div>
                         <div class="form-group mt-0 mb-0">
-                          <label class="control-label" for="id_name">
-                          Estado
-                          </label>
-                            <select id="id_status" name="status" style="width: 100%;" class="form-control form-select">
-                              <option></option>
-                                  <option value="creado">Creado</option>
-                                  <option value="finalizado">Finalizado</option>
-                          </select> 
+                          <label class="control-label" for="id_name">Estado</label>
+                          <select id="id_status"
+                                  name="status"
+                                  style="width: 100%"
+                                  class="form-control form-select">
+                            <option></option>
+                            <option value="creado">Creado</option>
+                            <option value="finalizado">Finalizado</option>
+                          </select>
                           <br>
                         </div>
                         <div class="form-group mt-0 mb-0">
-                          <label class="control-label" for="id_name">
-                          Activo
-                          </label>
-                            <select id="id_active" name="active" style="width: 100%;" class="form-control form-select">
-                              <option></option>
-                                  <option value="si">SI</option>
-                                  <option value="no">NO</option>
-                                  <option value="si_no">SI o NO</option>
-                          </select> 
+                          <label class="control-label" for="id_name">Activo</label>
+                          <select id="id_active"
+                                  name="active"
+                                  style="width: 100%"
+                                  class="form-control form-select">
+                            <option></option>
+                            <option value="si">SI</option>
+                            <option value="no">NO</option>
+                            <option value="si_no">SI o NO</option>
+                          </select>
                           <br>
                         </div>
                         <!--div class="form-group">
@@ -306,14 +308,10 @@
                             {% trans 'Código' %}
                           </label>
                           <div class=" ">
-                            <input id="id_cemail"
-                                   type="text"
-                                   name="email"
-                                   class="form-control"
-                                   value="{{ value_email }}">
+                            <input id="id_cemail" type="text" name="email" class="form-control" value="{{ value_email }}">
                           </div>
                           <br>
-                        </div-->
+                        </div -->
                       </form>
                     </div>
                   </div>
@@ -327,9 +325,7 @@
                     <button form="filter_form" type="submit" class="btn btn-secondary btn-sm">
                       <i class="fa fa-filter"></i>&nbsp;&nbsp;{% trans 'Filtrar' %}
                     </button>
-                    <button type="button" class="btn btn-white btn-sm" data-bs-dismiss="modal">
-                      {% trans 'Cerrar' %}
-                    </button>
+                    <button type="button" class="btn btn-white btn-sm" data-bs-dismiss="modal">{% trans 'Cerrar' %}</button>
                   </div>
                 </div>
               </div>
@@ -338,7 +334,6 @@
         </div>
       </div>
     </div>
-   
     {% include "includes/footer.html" %}
   </div>
 {% endblock content %}
@@ -347,9 +342,8 @@
   <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script>
-
     $(document).ready(function() {
-      $('.js-select2-simple').select2();
+      //$('.js-select2-simple').select2();
 
 
       document.getElementById("id_type").value = "{{value_type}}";

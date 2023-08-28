@@ -166,6 +166,9 @@
                       <th>
                         <b>Grupo</b>
                       </th>
+                      <th>
+                        <b>Activo</b>
+                      </th>
                     
                     </tr>
                   </thead>
@@ -180,6 +183,11 @@
                         </td>
                         <td >{% firstof user.email|default_if_none:"" %}</td>
                         <td >{% firstof user.group|default_if_none:"" %}</td>
+                        {% if user.active %}
+                        <td>SI</td>
+                        {% else %}
+                        <td>NO</td>
+                        {% endif %}
                       </tr>
                     </tbody>
                   {% endfor %}
@@ -217,7 +225,7 @@
                             class=""
                             method="get"
                             autocomplete="off">
-                        <div class="form-group">
+                        <div class="form-group mt-0 mb-0">
                           <label class="control-label" for="id_name">
                             {% trans 'Nombre' %}
                           </label>
@@ -230,12 +238,12 @@
                           </div>
                           <br>
                         </div>
-                        <div class="form-group">
-                          <label class="control-label" for="id_email">
-                            {% trans 'Código' %}
+                        <div class="form-group mt-0 mb-0">
+                          <label class="control-label" for="id_name">
+                            Correo electrónico
                           </label>
                           <div class=" ">
-                            <input id="id_cemail"
+                            <input id="id_email"
                                    type="text"
                                    name="email"
                                    class="form-control"
@@ -243,6 +251,34 @@
                           </div>
                           <br>
                         </div>
+                        <div class="form-group mt-0 mb-0">
+                          <label class="control-label" for="id_name">
+                            Grupo
+                          </label>
+                  
+                            <select id="id_group" name="group" style="width: 100%;" class="form-control form-select .js-select2-simple">
+                              <option></option>
+                              {% for group in groups %}
+                                  <option value="{{ group.id }}">{{ group.name }}</option>
+                              {% endfor %}
+                  
+                          </select> 
+                        
+                          <br>
+                        </div>
+                        <div class="form-group mt-0 mb-0">
+                          <label class="control-label" for="id_name">
+                          Activo
+                          </label>
+                            <select id="id_active" name="active" style="width: 100%;" class="form-control form-select">
+                              <option></option>
+                                  <option value="si">SI</option>
+                                  <option value="no">NO</option>
+                                  <option value="si_no">SI o NO</option>
+                          </select> 
+                          <br>
+                        </div>
+
                       </form>
                     </div>
                   </div>
@@ -276,10 +312,23 @@
   <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
   <script>
 
+    $(document).ready(function() {
+     // $('.js-select2-simple').select2();
+
+
+
+      document.getElementById("id_group").value = "{{value_group}}";
+      document.getElementById("id_active").value = "{{value_active}}";
+      //console.log(`{% csrf_token %}`);
+
+  });
 
   $('#reset_button').click(function () {
       document.getElementById("id_name").value = "";
       document.getElementById("id_email").value = "";
+      document.getElementById("id_group").value = "";
+      document.getElementById("id_active").value = "";
+
      
   });
 

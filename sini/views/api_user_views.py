@@ -47,6 +47,14 @@ class ApiUserListView(LoginRequiredMixin, ListView):
         self.request.session['page_from'] = ""
         self.request.session['referer'] = {}
 
+        groups = ApiGroup.objects.all()
+        context['groups'] = groups
+
+        context['value_name'] = self.request.GET.get('name', '')
+        context['value_email'] = self.request.GET.get('email', '')
+        context['value_group'] = self.request.GET.get('group', '')
+        context['value_active'] = self.request.GET.get('active', '')
+
         if context['is_paginated']:
             list_pages = []
 
@@ -80,15 +88,31 @@ class ApiUserListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         query = {'name': self.request.GET.get('name', None),
-                 'email': self.request.GET.get('email', None)}
+                 'email': self.request.GET.get('email', None),
+                 'group': self.request.GET.get('group', None),
+                 'active': self.request.GET.get('active', None),
+                 
+                 }
 
         query_result =  ApiUser.objects.order_by('name')
+
+        if query['active'] and query['active'] != '':
+            if query['active']=='si':
+                query_result = query_result.filter(active=True)
+            elif query['active']=='no':
+                query_result = query_result.filter(active=False)
+            elif query['active']=='si_no':
+                pass
 
 
         if query['name'] and query['name'] != '':
             query_result = query_result.filter(name__icontains=query['name'])
         if query['email'] and query['email'] != '':
             query_result = query_result.filter(email__icontains=query['email'])
+        if query['group'] and query['group'] != '':
+            group_id = int(query['group'])
+            group = ApiGroup.objects.get(id=group_id)
+            query_result = query_result.filter(group=group )
   
         return query_result
     
@@ -143,7 +167,7 @@ def create_api_user(request):
             new_user.save()  
 
             current_site = get_current_site(request) #"localhost:8000" #get_current_site(request)  
-            mail_subject = 'Enlace para activación de cuenta en SINI'  
+            mail_subject = 'Enlace para activación de cuenta en AlertaDo'  
             uid = urlsafe_base64_encode(force_bytes(new_user.id))
 
             token = account_activation_token.make_token(new_user)
@@ -301,7 +325,7 @@ def user_change_password(request):
     user.save()  
 
     current_site = get_current_site(request) #"localhost:8000" #get_current_site(request)  
-    mail_subject = 'Nueva contraseña para su cuenta en SINI'  
+    mail_subject = 'Nueva contraseña para su cuenta en AlertaDo'  
 
 
 

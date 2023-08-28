@@ -3,12 +3,12 @@ from django.urls import path
 
 from .views.api_user_views import api_user_delete, user_change_password, ApiUserActivateView, ApiUserArchiveView, ApiUserListView, create_api_user, ApiUserDetailView, ApiUserUpdateView, activate_user
 from .views.warning_views import (WarningListView, WarningDetailView, WarningCreateView, ExportCsvWarningView,
-                                   WarningUpdateView, warning_delete, WarningDiscardView,
+                                   WarningUpdateView, warning_delete, WarningDiscardView, ExportShapefileWarningView,
                                    warning_assign, warning_create_incidence, warning_assign_closest,
                                    warning_archive, warning_toss, WarningArchiveView,  WarningActivateView)
 from .views.incidence_views import (IncidenceListView, IncidenceDetailView, IncidenceCreateView, IncidenceUpdateView, 
                                     incidence_delete,incidence_finalize, incidence_archive, IncidenceManagmentView,
-                                      IncidenceActivateView, ExportCsvIncidenceView, 
+                                      IncidenceActivateView, ExportCsvIncidenceView, ExportShapefileIncidenceView,
                                     IncidenceArchiveView, IncidenceFinalizeView, incidence_send_email)
 from .views.advice_views import AdviceListView, AdviceDetailView, AdviceCreateView, AdviceUpdateView, advice_delete
 from .views.notification_views import NotificationListView, NotificationDetailView, NotificationCreateView
@@ -22,7 +22,7 @@ urlpatterns = [
     path('usuarios-moviles/crear/', create_api_user, name='api_user_create'),
     path('usuarios-moviles/detalles/<str:pk>/', ApiUserDetailView.as_view(), name='api_user_detail'),
     path('usuarios-moviles/modificar/<str:pk>/', ApiUserUpdateView.as_view(), name='api_user_update'),
-    path('usuarios-moviles/eliminar/', api_user_delete, name='api_user_create'),
+    path('usuarios-moviles/eliminar/', api_user_delete, name='api_user_delete'),
 
 
     path('usuarios-moviles/activar/<str:pk>/', ApiUserActivateView.as_view(), name='api_user_activate'),
@@ -36,6 +36,8 @@ urlpatterns = [
     #-----------------------------------------------------------------
     path('avisos/', WarningListView.as_view(), name='warning_list'),
     path('avisos/csv/', ExportCsvWarningView.as_view(), name='warning_export_csv'),
+    path('avisos/shp/', ExportShapefileWarningView.as_view(), name='warning_export_shp'),
+    
     
     path('avisos/crear/', WarningCreateView.as_view(), name='warning_create'),
     path('avisos/detalles/<str:pk>/', WarningDetailView.as_view(), name='warning_detail'),
@@ -64,6 +66,9 @@ urlpatterns = [
     
     path('incidencias/eliminar/', incidence_delete, name='incidence_delete'),
     path('incidencias/csv/', ExportCsvIncidenceView.as_view(), name='incidence_export_csv'),
+    path('incidencias/shp/', ExportShapefileIncidenceView.as_view(), name='incidence_export_shp'),
+
+    
     
     path('incidencias/finalizar/<str:pk>/', incidence_finalize, name='incidence_finalize'),
     path('incidencias/archivar-map/<str:pk>/', incidence_archive, name='incidence_archive_map'),

@@ -67,25 +67,35 @@ def login_view(request):
     return response
 
 class WarningAPICreate(generics.CreateAPIView):
-    authentication_classes = [SafeJWTAuthentication]
-    permission_classes = (IsUserAuthenticated,)
+    authentication_classes = []
+    permission_classes = ()
     queryset = MobileWarning.objects.all()
     serializer_class = WarningSerializer
 
     def perform_create(self, serializer):
-        serializer.save(created_by_api_user=self.request.user, 
-        modified_by_api_user=self.request.user,creation_origin="api", active=True  )
+        if self.request.user.is_anonymous:
+            serializer.save(creation_origin="api", active=True  )
+        else:
+            serializer.save(created_by_api_user=self.request.user, 
+            modified_by_api_user=self.request.user,creation_origin="api", active=True  )
+
 
 
 
 class WarningAPIUpdate(generics.UpdateAPIView):
-    authentication_classes = [SafeJWTAuthentication]
-    permission_classes = (IsUserAuthenticated, IsUserOwner,)  
+    authentication_classes = []
+    permission_classes = ()  
     queryset = MobileWarning.objects.all()
     serializer_class = UploadWarningFilesSerializer
 
     def perform_update(self, serializer):
-        serializer.save( modified_by_api_user=self.request.user,  )
+        if not self.request.user.is_anonymous:
+            serializer.save( modified_by_api_user=self.request.user,  )
+        else:
+            serializer.save()
+
+
+        
 
 
 class IncidenceAPIList(generics.ListAPIView):
@@ -194,8 +204,8 @@ class FarmAPIDelete(generics.DestroyAPIView):
 
 
 class AdviceAPIList(generics.ListAPIView):
-    authentication_classes = [SafeJWTAuthentication]
-    permission_classes = (IsUserAuthenticated,)
+    authentication_classes = []
+    permission_classes = ()
     queryset = Advice.objects.all()
     serializer_class = AdviceSerializer
 

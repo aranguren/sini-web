@@ -12,6 +12,9 @@ import json
 from django.contrib.gis.db.models.functions import Distance
 import csv
 from django.http import HttpResponse
+import shapefile
+from zipfile import ZipFile
+from datetime import datetime
 
 
 class WarningListView(LoginRequiredMixin, ListView):
@@ -102,7 +105,7 @@ class WarningListView(LoginRequiredMixin, ListView):
         if query['type'] and query['type'] != '':
             type_id = query['type']
             type = IncidenceType.objects.get(id=type_id)
-            query_result = query_result.filter(name__icontains=query['name'],type_incidence=type )
+            query_result = query_result.filter(type_incidence=type )
         if query['status'] and query['status'] != '':
             query_result = query_result.filter(status__exact=query['status'])
 
@@ -402,7 +405,7 @@ class ExportCsvWarningView(LoginRequiredMixin, View):
 
     def post(self, request):
 
-        query_result = MobileWarning.objects.order_by('name')
+        query_result = MobileWarning.objects.order_by('-created')
 
 
         response = HttpResponse(
@@ -411,15 +414,93 @@ class ExportCsvWarningView(LoginRequiredMixin, View):
             )
         writer = csv.writer(response)
         #writer.writerow([])
-        writer.writerow(['Nombre','Fecha creación','Tipo incidente','Status','Incidencia', 'Activo','Latitud','Longitud','Descripción'])
+        writer.writerow(['ID','Nombre','Fecha creación','Fecha última modificación', 'Tipo incidente','Status','Incidencia', 'Activo','Latitud','Longitud','Descripción'])
 
         for item in query_result:
+            created = item.created.strftime("%d/%m/%Y, %H:%M:%S") if item.created else ""
+            modified = item.modified.strftime("%d/%m/%Y, %H:%M:%S") if item.created else ""
+            x =  item.geom.x if item.geom else ""
+            y =  item.geom.y if item.geom else ""
           
-            writer.writerow([item.name,item.created, item.type_incidence.name, item.status, item.assign_incidence.name if item.assign_incidence else "",
-                             "SI" if item.active else "NO", item.geom.y, item.geom.x, item.description])
+            writer.writerow([item.id, item.name, created, modified, item.type_incidence.name, item.status, item.assign_incidence.name if item.assign_incidence else "",
+                             "SI" if item.active else "NO", y, x, item.description])
       
         return response
 
+
+class ExportShapefileWarningView(LoginRequiredMixin, View):
+
+    def post(self, request):
+
+        mobile_warnings = MobileWarning.objects.order_by('-created')
+
+        """
+        response = HttpResponse(
+            content_type="application/force-download",
+            headers={"Content-Disposition": 'attachment; filename="incidencias.shp"'},
+            )
+        """
+        try:
+            from StringIO import StringIO
+        except ImportError:
+            from io import BytesIO as StringIO
+        
+        shp = StringIO()
+        shx = StringIO()
+        dbf = StringIO()
+        #shapefiles/test/testfile
+        #w = shapefile.Writer("./warnings.shp", shapeType=shapefile.POINT)
+        
+        w = shapefile.Writer(shp=shp, shx=shx, dbf=dbf, shapeType=shapefile.POINT)
+        w.autoBalance = 1
+        w.field('ID', 'C', size=255)
+        w.field('CREATED', 'D')
+        w.field('CREATED_TIME', 'C')
+        w.field('MODIFIED', 'D')
+        w.field('MODIFIED_TIME', 'C')
+        w.field('ACTIVE', 'L')
+        w.field('NAME', 'C', size=255)
+        w.field('TYPE_INCIDENCE', 'C', size=255)
+        w.field('DESCRIPTION', 'C')
+        w.field('STATUS', 'C', size=255)
+        w.field('ASSIGN_INCIDENCE', 'C', size=255)
+
+    
+        for mwarning in mobile_warnings:
+            created = mwarning.created.strftime("%Y%m%d") if mwarning.created else None
+            created_time = mwarning.created.strftime("%H:%M:%S") if mwarning.created else None
+            modified = mwarning.modified.strftime("%Y%m%d") if mwarning.modified else None
+            modified_time = mwarning.modified.strftime("%H:%M:%S") if mwarning.modified else None    
+
+            w.record(ID=mwarning.id, 
+                     CREATED=created, 
+                     CREATED_TIME=created_time, 
+                     MODIFIED=modified, 
+                     MODIFIED_TIME=modified_time, 
+                     ACTIVE=mwarning.active, 
+                     NAME=mwarning.name, 
+                     TYPE_INCIDENCE=mwarning.type_incidence.name,
+                     DESCRIPTION=mwarning.description,
+                    STATUS=mwarning.status, 
+                    ASSIGN_INCIDENCE=mwarning.assign_incidence.name if mwarning.assign_incidence else None)
+            w.point(mwarning.geom.x, mwarning.geom.y) 
+        
+    
+        w.close()
+        mem_zip = StringIO()
+        with ZipFile(mem_zip, 'w') as myzip:
+            myzip.writestr("avisos.shp", shp.getvalue())
+            myzip.writestr("avisos.dbf", dbf.getvalue())
+            myzip.writestr("avisos.shx", shx.getvalue())
+            
+
+        full_zip_in_memory = mem_zip.getvalue()
+
+        response = HttpResponse(full_zip_in_memory, content_type='application/force-download')
+        response['Content-Disposition'] = 'attachment; filename="{}"'.format('avisos.zip')
+    
+        return response
+    
 """
 class ApiUserDetailView(LoginRequiredMixin, DetailView):
     model = ApiUser
