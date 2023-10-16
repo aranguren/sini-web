@@ -17,6 +17,8 @@ from passlib.hash import pbkdf2_sha256 as sha256
 from django.db.models import RestrictedError
 from ..tokens import account_activation_token  
 from django.core.mail import EmailMessage  
+from django.core.exceptions import PermissionDenied
+
 
 
 from ..models import ApiUser, ApiGroup
@@ -93,8 +95,10 @@ class ApiUserListView(LoginRequiredMixin, ListView):
                  'active': self.request.GET.get('active', None),
                  
                  }
-
-        query_result =  ApiUser.objects.order_by('name')
+        if self.request.user.is_superuser:
+            query_result =  ApiUser.objects.order_by('name')
+        else:
+            query_result =  ApiUser.objects.exclude(name__iexact='api').order_by('name')
 
         if query['active'] and query['active'] != '':
             if query['active']=='si':
@@ -220,6 +224,8 @@ class ApiUserDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)   
         context['segment'] = ['appmobile','api_user']
         context['active_menu'] ='appmobile'
+        if not self.request.user.is_superuser and self.object.name == 'api':
+            raise PermissionDenied()
         
         return context
     
@@ -245,6 +251,8 @@ class ApiUserUpdateView(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)   
         context['segment'] = ['appmobile','api_user']
         context['active_menu'] ='appmobile'
+        if not self.request.user.is_superuser and self.object.name == 'api':
+            raise PermissionDenied()
         
         return context
     

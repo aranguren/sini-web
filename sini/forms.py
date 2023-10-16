@@ -12,6 +12,14 @@ LEAFLET_WIDGET_ATTRS = {
 
 class ApiUserForm(forms.ModelForm):
 
+    #group = forms.ModelChoiceField(queryset=ApiGroup.objects.exclude(name__iexact='api'))
+
+    """
+    def __init__(self,*args, user=None, **kwargs):
+        super(ApiUserForm, self).__init__(*args, **kwargs)
+        if not user.is_superuser:
+            self.fields['group'].queryset = emp.objects.filter(branch=user.admin.branch_name)
+    """
 
     class Meta:
         model = ApiUser
@@ -61,7 +69,7 @@ class IncidenceForm(forms.ModelForm):
             'type_incidence':forms.Select(attrs={'class': 'js-select2-simple form-select form-select-lg'}),
             'description':forms.Textarea(attrs={'class': 'form-control'}),
             #'active':forms.CheckboxInput(attrs={'class': 'form-check-input '}),
-            'priority':forms.NumberInput(attrs={'class': 'form-control'}),
+            'priority':forms.NumberInput(attrs={'class': 'form-control', 'min':1,'max': '5'}),
             'image1':forms.FileInput(attrs={'class': 'form-control'}),
             'image2':forms.FileInput(attrs={'class': 'form-control'}),
             'image3':forms.FileInput(attrs={'class': 'form-control'}),

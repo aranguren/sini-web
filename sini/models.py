@@ -12,6 +12,7 @@ from django.dispatch import receiver
 # requeridos para enviar mensajes
 from firebase_admin.messaging import Message
 from computedfields.models import ComputedFieldsModel, computed, compute
+from .validators import validate_audio_file_extension, validate_video_file_extension
 
 # Create your models here.
 
@@ -75,16 +76,18 @@ class Incidence(BasicAuditModel, ComputedFieldsModel):
     status = models.CharField(_("Status"), max_length=50, choices=STATUS_CHOICES, default="creado")
     
     image1 = models.ImageField(verbose_name=_("Foto 1"), upload_to="incidencia_fotos",
-                                                null=False, blank=False)
+                                                null=True, blank=True)
     image2 = models.ImageField(verbose_name=_("Foto 2"), upload_to="incidencia_fotos",
-                                                null=False, blank=False)
+                                                null=True, blank=True)
     image3 = models.ImageField(verbose_name=_("Foto 3"), upload_to="incidencia_fotos",
-                                                null=False, blank=False)
-    audio = models.FileField(verbose_name=_("Audio"), upload_to="incidencia_audioa",
-                                                null=False, blank=False)
+                                                null=True, blank=True)
+    audio = models.FileField(verbose_name=_("Audio"), upload_to="incidencia_audioa", 
+                                                validators=[validate_audio_file_extension],
+                                                null=True, blank=True)
     
     video = models.FileField(verbose_name=_("Video"), upload_to="incidencia_video",
-                                                null=False, blank=False)    
+                                                validators=[validate_video_file_extension],
+                                                null=True, blank=True)    
 
     priority = models.IntegerField(_("Prioridad"), default=1, 
                                    validators=[MaxValueValidator(5), MinValueValidator(1)])
@@ -153,10 +156,12 @@ class MobileWarning(BasicAuditModel, ComputedFieldsModel):
                                                 null=True, blank=True)
     image3 = models.ImageField(verbose_name=_("Foto 3"), upload_to="aviso_fotos",
                                                  null=True, blank=True)
-    audio = models.FileField(verbose_name=_("Audio"), upload_to="aviso_audios",
+    audio = models.FileField(verbose_name=_("Audio"), upload_to="aviso_audios", 
+                                               validators=[validate_audio_file_extension],
                                                null=True, blank=True)
     
     video = models.FileField(verbose_name=_("Video"), upload_to="aviso_video",
+                                                validators=[validate_video_file_extension],
                                                null=True, blank=True)
 
     assign_incidence = models.ForeignKey("sini.Incidence", verbose_name=_("Incidencia asignada"), 
