@@ -1,0 +1,63 @@
+version: '3'
+
+volumes:
+   db-data:
+   pgadmin:
+
+services:
+   db:
+      image: kartoza/postgis:12.0
+      volumes:
+         - db-data:/var/lib/postgresql
+      ports:
+        - 5432:5432
+      env_file:
+      - docker-env/db.env
+        #      restart: on-failure
+      healthcheck:
+        test: "exit 0"
+
+   pgadmin:
+      image: dpage/pgadmin4
+      volumes:
+      - pgadmin:/var/lib/pgadmin
+      ports:
+      - "5050:80"
+      env_file:
+        - docker-env/pgadmin.env
+      restart: on-failure
+
+   metabase:
+      image: metabase/metabase
+      ports:
+      - "3000:3000"
+
+   web:
+      build: web
+      command: bash -c "python manage.py runserver 0.0.0.0:8000"
+      #      volumes:
+      #   - ./code:/code
+      env_file:
+      - docker-env/web.env
+      volumes:
+      - ./web:/code
+      ports:
+         - "8000:8000"
+      depends_on:
+         - db
+   nginx:
+      image: nginx:latest
+      volumes:
+          - ./nginx/conf:/etc/nginx/conf.d
+          - ./nginx/certbot/conf:/etc/letsencrypt
+          - ./nginx/certbot/www:/var/www/certbot
+      ports:
+       - "80:80"
+       - "443:443"
+      #restart: on-failure
+
+   certbot:
+      image: certbot/certbot
+      volumes:
+          - ./nginx/certbot/conf:/etc/letsencrypt
+          - ./nginx/certbot/www:/var/www/certbot
