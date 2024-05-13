@@ -217,5 +217,5 @@ CKEDITOR_CONFIGS = {
 BASE_DIR_CREDENTIALS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_APP = os.path.basename(BASE_DIR_CREDENTIALS)
 
-cred = credentials.Certificate(os.path.join(PROJECT_APP, './credentials.json'))
+cred = credentials.Certificate(os.path.join(PROJECT_APP, 'credentials.json'))
 firebase_admin.initialize_app(cred)
