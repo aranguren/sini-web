@@ -45,7 +45,7 @@ gunicorn==22.0.0
 html-tag-names==0.1.2
 html-void-elements==0.1.0
 httplib2==0.22.0
-idna==3.4
+idna==3.7
 jsbeautifier==1.14.9
 json5==0.9.14
 Markdown==3.4.3
