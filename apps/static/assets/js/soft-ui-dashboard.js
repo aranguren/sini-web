@@ -790,7 +790,7 @@ function notify(el) {
     '</div>' +
     '<span class="text-sm">' + el.getAttribute('data-content') + '</span>';
   
-  alert.innerHTML=textoAlerta;
+  $.find(alert).innerHTML=textoAlerta;
   body.appendChild(alert);
   setTimeout(function() {
     alert.style.transform = 'translate3d(0px, 0px, 0px)'
