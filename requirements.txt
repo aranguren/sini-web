@@ -12,7 +12,7 @@ cssbeautifier==1.14.9
 defusedxml==0.7.1
 diff-match-patch==20230430
 dj-database-url==0.5.0
-Django==3.2.6
+Django==3.2.25
 django-ckeditor==6.5.1
 django-computedfields==0.2.3
 django-fast-update==0.2.3
