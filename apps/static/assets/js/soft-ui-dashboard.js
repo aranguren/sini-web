@@ -782,14 +782,15 @@ function notify(el) {
     alert.style.setProperty("opacity", "1", "important");
   }, 100);
 
-  alert.innerHTML = '<div class="d-flex mb-1">' +
+  textoAlerta = '<div class="d-flex mb-1">' +
     '<div class="alert-icon me-1">' +
     '<i class="' + el.getAttribute('data-icon') + ' mt-1"></i>' +
     '</div>' +
     '<span class="alert-text"><strong>' + el.getAttribute('data-title') + '</strong></span>' +
     '</div>' +
     '<span class="text-sm">' + el.getAttribute('data-content') + '</span>';
-
+  
+  $.find(alert).innerHTML=textoAlerta;
   body.appendChild(alert);
   setTimeout(function() {
     alert.style.transform = 'translate3d(0px, 0px, 0px)'
