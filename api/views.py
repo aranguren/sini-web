@@ -4,11 +4,11 @@ from django.shortcuts import render
 from .authentication import SafeJWTAuthentication
 from .permissions import IsUserAuthenticated, IsUserOwner
 from rest_framework import generics
-from sini.models import Incidence, ApiUser, MobileWarning, Advice, IncidenceType
+from sini.models import Incidence, ApiUser, MobileWarning, Advice, IncidenceType, UserDevice
 from .serializers import FCMDeviceSerializer, IncidenceSerializer, WarningSerializer, UploadWarningFilesSerializer, AdviceSerializer, IncidenceTypeSerializer
 from django_filters import rest_framework as filters
 from .filters import IncidenceFilterDRF
-
+import uuid
 from django.contrib.auth import get_user_model
 
 from rest_framework import exceptions, status
@@ -130,12 +130,8 @@ class FCMTokenView(APIView):
         Si ya tiene actualiza la informacion del dispositivo
         """
         user = request.user
-        if user.device:
-            created=False
-            serializer = FCMDeviceSerializer(user.device, data=request.data)
-        else:
-            created=True
-            serializer = FCMDeviceSerializer(data=request.data)
+
+        serializer = FCMDeviceSerializer(data=request.data)
         #Calling .save() will either create a new instance, or update an existing instance, depending on if an existing instance was passed when instantiating the serializer class:
 
         # .save() will create a new instance.
@@ -145,10 +141,22 @@ class FCMTokenView(APIView):
         #serializer = CommentSerializer(comment, data=data)
         #serializer = FCMDeviceSerializer(request.data)
         if serializer.is_valid():
-            device = serializer.save()
-            if created:
-                device.name = f"{user.name}({user.email})"
-                user.device = device
-                user.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+            registration_id = request.data.get('registration_id')
+            try:
+                obj = FCMDevice.objects.get(registration_id=registration_id)
+            except FCMDevice.DoesNotExist:
+                # We have no object! Do something...
+                device = serializer.save()
+                device_id = str(uuid.uuid4())
+                device.name = f"{user.name}({device_id})"
+                device.device_id = device_id
+                device.save()
+                new_device = UserDevice(device=device, user=user)
+                new_device.save()
+                #user.device = device
+                #user.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'detail': 'Ya existe un dispositivo con el mismo identificador'}, status=status.HTTP_400_BAD_REQUEST)
+                
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

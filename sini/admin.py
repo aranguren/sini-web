@@ -5,7 +5,7 @@ from import_export.admin import ImportExportModelAdmin
 
 # Register your models here.
 
-from .models import Contact, MobileWarning, Incidence, Advice, ApiGroup, ApiUser, Notification, IncidenceType
+from .models import Contact, MobileWarning, Incidence, Advice, ApiGroup, ApiUser, Notification, IncidenceType, UserDevice
 
 class WarningAdmin(LeafletGeoAdmin):
     #fields = ['name', 'geom']
@@ -69,13 +69,21 @@ class AdviceAdmin(admin.ModelAdmin):
 
 admin.site.register(Advice, AdviceAdmin)
 
+
+class UserDeviceInline(admin.TabularInline):
+    model = UserDevice
+    fields = ['device',]
+    extra = 3 
+
 class ApiUserAdmin(admin.ModelAdmin):
     #fields = ['name', 'geom']
     list_display = ('name','email','group', 'active')
     readonly_fields = ['password','password_str']
     fields  =[
-        'name','email','group', 'password_str', 'active', 'device'
+        'name','email','group', 'password_str', 'active', 'is_anonymous',
     ]
+
+    inlines = [UserDeviceInline,]
  
 
 
@@ -183,3 +191,7 @@ class IncidenceTypeAdmin(ImportExportModelAdmin):
  
 
 admin.site.register(IncidenceType, IncidenceTypeAdmin)
+
+
+
+

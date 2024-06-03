@@ -226,9 +226,12 @@ class ApiUser(BasicAuditModel):
 
     group = models.ForeignKey("ApiGroup", verbose_name=_("Grupo"), on_delete=models.RESTRICT, related_name="usuarios")
 
-    device = models.OneToOneField(FCMDevice, verbose_name=_("Dispositivo"), 
-                               on_delete=models.CASCADE, blank=True, null=True,
-                               related_name="api_user")
+    #device = models.OneToOneField(FCMDevice, verbose_name=_("Dispositivo"), 
+    #                           on_delete=models.CASCADE, blank=True, null=True,
+    #                           related_name="api_user")
+
+
+    is_anonymous =  models.BooleanField(_("Es anónimo?"), default=False)
 
     def check_password(self,password):
         return sha256.verify(password, self.password)
@@ -237,54 +240,7 @@ class ApiUser(BasicAuditModel):
         self.password = sha256.hash(password)
         self.save()
          
-    """
-    def save(self, *args, **kwargs):
-        if not self.pk:
 
-            User = get_user_model()
-            password = User.objects.make_random_password() # 7Gjk2kd4T9
-
-            self.password = sha256.hash(password)
-            self.password_str = password
-            #current_app.send_task("riesgo.tasks.send_worker_email",args=(self.email,password,"new"),queue="celery")
-
-            # to get the domain of the current site  
-           
-            from django.contrib.sites.shortcuts import get_current_site  
-            from django.utils.encoding import force_bytes, force_text  
-            from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode  
-            from django.template.loader import render_to_string  
-            from ..tokens import account_activation_token  
-            from django.core.mail import EmailMessage  
-            current_site = get_current_site(request) #"localhost:8000" #get_current_site(request)  
-            mail_subject = 'Enlace para activación de cuenta en INETER'  
-            uid = urlsafe_base64_encode(force_bytes(new_user.id))
-
-            token = account_activation_token.make_token(new_user)
-
-            uiddecoded = force_text(urlsafe_base64_decode(uid))  
-            new_user.save() 
-            message = render_to_string('agrimensuras/acc_active_email.html', {  
-                'user': new_user,  
-                'domain': current_site.domain,  
-                'uid':uid,  
-                'token':token,  
-            })  
-            
-            email_message = EmailMessage(  
-                        mail_subject, message, to=[email], from_email= settings.DEFAULT_FROM_EMAIL # "idec@deneb.io"  
-            )  
-            email_message.content_subtype = "html"  
-            email_message.send()  
-          
-            #self.password = sha256.hash(self.password)
-            # This code only happens if the objects is
-            # not in the database yet. Otherwise it would
-            # have pk
-        super(ApiUser, self).save(*args, **kwargs)
-
-
-    """
     def __str__(self):
         return f"{self.name} ({self.email})"
 
@@ -293,6 +249,25 @@ class ApiUser(BasicAuditModel):
         managed = True
         verbose_name = 'Usuario API'
         verbose_name_plural = 'Usuarios API'
+
+class UserDevice(models.Model):
+
+    device = models.ForeignKey(FCMDevice, verbose_name=_("Dispositivo"), 
+                               on_delete=models.CASCADE,
+                               related_name="user_device")
+    
+    user = models.ForeignKey(ApiUser, verbose_name=_("Usuario"), 
+                               on_delete=models.CASCADE, 
+                               related_name="user_device")
+
+    def __str__(self):
+        return self.device.name
+
+    class Meta:
+        db_table = 'sini_user_device'
+        managed = True
+        verbose_name = 'User Device'
+        verbose_name_plural = 'User Devices'
 
 class ApiGroup(models.Model):
 
@@ -396,6 +371,8 @@ class IncidenceType(BasicAuditModel):
         verbose_name = 'Tipo Incidencia'
         verbose_name_plural = 'Tipos Incidencia'
 
+
+
 @receiver(post_save, sender=Notification)
 def created_notification_send_push(sender, instance, created,  **kwargs):
     if created:
@@ -409,10 +386,10 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
             data['geom'] = instance.geom.wkt
         mensaje = Message(data)
         if instance.send_to=='uno':
-            device = FCMDevice.objects.filter(api_user=instance.api_user).first()
-            if device and device.active:
+            devices = FCMDevice.objects.filter(user_device__user=instance.api_user, active=True)
+            if devices:
                 try:
-                    device.send_message(mensaje)
+                    devices.send_message(mensaje)
                 except Exception as e:
                     instance.status='fallido'
                     instance.status_description=str(e)
@@ -429,7 +406,7 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
             usuarios = ApiUser.objects.filter(group=grupo, active=True)
             texto=""
             fallidos=False
-            devices = FCMDevice.objects.filter(api_user__group=grupo, api_user__active=True, active=True)
+            devices = FCMDevice.objects.filter(user_device__user__group=grupo, user_device__user__active=True, active=True)
             if(devices and len(devices)>0):
                 try:
                     devices.send_message(mensaje)
@@ -440,7 +417,7 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
                 else:
                     instance.status='enviado'
                     for usuario in usuarios:
-                        if not usuario.device or (usuario.device and not usuario.device.active):
+                        if len(usuario.user_device.all())==0:
                             texto+=f"El usuario '{usuario.name}' no tiene dispositivos activos\n"
                             fallidos=True
                     if fallidos:
@@ -456,7 +433,7 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
             usuarios = ApiUser.objects.filter(active=True)
             texto=""
             fallidos=False
-            devices = FCMDevice.objects.filter(api_user__active=True, active=True)
+            devices = FCMDevice.objects.filter(user_device__user__active=True, active=True)
             if(devices and len(devices)>0):
                 try:
                     devices.send_message(mensaje)
@@ -481,4 +458,6 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
             instance.save()
 
         # procedemos a enviar la notificacion mediante FCM
+  
+
   
