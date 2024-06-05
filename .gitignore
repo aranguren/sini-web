@@ -1,4 +1,5 @@
 # byte-compiled / optimized / DLL files
+credentials.json
 __pycache__/
 *.py[cod]
 

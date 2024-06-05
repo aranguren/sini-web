@@ -444,7 +444,7 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
                     instance.status='enviado'
 
                     for usuario in usuarios:
-                        if not usuario.device or (usuario.device and not usuario.device.active):
+                        if len(usuario.user_device.all())==0:
                             texto+=f"El usuario '{usuario.name}' no tiene dispositivos activos\n"
                             fallidos=True
                     if fallidos:
