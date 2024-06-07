@@ -4,13 +4,13 @@ from django.shortcuts import render
 from .authentication import SafeJWTAuthentication
 from .permissions import IsUserAuthenticated, IsUserOwner
 from rest_framework import generics
-from sini.models import Incidence, ApiUser, MobileWarning, Advice, IncidenceType, UserDevice
+from sini.models import Incidence, ApiUser, MobileWarning, Advice, IncidenceType, SiniFCMDevice
 from .serializers import FCMDeviceSerializer, IncidenceSerializer, WarningSerializer, UploadWarningFilesSerializer, AdviceSerializer, IncidenceTypeSerializer
 from django_filters import rest_framework as filters
 from .filters import IncidenceFilterDRF
 import uuid
 from django.contrib.auth import get_user_model
-
+from django.core import serializers
 from rest_framework import exceptions, status
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -21,9 +21,8 @@ from passlib.hash import pbkdf2_sha256 as sha256
 
 from rest_framework.response import Response
 
-from fcm_django.models import FCMDevice
 from rest_framework.views import APIView
-
+import json
 
 
 
@@ -143,19 +142,28 @@ class FCMTokenView(APIView):
         if serializer.is_valid():
             registration_id = request.data.get('registration_id')
             try:
-                obj = FCMDevice.objects.get(registration_id=registration_id)
-            except FCMDevice.DoesNotExist:
+                obj = SiniFCMDevice.objects.get(registration_id=registration_id)
+            except SiniFCMDevice.DoesNotExist:
                 # We have no object! Do something...
                 device = serializer.save()
+                device.user = user
                 device_id = str(uuid.uuid4())
                 device.name = f"{user.name}({device_id})"
                 device.device_id = device_id
                 device.save()
-                new_device = UserDevice(device=device, user=user)
-                new_device.save()
-                #user.device = device
-                #user.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+                values = {
+                    "name": device.name,
+                    "device_id": device.device_id,
+                    "registration_id": device.registration_id,
+                    "type": device.type,
+                    "active": device.active,
+                    "created": device.created,
+                    "modified": device.modified,
+
+                }
+
+                return Response(values, status=status.HTTP_201_CREATED)
             else:
                 return Response({'detail': 'Ya existe un dispositivo con el mismo identificador'}, status=status.HTTP_400_BAD_REQUEST)
                 

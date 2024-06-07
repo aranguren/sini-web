@@ -6,14 +6,16 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth import get_user_model
 from passlib.hash import pbkdf2_sha256 as sha256
 from ckeditor_uploader.fields import RichTextUploadingField
-from fcm_django.models import FCMDevice
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 # requeridos para enviar mensajes
 from firebase_admin.messaging import Message
 from computedfields.models import ComputedFieldsModel, computed, compute
 from .validators import validate_audio_file_extension, validate_video_file_extension
+import datetime
 
+from firebase_admin import messaging
+from firebase_admin.messaging import Message
 # Create your models here.
 
 class BasicAuditModel(models.Model):
@@ -226,11 +228,6 @@ class ApiUser(BasicAuditModel):
 
     group = models.ForeignKey("ApiGroup", verbose_name=_("Grupo"), on_delete=models.RESTRICT, related_name="usuarios")
 
-    #device = models.OneToOneField(FCMDevice, verbose_name=_("Dispositivo"), 
-    #                           on_delete=models.CASCADE, blank=True, null=True,
-    #                           related_name="api_user")
-
-
     is_anonymous =  models.BooleanField(_("Es anónimo?"), default=False)
 
     def check_password(self,password):
@@ -250,24 +247,6 @@ class ApiUser(BasicAuditModel):
         verbose_name = 'Usuario API'
         verbose_name_plural = 'Usuarios API'
 
-class UserDevice(models.Model):
-
-    device = models.ForeignKey(FCMDevice, verbose_name=_("Dispositivo"), 
-                               on_delete=models.CASCADE,
-                               related_name="user_device")
-    
-    user = models.ForeignKey(ApiUser, verbose_name=_("Usuario"), 
-                               on_delete=models.CASCADE, 
-                               related_name="user_device")
-
-    def __str__(self):
-        return self.device.name
-
-    class Meta:
-        db_table = 'sini_user_device'
-        managed = True
-        verbose_name = 'User Device'
-        verbose_name_plural = 'User Devices'
 
 class ApiGroup(models.Model):
 
@@ -347,7 +326,7 @@ class Contact(BasicAuditModel):
         return f"{self.name} ({self.email})"
 
     class Meta:
-        db_table = 'arbolsaf_contact'
+        db_table = 'sini_contact'
         managed = True
         ordering= ["name"]
         verbose_name = 'Contacto'
@@ -365,13 +344,13 @@ class IncidenceType(BasicAuditModel):
         return self.name
 
     class Meta:
-        db_table = 'arbolsaf_type_incidence'
+        db_table = 'sini_type_incidence'
         managed = True
         ordering= ["name"]
         verbose_name = 'Tipo Incidencia'
         verbose_name_plural = 'Tipos Incidencia'
 
-
+from pyfcm import FCMNotification
 
 @receiver(post_save, sender=Notification)
 def created_notification_send_push(sender, instance, created,  **kwargs):
@@ -384,18 +363,38 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
             }
         if instance.geom:
             data['geom'] = instance.geom.wkt
-        mensaje = Message(data)
+        # mensaje = messaging.Message(data)
         if instance.send_to=='uno':
-            devices = FCMDevice.objects.filter(user_device__user=instance.api_user, active=True)
+            devices = SiniFCMDevice.objects.filter(user=instance.api_user, active=True)
             if devices:
-                try:
-                    devices.send_message(mensaje)
-                except Exception as e:
-                    instance.status='fallido'
-                    instance.status_description=str(e)
-                    instance.save()
-                else:
-                    instance.status='enviado'
+                for device in devices:
+                    message = messaging.Message(
+                            data,
+                            android=messaging.AndroidConfig(
+                                    ttl=datetime.timedelta(seconds=3600),
+                                    priority='normal',
+                                    notification=messaging.AndroidNotification(
+                                    title=instance.subject,
+                                    body=instance.message,
+                                    icon='stock_ticker_update',
+                                    color='#f45342',
+                                    image= instance.url_imagen, #'https://firebasestorage.googleapis.com/v0/b/sini-1529613608740.appspot.com/o/FCMImages%2Fphoto1685036012.jpeg?alt=media&token=4b32205b-5e05-482c-bd08-eaa587146cf9',
+                                    ),
+
+                            ),
+                            token=device.registration_id,
+                    )
+                    #print(message)
+                    try:
+                        response = messaging.send(message)
+                        print('Successfully sent message:')
+                        print(device.registration_id)
+                    except Exception as e:
+                        instance.status='fallido'
+                        instance.status_description=str(e)
+                        instance.save()
+                    else:
+                        instance.status='enviado'
 
             else:
                 instance.status='fallido'
@@ -406,23 +405,36 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
             usuarios = ApiUser.objects.filter(group=grupo, active=True)
             texto=""
             fallidos=False
-            devices = FCMDevice.objects.filter(user_device__user__group=grupo, user_device__user__active=True, active=True)
+            devices = SiniFCMDevice.objects.filter(user__group=grupo, user_device__user__active=True, active=True)
             if(devices and len(devices)>0):
-                try:
-                    devices.send_message(mensaje)
-                except Exception as e:
-                    instance.status='fallido'
-                    instance.status_description=str(e)
-                    instance.save()
-                else:
-                    instance.status='enviado'
-                    for usuario in usuarios:
-                        if len(usuario.user_device.all())==0:
-                            texto+=f"El usuario '{usuario.name}' no tiene dispositivos activos\n"
-                            fallidos=True
-                    if fallidos:
-                        instance.status="enviado_parcialmente"
-                        instance.status_description=texto  
+                for device in devices:
+                    message = messaging.Message(
+                            data,
+                            android=messaging.AndroidConfig(
+                                    ttl=datetime.timedelta(seconds=3600),
+                                    priority='normal',
+                                    notification=messaging.AndroidNotification(
+                                    title=instance.subject,
+                                    body=instance.message,
+                                    icon='stock_ticker_update',
+                                    color='#f45342',
+                                    image= instance.url_imagen, #'https://firebasestorage.googleapis.com/v0/b/sini-1529613608740.appspot.com/o/FCMImages%2Fphoto1685036012.jpeg?alt=media&token=4b32205b-5e05-482c-bd08-eaa587146cf9',
+                                    ),
+
+                            ),
+                            token=device.registration_id,
+                    )
+                    #print(message)
+                    try:
+                        response = messaging.send(message)
+                        print('Successfully sent message:')
+                        print(device.registration_id)
+                    except Exception as e:
+                        instance.status='fallido'
+                        instance.status_description=str(e)
+                        instance.save()
+                    else:
+                        instance.status='enviado'
             else:
                 instance.status='fallido'
                 instance.status_description='No existen usuarios activos en el grupo que cuenten con dispositivos'
@@ -430,21 +442,47 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
             instance.save()
 
         elif instance.send_to=='todos':
+            #print("Pasando por sendto")
             usuarios = ApiUser.objects.filter(active=True)
             texto=""
             fallidos=False
-            devices = FCMDevice.objects.filter(user_device__user__active=True, active=True)
+            #devices = FCMDevice.objects.filter(api_user__active=True, active=True)
+            devices = SiniFCMDevice.objects.filter(active=True) # Modified by AA
             if(devices and len(devices)>0):
-                try:
-                    devices.send_message(mensaje)
-                except Exception as e:
-                    instance.status='fallido'
-                    instance.status_description=str(e)
+                for device in devices:
+                    message = messaging.Message(
+                            data,
+                            android=messaging.AndroidConfig(
+                                    ttl=datetime.timedelta(seconds=3600),
+                                    priority='normal',
+                                    notification=messaging.AndroidNotification(
+                                    title=instance.subject,
+                                    body=instance.message,
+                                    icon='stock_ticker_update',
+                                    color='#f45342',
+                                    image= instance.url_imagen, #'https://firebasestorage.googleapis.com/v0/b/sini-1529613608740.appspot.com/o/FCMImages%2Fphoto1685036012.jpeg?alt=media&token=4b32205b-5e05-482c-bd08-eaa587146cf9',
+                                    ),
+
+                            ),
+                            token=device.registration_id,
+                    )
+                    #print(message)
+                    try:
+                        response = messaging.send(message)
+                        print('Successfully sent message:')
+                        print(device.registration_id)
+                    except Exception as e:
+                        instance.status='fallido'
+                        instance.status_description=str(e)
+                        instance.save()
+                    else:
+                        instance.status='enviado'
+
                 else:
                     instance.status='enviado'
 
                     for usuario in usuarios:
-                        if len(usuario.user_device.all())==0:
+                        if not usuario.device or (usuario.device and not usuario.device.active):
                             texto+=f"El usuario '{usuario.name}' no tiene dispositivos activos\n"
                             fallidos=True
                     if fallidos:
@@ -455,9 +493,55 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
                 instance.status='fallido'
                 instance.status_description='No existen usuarios activos que cuenten con dispositivos'
             
-            instance.save()
 
         # procedemos a enviar la notificacion mediante FCM
   
 
   
+
+class DeviceType(models.TextChoices):
+    IOS = "ios", "ios"
+    ANDROID = "android", "android"
+    WEB = "web", "web"
+
+
+class SiniFCMDevice(models.Model):
+    name = models.CharField(verbose_name=_("Nombre dispositivo"), max_length=255)
+    device_id = models.CharField(
+        verbose_name=_("Device ID"),
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text=_("Identificador del dispositivo"),
+        max_length=255,
+    )
+    registration_id = models.TextField(
+        verbose_name=_("Token FCM"),
+        unique=True,
+    )
+    type = models.CharField(choices=DeviceType.choices, max_length=10)
+
+    active = models.BooleanField(
+        verbose_name=_("Is active"),
+        default=True,
+        help_text=_("Los dispositivos inactivos no recibiran notificaciones"),
+    )
+    user = models.ForeignKey(
+        "ApiUser",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="fcm_devices",
+    )
+
+    created = models.DateTimeField(auto_now_add=True, verbose_name=_("Fecha creado"))
+    modified = models.DateTimeField(auto_now=True, verbose_name=_("Fecha modificado"))
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        db_table = 'sini_fcm_device'
+        managed = True
+        verbose_name = 'Dispositivo'
+        verbose_name_plural = 'Dispositivos'

@@ -5,7 +5,7 @@ from import_export.admin import ImportExportModelAdmin
 
 # Register your models here.
 
-from .models import Contact, MobileWarning, Incidence, Advice, ApiGroup, ApiUser, Notification, IncidenceType, UserDevice
+from .models import Contact, MobileWarning, Incidence, Advice, ApiGroup, ApiUser, Notification, IncidenceType, SiniFCMDevice
 
 class WarningAdmin(LeafletGeoAdmin):
     #fields = ['name', 'geom']
@@ -71,8 +71,8 @@ admin.site.register(Advice, AdviceAdmin)
 
 
 class UserDeviceInline(admin.TabularInline):
-    model = UserDevice
-    fields = ['device',]
+    model = SiniFCMDevice
+    fields = ['name','device_id', 'registration_id', 'type', 'active']
     extra = 3 
 
 class ApiUserAdmin(admin.ModelAdmin):
@@ -84,12 +84,21 @@ class ApiUserAdmin(admin.ModelAdmin):
     ]
 
     inlines = [UserDeviceInline,]
- 
-
-
 
 
 admin.site.register(ApiUser, ApiUserAdmin)
+
+
+class SiniFCMDeviceAdmin(admin.ModelAdmin):
+    #fields = ['name', 'geom']
+    list_display = ('name','device_id','registration_id','type', 'user', 'active')
+    fields  =[
+        'name','device_id','registration_id','type', 'user', 'active'
+    ]
+    readonly_fields = ['created','modified']
+ 
+
+admin.site.register(SiniFCMDevice, SiniFCMDeviceAdmin)
 
 class ApiGroupAdmin(admin.ModelAdmin):
     #fields = ['name', 'geom']
@@ -98,10 +107,6 @@ class ApiGroupAdmin(admin.ModelAdmin):
         'name'
     ]
  
-
-
-
-
 admin.site.register(ApiGroup, ApiGroupAdmin)
 
 
