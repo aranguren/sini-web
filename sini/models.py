@@ -401,7 +401,7 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
                 except Exception as e:
                     error = f"No se ha podido enviar al dispositivo {device.name} \n"
                     detalles+= error
-                    detalles+=str(e)
+                    detalles+=(str(e)+"\n")
                 else:
                     send_qty+=1
 
@@ -415,7 +415,7 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
             else:
                 instance.status='enviado_parcialmente'
                 instance.status_description = detalles
-                
+
             instance.save()
         else:
             instance.status='fallido'
