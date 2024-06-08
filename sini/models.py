@@ -13,9 +13,12 @@ from firebase_admin.messaging import Message
 from computedfields.models import ComputedFieldsModel, computed, compute
 from .validators import validate_audio_file_extension, validate_video_file_extension
 import datetime
-
+import os
 from firebase_admin import messaging
 from firebase_admin.messaging import Message
+import firebase_admin
+from firebase_admin import credentials
+from .firebase_utils import send_push_notification, send_push_notification_multi
 # Create your models here.
 
 class BasicAuditModel(models.Model):
@@ -350,10 +353,15 @@ class IncidenceType(BasicAuditModel):
         verbose_name = 'Tipo Incidencia'
         verbose_name_plural = 'Tipos Incidencia'
 
-from pyfcm import FCMNotification
+
 
 @receiver(post_save, sender=Notification)
 def created_notification_send_push(sender, instance, created,  **kwargs):
+    #BASE_DIR_CREDENTIALS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    #PROJECT_APP = os.path.basename(BASE_DIR_CREDENTIALS)
+
+    #cred = credentials.Certificate(os.path.join(BASE_DIR_CREDENTIALS, 'credentials.json'))
+    #firebase_admin.initialize_app(cred)
     if created:
         data={
                 "subject" : instance.subject,
@@ -364,137 +372,58 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
         if instance.geom:
             data['geom'] = instance.geom.wkt
         # mensaje = messaging.Message(data)
+        devices=False
         if instance.send_to=='uno':
             devices = SiniFCMDevice.objects.filter(user=instance.api_user, active=True)
-            if devices:
-                for device in devices:
-                    message = messaging.Message(
-                            data,
-                            android=messaging.AndroidConfig(
-                                    ttl=datetime.timedelta(seconds=3600),
-                                    priority='normal',
-                                    notification=messaging.AndroidNotification(
-                                    title=instance.subject,
-                                    body=instance.message,
-                                    icon='stock_ticker_update',
-                                    color='#f45342',
-                                    image= instance.url_imagen, #'https://firebasestorage.googleapis.com/v0/b/sini-1529613608740.appspot.com/o/FCMImages%2Fphoto1685036012.jpeg?alt=media&token=4b32205b-5e05-482c-bd08-eaa587146cf9',
-                                    ),
 
-                            ),
-                            token=device.registration_id,
-                    )
-                    #print(message)
-                    try:
-                        response = messaging.send(message)
-                        print('Successfully sent message:')
-                        print(device.registration_id)
-                    except Exception as e:
-                        instance.status='fallido'
-                        instance.status_description=str(e)
-                        instance.save()
-                    else:
-                        instance.status='enviado'
-
-            else:
-                instance.status='fallido'
-                instance.status_description='El usuario seleccionado no tiene dispositivos asignados o el dispositivo no está activo'
-                instance.save()
         elif instance.send_to =='grupo':
             grupo = instance.api_group
-            usuarios = ApiUser.objects.filter(group=grupo, active=True)
-            texto=""
-            fallidos=False
             devices = SiniFCMDevice.objects.filter(user__group=grupo, user_device__user__active=True, active=True)
-            if(devices and len(devices)>0):
-                for device in devices:
-                    message = messaging.Message(
-                            data,
-                            android=messaging.AndroidConfig(
-                                    ttl=datetime.timedelta(seconds=3600),
-                                    priority='normal',
-                                    notification=messaging.AndroidNotification(
-                                    title=instance.subject,
-                                    body=instance.message,
-                                    icon='stock_ticker_update',
-                                    color='#f45342',
-                                    image= instance.url_imagen, #'https://firebasestorage.googleapis.com/v0/b/sini-1529613608740.appspot.com/o/FCMImages%2Fphoto1685036012.jpeg?alt=media&token=4b32205b-5e05-482c-bd08-eaa587146cf9',
-                                    ),
-
-                            ),
-                            token=device.registration_id,
-                    )
-                    #print(message)
-                    try:
-                        response = messaging.send(message)
-                        print('Successfully sent message:')
-                        print(device.registration_id)
-                    except Exception as e:
-                        instance.status='fallido'
-                        instance.status_description=str(e)
-                        instance.save()
-                    else:
-                        instance.status='enviado'
-            else:
-                instance.status='fallido'
-                instance.status_description='No existen usuarios activos en el grupo que cuenten con dispositivos'
             
+        elif instance.send_to=='todos':
+            devices = SiniFCMDevice.objects.filter(active=True) # Modified by AA
+                        
+        if devices:
+            detalles = ""
+            devices_qty = len(devices)
+            send_qty = 0
+            for device in devices:
+
+                try:
+                    response = send_push_notification(device_token= device.registration_id, 
+                                                        title= instance.subject, 
+                                                        body=instance.message, 
+                                                        image_url=instance.url_imagen, 
+                                                        data=data
+                    )
+                    print('Successfully sent message: '+response)
+                    print(device.registration_id)
+                except Exception as e:
+                    error = f"No se ha podido enviar al dispositivo {device.name} \n"
+                    detalles+= error
+                    detalles+=str(e)
+                else:
+                    send_qty+=1
+
+            if send_qty==0:
+                instance.status='fallido'
+                instance.status_description=detalles
+            elif send_qty == devices_qty:
+                instance.status='enviado'
+                instance.status_description='Se ha enviado el mensaje a todos los dispositivos'
+
+            else:
+                instance.status='enviado_parcialmente'
+                instance.status_description = 'detalles'
+
+            instance.save()
+        else:
+            instance.status='fallido'
+            instance.status_description='No se han encontrado dispositivos para enviar el mensaje'
             instance.save()
 
-        elif instance.send_to=='todos':
-            #print("Pasando por sendto")
-            usuarios = ApiUser.objects.filter(active=True)
-            texto=""
-            fallidos=False
-            #devices = FCMDevice.objects.filter(api_user__active=True, active=True)
-            devices = SiniFCMDevice.objects.filter(active=True) # Modified by AA
-            if(devices and len(devices)>0):
-                for device in devices:
-                    message = messaging.Message(
-                            data,
-                            android=messaging.AndroidConfig(
-                                    ttl=datetime.timedelta(seconds=3600),
-                                    priority='normal',
-                                    notification=messaging.AndroidNotification(
-                                    title=instance.subject,
-                                    body=instance.message,
-                                    icon='stock_ticker_update',
-                                    color='#f45342',
-                                    image= instance.url_imagen, #'https://firebasestorage.googleapis.com/v0/b/sini-1529613608740.appspot.com/o/FCMImages%2Fphoto1685036012.jpeg?alt=media&token=4b32205b-5e05-482c-bd08-eaa587146cf9',
-                                    ),
-
-                            ),
-                            token=device.registration_id,
-                    )
-                    #print(message)
-                    try:
-                        response = messaging.send(message)
-                        print('Successfully sent message:')
-                        print(device.registration_id)
-                    except Exception as e:
-                        instance.status='fallido'
-                        instance.status_description=str(e)
-                        instance.save()
-                    else:
-                        instance.status='enviado'
-
-                else:
-                    instance.status='enviado'
-
-                    for usuario in usuarios:
-                        if not usuario.device or (usuario.device and not usuario.device.active):
-                            texto+=f"El usuario '{usuario.name}' no tiene dispositivos activos\n"
-                            fallidos=True
-                    if fallidos:
-                        instance.status="enviado_parcialmente"
-                        instance.status_description=texto
-            else:
-
-                instance.status='fallido'
-                instance.status_description='No existen usuarios activos que cuenten con dispositivos'
             
 
-        # procedemos a enviar la notificacion mediante FCM
   
 
   
