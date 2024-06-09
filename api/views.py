@@ -148,7 +148,7 @@ class FCMTokenView(APIView):
                 device = serializer.save()
                 device.user = user
                 device_id = str(uuid.uuid4())
-                device.name = f"{user.name}({device_id})"
+                device.name = f"{user.name} ({device_id})"
                 device.device_id = device_id
                 device.save()
 

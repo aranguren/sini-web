@@ -32,7 +32,7 @@ def send_push_notification_multi(device_tokens, title, body, data=None):
     message = messaging.MulticastMessage(
         notification=messaging.Notification(
             title=title,
-            body=body
+            body=body,
         ),
         tokens=device_tokens
     )

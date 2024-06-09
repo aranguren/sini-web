@@ -354,14 +354,10 @@ class IncidenceType(BasicAuditModel):
         verbose_name_plural = 'Tipos Incidencia'
 
 
-
+"""
 @receiver(post_save, sender=Notification)
 def created_notification_send_push(sender, instance, created,  **kwargs):
-    #BASE_DIR_CREDENTIALS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    #PROJECT_APP = os.path.basename(BASE_DIR_CREDENTIALS)
 
-    #cred = credentials.Certificate(os.path.join(BASE_DIR_CREDENTIALS, 'credentials.json'))
-    #firebase_admin.initialize_app(cred)
     if created:
         data={
                 "subject" : instance.subject,
@@ -399,7 +395,7 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
                     print('Successfully sent message: '+response)
                     print(device.registration_id)
                 except Exception as e:
-                    error = f"No se ha podido enviar al dispositivo {device.name} \n"
+                    error = f"- No se ha podido enviar al dispositivo {device.name} \n"
                     detalles+= error
                     detalles+=(str(e)+"\n")
                 else:
@@ -421,9 +417,85 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
             instance.status='fallido'
             instance.status_description='No se han encontrado dispositivos para enviar el mensaje'
             instance.save()
-
+"""
             
+@receiver(post_save, sender=Notification)
+def created_notification_send_push(sender, instance, created,  **kwargs):
 
+    if created:
+        data={
+                "link" : instance.url_noticia,
+                "image": instance.url_imagen,
+            }
+        if instance.geom:
+            data['polygon'] = ''
+        # mensaje = messaging.Message(data)
+        devices=False
+        if instance.send_to=='uno':
+            devices = SiniFCMDevice.objects.filter(user=instance.api_user, user__active=True, active=True)
+
+        elif instance.send_to =='grupo':
+            grupo = instance.api_group
+            devices = SiniFCMDevice.objects.filter(user__group=grupo, user__active=True, active=True)
+            
+        elif instance.send_to=='todos':
+            devices = SiniFCMDevice.objects.filter(user__active=True, active=True) # Modified by AA
+                        
+        if devices:
+            detalles = ""
+            devices_qty = len(devices)
+            send_qty = 0
+            token_list = [d.registration_id for d in devices]
+       
+            try:
+                batch_response = send_push_notification_multi(device_tokens=token_list,
+                                                title= instance.subject, 
+                                                body=instance.message, 
+                                                data=data)
+                
+                failure_count = batch_response.failure_count
+
+                success_count = batch_response.success_count
+                responses = batch_response.responses
+                detalles+= "Resumen:\n"
+                detalles+= f"Total de mensajes: {len(token_list)}\n"
+                detalles+= f"Mensajes enviados: {success_count}\n"
+                detalles+= f"Mensajes fallidos: {failure_count}\n"
+        
+
+            except Exception as e:
+                instance.status='fallido'
+                instance.status_description="Ha ocurrido un error al enviar los mensajes. Pongase en contacto con el administrador"
+            else:
+                if failure_count>0:
+                    for i in range(len(responses)):
+                        if not responses[i].success:
+                            texto = f"No se ha podido enviar la notificacion al dispositivo {devices[i].name}"
+                            if responses[i].exception:
+                                texto+=f" Error: '{str(responses[0].exception)}'"
+                                if responses[i].exception and \
+                                    isinstance(responses[i].exception, messaging.UnregisteredError):
+                                    print("El dispositivo no existe in Firebase")
+                                    # TODO Estudian un mecanismo para eliminar los tokens que ya no existan
+                            texto+="\n"
+                            detalles+=texto              
+ 
+                if success_count==0:
+                    instance.status='fallido'
+                    instance.status_description=detalles
+                elif failure_count==0:
+                    instance.status='enviado'
+                    instance.status_description='Se ha enviado el mensaje a todos los dispositivos'
+                else:
+                    instance.status='enviado_parcialmente'
+                    instance.status_description = detalles
+
+         
+        else:
+            instance.status='fallido'
+            instance.status_description='No se han encontrado dispositivos para enviar el mensaje'
+        
+        instance.save()
   
 
   
