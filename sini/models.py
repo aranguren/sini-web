@@ -520,7 +520,7 @@ class SiniFCMDevice(models.Model):
         verbose_name=_("Token FCM"),
         unique=True,
     )
-    type = models.CharField(choices=DeviceType.choices, max_length=10)
+    type = models.CharField(choices=DeviceType.choices, max_length=10, verbose_name=_("Tipo dispositivo"))
 
     active = models.BooleanField(
         verbose_name=_("Is active"),

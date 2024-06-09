@@ -2,7 +2,7 @@ from rest_framework import generics, serializers
 from rest_framework.fields import CharField
 from  sini.models import Incidence, MobileWarning, Advice, IncidenceType, SiniFCMDevice
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
-
+from sini.models import DeviceType
 
 
 #---------------------------------------------------------
@@ -132,7 +132,15 @@ class FCMDeviceSerializer(serializers.ModelSerializer):
         fields = ('id','device_id','registration_id','type' )
         read_only_fields = ['id','created', 'modified']
 
-    
+
+
+class SiniFCMDeviceSerializer(serializers.Serializer):
+
+    registration_id = serializers.CharField(label="Token FCM", required=True)
+    type = serializers.ChoiceField(label="Tipo dispositivo", choices=DeviceType.choices)
+
+    def create(self, validated_data):
+        return SiniFCMDevice(**validated_data)
 
 class IncidenceTypeSerializer(serializers.ModelSerializer):
 

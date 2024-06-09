@@ -5,7 +5,7 @@ from .authentication import SafeJWTAuthentication
 from .permissions import IsUserAuthenticated, IsUserOwner
 from rest_framework import generics
 from sini.models import Incidence, ApiUser, MobileWarning, Advice, IncidenceType, SiniFCMDevice
-from .serializers import FCMDeviceSerializer, IncidenceSerializer, WarningSerializer, UploadWarningFilesSerializer, AdviceSerializer, IncidenceTypeSerializer
+from .serializers import SiniFCMDeviceSerializer, IncidenceSerializer, WarningSerializer, UploadWarningFilesSerializer, AdviceSerializer, IncidenceTypeSerializer
 from django_filters import rest_framework as filters
 from .filters import IncidenceFilterDRF
 import uuid
@@ -130,7 +130,7 @@ class FCMTokenView(APIView):
         """
         user = request.user
 
-        serializer = FCMDeviceSerializer(data=request.data)
+        serializer = SiniFCMDeviceSerializer(data=request.data)
         #Calling .save() will either create a new instance, or update an existing instance, depending on if an existing instance was passed when instantiating the serializer class:
 
         # .save() will create a new instance.
@@ -142,7 +142,7 @@ class FCMTokenView(APIView):
         if serializer.is_valid():
             registration_id = request.data.get('registration_id')
             try:
-                obj = SiniFCMDevice.objects.get(registration_id=registration_id)
+                found_device = SiniFCMDevice.objects.get(registration_id=registration_id)
             except SiniFCMDevice.DoesNotExist:
                 # We have no object! Do something...
                 device = serializer.save()
@@ -165,6 +165,26 @@ class FCMTokenView(APIView):
 
                 return Response(values, status=status.HTTP_201_CREATED)
             else:
-                return Response({'detail': 'Ya existe un dispositivo con el mismo identificador'}, status=status.HTTP_400_BAD_REQUEST)
+                if found_device.user==user:
+                    return Response({'detail': 'El usuario ya tiene el token asignado. Nada que hacer'}, status=status.HTTP_202_ACCEPTED)
+                elif found_device.user.is_anonymous and not user.is_anonymous:
+                    found_device.user = user
+                    found_device.name = f"{user.name} ({found_device.device_id})"
+                    found_device.save()
+
+                    values = {
+                        "name": found_device.name,
+                        "device_id": found_device.device_id,
+                        "registration_id": found_device.registration_id,
+                        "type": found_device.type,
+                        "active": found_device.active,
+                        "created": found_device.created,
+                        "modified": found_device.modified,
+
+                    }
+
+                    return Response(values, status=status.HTTP_200_OK)
+                elif not found_device.user.is_anonymous and user.is_anonymous:
+                    return Response({'detail': 'Ya existe un usuario (no anónimo) con el mismo token. No se efectuará ningún cambio'}, status=status.HTTP_202_ACCEPTED)
                 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
