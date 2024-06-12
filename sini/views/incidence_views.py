@@ -13,6 +13,7 @@ from django.shortcuts import render, redirect, get_object_or_404, get_list_or_40
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string  
 import csv
+import io
 from django.http import HttpResponse
 import shapefile
 from zipfile import ZipFile
@@ -315,9 +316,12 @@ def incidence_send_email(request):
     imagen3 = incidence.image3
     if imagen3:
         email_message.attach_file(incidence.image3.path)
+    attachment_csv = generate_csv(incidence)
+    email_message.attach('incidencia.csv', attachment_csv.read())
 
     email_message.content_subtype = "html"
-      
+    
+
     try:
         email_message.send()
     except Exception as e:
@@ -429,3 +433,24 @@ class ExportShapefileIncidenceView(LoginRequiredMixin, View):
         response['Content-Disposition'] = 'attachment; filename="{}"'.format('incidencias.zip')
     
         return response
+
+
+
+def generate_csv(incidence: Incidence):
+    file_output = io.StringIO()
+    csv_writer = csv.writer(file_output, delimiter=',',                 
+        quoting=csv.QUOTE_ALL)
+    csv_writer.writerow(['NOMBRE', 'TIPO INCIDENTE', 'PRIORIDAD', 'FECHA CREACIÓN', 'LATITUD', 'LONGITUD', 'ESTADO', 'DESCRIPCIÓN'])
+    csv_items = [incidence.name, 
+                 incidence.type_incidence.name, 
+                 str(incidence.priority),
+                 incidence.created.strftime("%d/%m/%Y, %H:%M:%S"),
+                 str(incidence.geom.y), 
+                 str(incidence.geom.x), 
+                 incidence.status, 
+                 incidence.description]
+    
+    #for item in csv_items:
+    csv_writer.writerow(csv_items)
+    file_output.seek(0)
+    return file_output

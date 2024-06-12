@@ -186,6 +186,8 @@
     if (send_to=='todos'){
       $("#id_api_group").prop('disabled', true);
       $("#id_api_user").prop('disabled', true);
+      $("#id_api_group").removeAttr('required')
+      $("#id_api_user").removeAttr('required')      
       $("#div_api_user").hide();
       $("#div_api_group").hide();
       document.getElementById("id_api_user").value = "";
@@ -195,6 +197,10 @@
     else if (send_to=='grupo'){
     $("#id_api_group").prop('disabled', false);
     $("#id_api_user").prop('disabled', true);
+    $("#id_api_group").attr('required', ''); 
+    $("#id_api_user").removeAttr('required');
+    
+    
     $("#div_api_user").hide();
     $("#div_api_group").show();
 
@@ -205,6 +211,8 @@
     else if (send_to=='uno'){
       $("#id_api_group").prop('disabled', true);
       $("#id_api_user").prop('disabled', false);
+      $("#id_api_group").removeAttr('required');
+      $("#id_api_user").attr('required', ''); 
       $("#div_api_user").show();
       $("#div_api_group").hide();
 
@@ -230,6 +238,8 @@
     else if (send_to=='grupo'){
     $("#id_api_group").prop('disabled', false);
     $("#id_api_user").prop('disabled', true);
+    $("#id_api_group").attr('required', ''); 
+    $("#id_api_user").removeAttr('required');
     $("#div_api_user").hide();
     $("#div_api_group").show();
 
@@ -237,6 +247,8 @@
     else if (send_to=='uno'){
       $("#id_api_group").prop('disabled', true);
       $("#id_api_user").prop('disabled', false);
+      $("#id_api_group").removeAttr('required');
+      $("#id_api_user").attr('required', ''); 
       $("#div_api_user").show();
       $("#div_api_group").hide();
 

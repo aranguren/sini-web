@@ -184,6 +184,7 @@ class FCMTokenView(APIView):
                     }
 
                     return Response(values, status=status.HTTP_200_OK)
+                
                 elif not found_device.user.is_anonymous and user.is_anonymous:
                     return Response({'detail': 'Ya existe un usuario (no anónimo) con el mismo token. No se efectuará ningún cambio'}, status=status.HTTP_202_ACCEPTED)
                 
