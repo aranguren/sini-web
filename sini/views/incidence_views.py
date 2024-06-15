@@ -183,8 +183,8 @@ class IncidenceManagmentView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)   
         context['segment'] = ['sini', 'managment']
         context['active_menu'] = 'sini'
-        incidences = Incidence.objects.filter(active=True, status='creado')
-        mobile_warnings = MobileWarning.objects.filter(active=True, status='creado')
+        incidences = Incidence.objects.filter(active=True, status='creado').order_by("-created")
+        mobile_warnings = MobileWarning.objects.filter(active=True, status='creado').order_by("-created")
         context['incidences'] = incidences
         context['mobile_warnings'] = mobile_warnings
         contactos = Contact.objects.all()

@@ -889,7 +889,9 @@
 
       datatableWarnings = $('#datatable-warnings').DataTable(
         {
-          language: langes
+          language: langes,
+           /* Disable initial sort */
+          aaSorting: []
         }
         
       );
@@ -910,7 +912,8 @@
                         { "name": "estado" },
                         { "name": "fecha" },
                         { "name": "acciones" },
-                      ]
+                      ],
+          aaSorting: []
         }
       );
       console.log('DATATABLE INCIDENCES')

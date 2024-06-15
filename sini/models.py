@@ -428,7 +428,12 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
                 "image": instance.url_imagen,
             }
         if instance.geom:
+            geom_tuple = instance.geom.tuple[0]
+            poly = [[t[1], t[0]] for t in geom_tuple]
+            data['polygon'] = poly
+        else:
             data['polygon'] = ''
+        
         # mensaje = messaging.Message(data)
         devices=False
         if instance.send_to=='uno':
