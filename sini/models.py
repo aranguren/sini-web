@@ -20,6 +20,9 @@ import firebase_admin
 from firebase_admin import credentials
 from .firebase_utils import send_push_notification, send_push_notification_multi
 # Create your models here.
+import logging
+_logger = logging.getLogger(__name__)
+import json
 
 class BasicAuditModel(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, 
@@ -430,7 +433,7 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
         if instance.geom:
             geom_tuple = instance.geom.tuple[0]
             poly = [[t[1], t[0]] for t in geom_tuple]
-            data['polygon'] = poly
+            data['polygon'] =  json.dumps(poly)
         else:
             data['polygon'] = ''
         
@@ -471,15 +474,17 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
             except Exception as e:
                 instance.status='fallido'
                 instance.status_description="Ha ocurrido un error al enviar los mensajes. Pongase en contacto con el administrador"
+                _logger.error("Error al enviar las notificaciones")
+                _logger.error(str(e))
             else:
                 if failure_count>0:
                     for i in range(len(responses)):
                         if not responses[i].success:
                             texto = f"No se ha podido enviar la notificacion al dispositivo {devices[i].name}"
                             if responses[i].exception:
-                                texto+=f" Error: '{str(responses[0].exception)}'"
+                                texto+=f" Error: '{str(responses[i].exception)}'"
                                 if responses[i].exception and \
-                                    isinstance(responses[i].exception, messaging.UnregisteredError):
+                                    isinstance(responses[i].exception, messaging.UnregisteredError): #tambien InvalidArgumentError
                                     print("El dispositivo no existe in Firebase")
                                     # TODO Estudian un mecanismo para eliminar los tokens que ya no existan
                             texto+="\n"
