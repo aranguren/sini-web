@@ -18,7 +18,7 @@ from firebase_admin import messaging
 from firebase_admin.messaging import Message
 import firebase_admin
 from firebase_admin import credentials
-from .firebase_utils import send_push_notification, send_push_notification_multi
+from .firebase_utils import send_web_push_notification, send_push_notification, send_push_notification_multi
 # Create your models here.
 import logging
 _logger = logging.getLogger(__name__)
@@ -357,52 +357,62 @@ class IncidenceType(BasicAuditModel):
         verbose_name_plural = 'Tipos Incidencia'
 
 
-"""
+
 @receiver(post_save, sender=Notification)
 def created_notification_send_push(sender, instance, created,  **kwargs):
 
     if created:
         data={
-                "subject" : instance.subject,
-                "body" : instance.message,
-                "url_noticia" : instance.url_noticia,
-                "url_imagen": instance.url_imagen,
+                "link" : instance.url_noticia,
+                "image": instance.url_imagen,
             }
         if instance.geom:
-            data['geom'] = instance.geom.wkt
+            geom_tuple = instance.geom.tuple[0]
+            poly = [[t[1], t[0]] for t in geom_tuple]
+            data['polygon'] =  json.dumps(poly)
+        else:
+            data['polygon'] = ''
+        
         # mensaje = messaging.Message(data)
         devices=False
         if instance.send_to=='uno':
-            devices = SiniFCMDevice.objects.filter(user=instance.api_user, active=True)
+            devices = SiniFCMDevice.objects.filter(user=instance.api_user, user__active=True, active=True)
 
         elif instance.send_to =='grupo':
             grupo = instance.api_group
-            devices = SiniFCMDevice.objects.filter(user__group=grupo, user_device__user__active=True, active=True)
+            devices = SiniFCMDevice.objects.filter(user__group=grupo, user__active=True, active=True)
             
         elif instance.send_to=='todos':
-            devices = SiniFCMDevice.objects.filter(active=True) # Modified by AA
-                        
+            devices = SiniFCMDevice.objects.filter(user__active=True, active=True) # Modified by AA
+                            
         if devices:
             detalles = ""
             devices_qty = len(devices)
             send_qty = 0
+            failure_count = 0
             for device in devices:
 
                 try:
-                    response = send_push_notification(device_token= device.registration_id, 
-                                                        title= instance.subject, 
-                                                        body=instance.message, 
-                                                        image_url=instance.url_imagen, 
-                                                        data=data
-                    )
+                    response = send_web_push_notification(device_token=device.registration_id,
+                                                title= instance.subject, 
+                                                body=instance.message, 
+                                                data=data)
+                    
                     print('Successfully sent message: '+response)
                     print(device.registration_id)
                 except Exception as e:
                     error = f"- No se ha podido enviar al dispositivo {device.name} \n"
                     detalles+= error
                     detalles+=(str(e)+"\n")
+                    failure_count +=1
                 else:
                     send_qty+=1
+
+
+            detalles+= "Resumen:\n"
+            detalles+= f"Total de mensajes: {len(devices)}\n"
+            detalles+= f"Mensajes enviados: {send_qty}\n"
+            detalles+= f"Mensajes fallidos: {failure_count}\n"
 
             if send_qty==0:
                 instance.status='fallido'
@@ -410,18 +420,20 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
             elif send_qty == devices_qty:
                 instance.status='enviado'
                 instance.status_description='Se ha enviado el mensaje a todos los dispositivos'
-
             else:
                 instance.status='enviado_parcialmente'
                 instance.status_description = detalles
+
 
             instance.save()
         else:
             instance.status='fallido'
             instance.status_description='No se han encontrado dispositivos para enviar el mensaje'
             instance.save()
-"""
-            
+
+
+"""     
+Esta es la manera vieja de enviar notificaciones    
 @receiver(post_save, sender=Notification)
 def created_notification_send_push(sender, instance, created,  **kwargs):
 
@@ -506,7 +518,7 @@ def created_notification_send_push(sender, instance, created,  **kwargs):
             instance.status_description='No se han encontrado dispositivos para enviar el mensaje'
         
         instance.save()
-  
+""" 
 
   
 

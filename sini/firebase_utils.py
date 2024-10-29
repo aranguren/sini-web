@@ -45,4 +45,24 @@ def send_push_notification_multi(device_tokens, title, body, data=None):
 
     return response
 
+
+def send_web_push_notification(device_token, title, body, data):
+
+    message = messaging.Message(
+        notification=messaging.Notification(
+            title=title,
+            body=body
+        ),
+        token=device_token
+    )
+
+    if data:
+        message.data = data
+    
+    response = messaging.send(message)
+    return response
+
+
+
+
     
